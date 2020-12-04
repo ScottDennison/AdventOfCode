@@ -3,6 +3,7 @@ package uk.co.scottdennison.java.challenges.adventofcode.year2020;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,7 +27,8 @@ public class Day01 {
 			tierResults.put(value, Collections.singleton(Collections.singleton(value)));
 		}
 		Set<Integer> interestedTiersSet = IntStream.of(INTERESTED_TIERS).boxed().collect(Collectors.toSet());
-		SortedSet<Integer> targetSet = IntStream.of(TARGETS).boxed().collect(Collectors.toCollection(TreeSet::new));
+		int[] sortedTargets = Arrays.copyOf(TARGETS, TARGETS.length);
+		Arrays.sort(sortedTargets);
 		int maxTier = IntStream.of(INTERESTED_TIERS).max().orElseThrow(() -> new IllegalStateException("No interested tiers"));
 		int maxTarget = IntStream.of(TARGETS).max().orElseThrow(() -> new IllegalStateException("No targets"));
 		Map<Integer, Map<Integer, Set<Set<Integer>>>> interestedTierResults = new TreeMap<>();
@@ -44,7 +46,7 @@ public class Day01 {
 							if (newSum <= maxTarget) {
 								Set<Integer> newCombination = new HashSet<>(oldCombination);
 								newCombination.add(value);
-								newTierResults.computeIfAbsent(oldSum + value, k -> new HashSet<>()).add(newCombination);
+								newTierResults.computeIfAbsent(newSum, __ -> new HashSet<>()).add(newCombination);
 							}
 						}
 					}
@@ -58,7 +60,7 @@ public class Day01 {
 		for (Map.Entry<Integer, Map<Integer, Set<Set<Integer>>>> interestedTierResultsEntry : interestedTierResults.entrySet()) {
 			int tier = interestedTierResultsEntry.getKey();
 			Map<Integer, Set<Set<Integer>>> interestedTierResultsForTier = interestedTierResultsEntry.getValue();
-			for (int target : targetSet) {
+			for (int target : sortedTargets) {
 				System.out.format("Ways of making %d using %d tiers: ", target, tier);
 				Set<Set<Integer>> waysOfMakingTarget = interestedTierResultsForTier.get(target);
 				if (waysOfMakingTarget == null) {
