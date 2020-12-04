@@ -105,7 +105,7 @@ public class Day03 {
 					currentColumn %= columnCount;
 				}
 				treesEncounteredProduct *= treesEncountered;
-				System.out.format("Trees encountered for slope of right %d down %d, starting a position x=%d,y=%d is %d%n", xIncrement, yIncrement, xStartPosition, yStartPosition, treesEncountered);
+				System.out.format("Trees encountered for slope of right %d down %d, starting at position x=%d,y=%d is %d%n", xIncrement, yIncrement, xStartPosition, yStartPosition, treesEncountered);
 			}
 			System.out.format("Trees encountered product is %d%n", treesEncounteredProduct);
 			System.out.println();
