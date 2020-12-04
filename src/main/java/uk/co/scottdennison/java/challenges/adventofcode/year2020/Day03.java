@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Day03 {
+	private static final char TREE_CHAR = '#';
+	private static final char NO_TREE_CHAR = '.';
+
 	private static final Slope[][] SLOPE_SETS =
 		{
 			{
@@ -21,12 +24,28 @@ public class Day03 {
 		};
 
 	private static class Slope {
+		private final int xStartPosition;
+		private final int yStartPosition;
 		private final int xIncrement;
 		private final int yIncrement;
 
 		public Slope(int xIncrement, int yIncrement) {
+			this(0, 0, xIncrement, yIncrement);
+		}
+
+		public Slope(int xStartPosition, int yStartPosition, int xIncrement, int yIncrement) {
+			this.xStartPosition = 0;
+			this.yStartPosition = 0;
 			this.xIncrement = xIncrement;
 			this.yIncrement = yIncrement;
+		}
+
+		public int getXStartPosition() {
+			return this.xStartPosition;
+		}
+
+		public int getYStartPosition() {
+			return this.yStartPosition;
 		}
 
 		public int getXIncrement() {
@@ -50,10 +69,10 @@ public class Day03 {
 			for (int columnIndex = 0; columnIndex < columnCount; columnIndex++) {
 				boolean isTree;
 				switch (fileLine.charAt(columnIndex)) {
-					case '.':
+					case NO_TREE_CHAR:
 						isTree = false;
 						break;
-					case '#':
+					case TREE_CHAR:
 						isTree = true;
 						break;
 					default:
@@ -67,10 +86,12 @@ public class Day03 {
 		for (Slope[] slopeSet : SLOPE_SETS) {
 			int treesEncounteredProduct = 1;
 			for (Slope slope : slopeSet) {
+				int xStartPosition = slope.getXStartPosition();
+				int yStartPosition = slope.getYStartPosition();
 				int xIncrement = slope.getXIncrement();
 				int yIncrement = slope.getYIncrement();
-				int currentRow = 0;
-				int currentColumn = 0;
+				int currentColumn = xStartPosition;
+				int currentRow = yStartPosition;
 				int treesEncountered = 0;
 				while (currentRow >= 0 && currentRow < rowCount) {
 					if (trees.get(currentRow)[currentColumn]) {
@@ -84,7 +105,7 @@ public class Day03 {
 					currentColumn %= columnCount;
 				}
 				treesEncounteredProduct *= treesEncountered;
-				System.out.format("Trees encountered for slope of right %d down %d is %d%n", xIncrement, yIncrement, treesEncountered);
+				System.out.format("Trees encountered for slope of right %d down %d, starting a position x=%d,y=%d is %d%n", xIncrement, yIncrement, xStartPosition, yStartPosition, treesEncountered);
 			}
 			System.out.format("Trees encountered product is %d%n", treesEncounteredProduct);
 			System.out.println();
