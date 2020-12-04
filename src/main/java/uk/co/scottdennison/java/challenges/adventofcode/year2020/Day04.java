@@ -155,8 +155,7 @@ public class Day04 {
 
 	public static void main(String[] args) throws IOException {
 		List<String> fileLines = Files.readAllLines(Paths.get("data/day04/input.txt"));
-		fileLines.add(""); // Add a blank line to the end to prevent having to do any special end-of-lines handling.
-
+		fileLines.add(""); // Add a blank line to the end to prevent having to do any special end-of-file handling.
 		Map<String, FieldDefiniton> fieldDefinitionsByKey = Stream.of(FIELD_DEFINITONS).collect(Collectors.toMap(FieldDefiniton::getKey, Function.identity()));
 		Set<String> requiredFieldKeys = Stream.of(FIELD_DEFINITONS).filter(fieldDefiniton -> !fieldDefiniton.isOptional()).map(FieldDefiniton::getKey).collect(Collectors.toSet());
 		Set<String> foundFieldKeys = new HashSet<>();
