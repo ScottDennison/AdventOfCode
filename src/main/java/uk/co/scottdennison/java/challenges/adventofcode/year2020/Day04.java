@@ -189,7 +189,7 @@ public class Day04 {
 					if (fieldParts.length == 2) {
 						String key = fieldParts[0].trim();
 						foundFieldKeys.add(key);
-						if (isPassportDataValid) {
+						if (isPassportDataValid || LOG) {
 							String value = fieldParts[1].trim();
 							FieldDefiniton fieldDefiniton = fieldDefinitionsByKey.get(key);
 							if (fieldDefiniton == null) {
