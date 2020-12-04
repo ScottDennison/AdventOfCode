@@ -34,8 +34,8 @@ public class Day03 {
 		}
 
 		public Slope(int xStartPosition, int yStartPosition, int xIncrement, int yIncrement) {
-			this.xStartPosition = 0;
-			this.yStartPosition = 0;
+			this.xStartPosition = xStartPosition;
+			this.yStartPosition = yStartPosition;
 			this.xIncrement = xIncrement;
 			this.yIncrement = yIncrement;
 		}
