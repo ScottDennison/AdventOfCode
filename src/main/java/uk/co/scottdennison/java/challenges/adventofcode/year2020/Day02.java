@@ -12,7 +12,7 @@ public class Day02 {
 	public static void main(String[] args) throws IOException {
 		int correctPasswordsForPolicy1 = 0;
 		int correctPasswordsForPolicy2 = 0;
-		for (String line : Files.readAllLines(Paths.get("data/day02/input.txt"))) {
+		for (String line : Files.readAllLines(Paths.get("data/year2020/day02/input.txt"))) {
 			Matcher matcher = PATTERN.matcher(line);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Unparsable line: " + line);

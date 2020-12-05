@@ -17,7 +17,7 @@ public class Day05 {
 		int maximumSeatId = Integer.MIN_VALUE;
 		Integer mySeatId = null;
 		Set<Integer> filledSeatIds = new HashSet<>();
-		for (String line : Files.readAllLines(Paths.get("data/day05/input.txt"))) {
+		for (String line : Files.readAllLines(Paths.get("data/year2020/day05/input.txt"))) {
 			if (line.length() != 10) {
 				throw new IllegalStateException("Unexpected line length");
 			}

@@ -19,7 +19,7 @@ public class Day01 {
 	private static final int[] INTERESTED_TIERS = {2, 3};
 
 	public static void main(String[] args) throws IOException {
-		Set<Integer> values = Files.lines(Paths.get("data/day01/input.txt")).map(Integer::parseInt).collect(Collectors.toSet());
+		Set<Integer> values = Files.lines(Paths.get("data/year2020/day01/input.txt")).map(Integer::parseInt).collect(Collectors.toSet());
 		Map<Integer, Set<Set<Integer>>> tierResults = new HashMap<>();
 		for (int value : values) {
 			tierResults.put(value, Collections.singleton(Collections.singleton(value)));

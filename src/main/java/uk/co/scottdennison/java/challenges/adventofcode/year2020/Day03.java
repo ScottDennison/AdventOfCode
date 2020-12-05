@@ -59,7 +59,7 @@ public class Day03 {
 
 	public static void main(String[] args) throws Exception {
 		List<boolean[]> trees = new ArrayList<>();
-		List<String> fileLines = Files.readAllLines(Paths.get("data/day03/input.txt"));
+		List<String> fileLines = Files.readAllLines(Paths.get("data/year2020/day03/input.txt"));
 		int columnCount = fileLines.get(0).length();
 		for (String fileLine : fileLines) {
 			if (fileLine.length() != columnCount) {
