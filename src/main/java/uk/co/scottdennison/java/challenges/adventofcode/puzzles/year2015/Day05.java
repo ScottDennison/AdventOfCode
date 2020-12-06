@@ -4,82 +4,40 @@ import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.regex.Pattern;
 
 public class Day05 {
+	private static final Pattern[][] RULESETS = {
+		{
+			Pattern.compile("[aeiou].*[aeiou].*[aeiou]"),
+			Pattern.compile("(.)\\1"),
+			Pattern.compile("^((?!(ab|cd|pq|xy)).)*$")
+		},
+		{
+			Pattern.compile("(..).*\\1"),
+			Pattern.compile("(.).\\1")
+		}
+	};
+
 	public static void main(String[] args) throws IOException {
-		int niceStringCountForRuleset1 = 0;
-		int niceStringCountForRuleset2 = 0;
+		int rulesetCount = RULESETS.length;
+		int[] niceStringCounts = new int[rulesetCount];
 		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			char[] characters = fileLine.toCharArray();
-			int charactersCount = characters.length;
-			int vowelCount = 0;
-			boolean hasDisallowedSubstring = false;
-			boolean hasRepeatedLetter = false;
-			boolean hasRepeatedLetterWithGap = false;
-			boolean hasRepeatedSubstring = false;
-			char lastCharacter1 = 0;
-			char lastCharacter2 = 0;
-			Map<String, Integer> encouteredSubStrings = new HashMap<>();
-			char[] thisSubstringChars = new char[2];
-			for (int characterIndex = 0; characterIndex < charactersCount; characterIndex++) {
-				char character = characters[characterIndex];
-				if (!hasRepeatedSubstring) {
-					thisSubstringChars[0] = lastCharacter1;
-					thisSubstringChars[1] = character;
-					String thisSubstring = new String(thisSubstringChars);
-					Integer existingSubstringStartCharacterIndex = encouteredSubStrings.putIfAbsent(thisSubstring, characterIndex);
-					if (existingSubstringStartCharacterIndex != null && (characterIndex - existingSubstringStartCharacterIndex) > 1) {
-						hasRepeatedSubstring = true;
+			for (int rulesetIndex = 0; rulesetIndex < rulesetCount; rulesetIndex++) {
+				boolean isValid = true;
+				for (Pattern rule : RULESETS[rulesetIndex]) {
+					if (!rule.matcher(fileLine).find()) {
+						isValid = false;
+						break;
 					}
 				}
-				if (character == lastCharacter1) {
-					hasRepeatedLetter = true;
+				if (isValid) {
+					niceStringCounts[rulesetIndex]++;
 				}
-				if (character == lastCharacter2) {
-					hasRepeatedLetterWithGap = true;
-				}
-				switch (character) {
-					case 'a':
-					case 'e':
-					case 'i':
-					case 'o':
-					case 'u':
-						vowelCount++;
-						break;
-					case 'b':
-						if (lastCharacter1 == 'a') {
-							hasDisallowedSubstring = true;
-						}
-						break;
-					case 'd':
-						if (lastCharacter1 == 'c') {
-							hasDisallowedSubstring = true;
-						}
-						break;
-					case 'q':
-						if (lastCharacter1 == 'p') {
-							hasDisallowedSubstring = true;
-						}
-						break;
-					case 'y':
-						if (lastCharacter1 == 'x') {
-							hasDisallowedSubstring = true;
-						}
-						break;
-				}
-				lastCharacter2 = lastCharacter1;
-				lastCharacter1 = character;
-			}
-			if (vowelCount >= 3 && hasRepeatedLetter && !hasDisallowedSubstring) {
-				niceStringCountForRuleset1++;
-			}
-			if (hasRepeatedSubstring && hasRepeatedLetterWithGap) {
-				niceStringCountForRuleset2++;
 			}
 		}
-		System.out.format("Nice string count for ruleset 1: %d%n", niceStringCountForRuleset1);
-		System.out.format("Nice string count for ruleset 2: %d%n", niceStringCountForRuleset2);
+		for (int rulesetIndex = 0; rulesetIndex < rulesetCount; rulesetIndex++) {
+			System.out.format("Nice string count for ruleset %d: %d%n", rulesetIndex + 1, niceStringCounts[rulesetIndex]);
+		}
 	}
 }
