@@ -3,16 +3,17 @@ package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Day01 {
-	private static class Position {
+	private static Pattern PATTERN = Pattern.compile("(?<rotation>[LR])(?<steps>[0-9]+)(?:$|(?:,?[\\s]*))");
+
+	private static final class Position {
 		private final int x;
 		private final int y;
 
@@ -30,256 +31,22 @@ public class Day01 {
 		}
 
 		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
+		public boolean equals(Object otherObject) {
+			if (this == otherObject) {
 				return true;
 			}
-			if (o == null || getClass() != o.getClass()) {
+			if (!(otherObject instanceof Position)) {
 				return false;
 			}
-
-			Position position = (Position) o;
-
-			if (x != position.x) {
-				return false;
-			}
-			return y == position.y;
+			Position otherPosition = (Position) otherObject;
+			return x == otherPosition.x && y == otherPosition.y;
 		}
 
 		@Override
 		public int hashCode() {
-			int result = x;
-			result = 31 * result + y;
-			return result;
+			return (x << 16) | y;
 		}
 	}
-
-	private static class State {
-		private Direction direction;
-		private Position position;
-		private int pendingSteps;
-		private boolean separationRequired;
-		private List<Position> visitedPositions;
-
-		public State(Direction initialDirection, Position initialPosition, int initialPendingSteps, boolean initialSeparationRequired, List<Position> initialVisitedPositions) {
-			this.direction = initialDirection;
-			this.position = initialPosition;
-			this.pendingSteps = initialPendingSteps;
-			this.separationRequired = initialSeparationRequired;
-			this.visitedPositions = new ArrayList<>(initialVisitedPositions);
-		}
-
-		public Direction getDirection() {
-			return this.direction;
-		}
-
-		public void setDirection(Direction direction) {
-			this.direction = direction;
-		}
-
-		public Position getPosition() {
-			return this.position;
-		}
-
-		public void setPosition(Position position) {
-			this.position = position;
-		}
-
-		public int getPendingSteps() {
-			return this.pendingSteps;
-		}
-
-		public void setPendingSteps(int pendingSteps) {
-			this.pendingSteps = pendingSteps;
-		}
-
-		public boolean isSeparationRequired() {
-			return this.separationRequired;
-		}
-
-		public void setSeparationRequired(boolean separationRequired) {
-			this.separationRequired = separationRequired;
-		}
-
-		public List<Position> getVisitedPositions() {
-			return Collections.unmodifiableList(this.visitedPositions);
-		}
-
-		public void setVisitedPositions(List<Position> visitedPositions) {
-			this.visitedPositions = new ArrayList<>(visitedPositions);
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-
-			State state = (State) o;
-
-			if (pendingSteps != state.pendingSteps) {
-				return false;
-			}
-			if (separationRequired != state.separationRequired) {
-				return false;
-			}
-			if (direction != state.direction) {
-				return false;
-			}
-			if (!Objects.equals(position, state.position)) {
-				return false;
-			}
-			return Objects.equals(visitedPositions, state.visitedPositions);
-		}
-
-		@Override
-		public int hashCode() {
-			int result = direction != null ? direction.hashCode() : 0;
-			result = 31 * result + (position != null ? position.hashCode() : 0);
-			result = 31 * result + pendingSteps;
-			result = 31 * result + (separationRequired ? 1 : 0);
-			result = 31 * result + (visitedPositions != null ? visitedPositions.hashCode() : 0);
-			return result;
-		}
-	}
-
-	private static final class ExpectationResult {
-		private final Expectation nextExpectation;
-		private final boolean advanceToNextByte;
-
-		public ExpectationResult(Expectation nextExpectation, boolean advanceToNextByte) {
-			this.nextExpectation = nextExpectation;
-			this.advanceToNextByte = advanceToNextByte;
-		}
-
-		public Expectation getNextExpectation() {
-			return this.nextExpectation;
-		}
-
-		public boolean isAdvanceToNextByte() {
-			return this.advanceToNextByte;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) {
-				return true;
-			}
-			if (o == null || getClass() != o.getClass()) {
-				return false;
-			}
-
-			ExpectationResult that = (ExpectationResult) o;
-
-			if (advanceToNextByte != that.advanceToNextByte) {
-				return false;
-			}
-			return nextExpectation == that.nextExpectation;
-		}
-
-		@Override
-		public int hashCode() {
-			int result = nextExpectation != null ? nextExpectation.hashCode() : 0;
-			result = 31 * result + (advanceToNextByte ? 1 : 0);
-			return result;
-		}
-	}
-
-	private enum Expectation {
-		SPACING {
-			@Override
-			public ExpectationResult accept(byte inputByte, State state) {
-				switch (inputByte) {
-					case ' ':
-					case '\t':
-					case '\r':
-					case '\n':
-						state.setSeparationRequired(false);
-						return new ExpectationResult(Expectation.SPACING, true);
-					default:
-						if (state.isSeparationRequired()) {
-							return null;
-						}
-						return new ExpectationResult(Expectation.DIRECTION, false);
-				}
-			}
-
-			@Override
-			public void finish(State state) {
-				if (state.isSeparationRequired()) {
-					throw new IllegalStateException("Unexpected a direction, recieved end of input");
-				}
-			}
-		},
-		DIRECTION {
-			@Override
-			public ExpectationResult accept(byte inputByte, State state) {
-				Rotation rotation;
-				switch (inputByte) {
-					case 'L':
-						rotation = Rotation.LEFT;
-						break;
-					case 'R':
-						rotation = Rotation.RIGHT;
-						break;
-					default:
-						return null;
-				}
-				state.setDirection(rotation.calculateNewDirection(state.getDirection()));
-				return new ExpectationResult(Expectation.PENDING_STEPS_DIGIT, true);
-			}
-
-			@Override
-			public void finish(State state) {
-				throw new IllegalStateException("Unexpected a direction, recieved end of input");
-			}
-		},
-		PENDING_STEPS_DIGIT {
-			@Override
-			public ExpectationResult accept(byte inputByte, State state) {
-				if (inputByte >= '0' && inputByte <= '9') {
-					state.setPendingSteps((state.getPendingSteps() * 10) + (inputByte - '0'));
-					return new ExpectationResult(Expectation.PENDING_STEPS_DIGIT, true);
-				}
-				this.move(state);
-				if (inputByte == ',') {
-					state.setSeparationRequired(false);
-					return new ExpectationResult(Expectation.SPACING, true);
-				}
-				else {
-					state.setSeparationRequired(true);
-					return new ExpectationResult(Expectation.SPACING, false);
-				}
-			}
-
-			@Override
-			public void finish(State state) {
-				this.move(state);
-			}
-
-			private void move(State state) {
-				Direction direction = state.getDirection();
-				Position position = state.getPosition();
-				int pendingSteps = state.getPendingSteps();
-				List<Position> newVisitedPositions = new ArrayList<>(state.getVisitedPositions());
-				for (int step = 1; step <= pendingSteps; step++) {
-					position = direction.calculateNewPosition(position, 1);
-					newVisitedPositions.add(position);
-				}
-				state.setPosition(position);
-				state.setVisitedPositions(newVisitedPositions);
-				state.setPendingSteps(0);
-			}
-		};
-
-		public abstract ExpectationResult accept(byte fileByte, State state);
-
-		public abstract void finish(State state);
-	}
-
 
 	private enum Rotation {
 		LEFT(-1),
@@ -319,40 +86,65 @@ public class Day01 {
 	}
 
 	public static void main(String[] args) throws IOException {
-		byte[] fileBytes = Files.readAllBytes(InputFileUtils.getInputPath());
-		Expectation expectation = Expectation.SPACING;
+		String input = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8);
+		int inputLength = input.length();
+		Matcher matcher = PATTERN.matcher(input);
+		Direction direction = Direction.NORTH;
 		Position initialPosition = new Position(0, 0);
-		State state = new State(Direction.NORTH, initialPosition, 0, false, Collections.emptyList());
-		for (byte fileByte : fileBytes) {
-			while (true) {
-				ExpectationResult expectationResult = expectation.accept(fileByte, state);
-				if (expectationResult == null) {
-					throw new IllegalStateException("Unexpected byte: " + fileByte);
+		Position currentPosition = initialPosition;
+		Set<Position> visitedPositionsSet = new HashSet<>();
+		Position firstDuplicatePosition = null;
+		while (!matcher.hitEnd()) {
+			if (matcher.lookingAt()) {
+				Rotation rotation;
+				switch (matcher.group("rotation")) {
+					case "L":
+					case "l":
+						rotation = Rotation.LEFT;
+						break;
+					case "R":
+					case "r":
+						rotation = Rotation.RIGHT;
+						break;
+					default:
+						throw new IllegalStateException("Unexpected rotation character.");
 				}
-				expectation = expectationResult.getNextExpectation();
-				if (expectationResult.isAdvanceToNextByte()) {
-					break;
+				direction = rotation.calculateNewDirection(direction);
+				int steps = Integer.parseInt(matcher.group("steps"));
+				if (firstDuplicatePosition == null) {
+					for (int step = 1; step <= steps; step++) {
+						currentPosition = direction.calculateNewPosition(currentPosition, 1);
+						if (!visitedPositionsSet.add(currentPosition)) {
+							firstDuplicatePosition = currentPosition;
+							int stepsRemaining = steps - step;
+							if (stepsRemaining > 0) {
+								currentPosition = direction.calculateNewPosition(currentPosition, stepsRemaining);
+							}
+							break;
+						}
+					}
 				}
+				else {
+					currentPosition = direction.calculateNewPosition(currentPosition, steps);
+				}
+				matcher.region(matcher.end(), inputLength);
+			}
+			else {
+				throw new IllegalStateException("Unable to parse instruction.");
 			}
 		}
-		expectation.finish(state);
-		Position easterBunnyHQPosition1 = state.getPosition();
-		Set<Position> encounteredPositions = new HashSet<>();
-		Position easterBunnyHQPosition2 = null;
-		for (Position position : state.getVisitedPositions()) {
-			if (!encounteredPositions.add(position)) {
-				easterBunnyHQPosition2 = position;
-				break;
-			}
+		if (firstDuplicatePosition == null) {
+			throw new IllegalStateException("No duplicate position.");
 		}
-		if (easterBunnyHQPosition2 == null) {
-			throw new IllegalStateException("No duplicate positions visited.");
-		}
-		System.out.format("Easter bunny HQ #1 is %d block(s) away%n", calculateBlocksAway(initialPosition, easterBunnyHQPosition1));
-		System.out.format("Easter bunny HQ #2 is %d block(s) away%n", calculateBlocksAway(initialPosition, easterBunnyHQPosition2));
+		outputAnswer(1, initialPosition, currentPosition);
+		outputAnswer(2, initialPosition, firstDuplicatePosition);
 	}
 
-	private static int calculateBlocksAway(Position initialPosition, Position currentPosition) {
-		return Math.abs(initialPosition.getX() - currentPosition.getX()) + Math.abs(initialPosition.getY() - currentPosition.getY());
+	private static void outputAnswer(int answer, Position initialPosition, Position position) {
+		System.out.format("Easter bunny HQ #%d is %d block(s) away%n", answer, calculateBlocksAway(initialPosition, position));
+	}
+
+	private static int calculateBlocksAway(Position initialPosition, Position position) {
+		return Math.abs(initialPosition.getX() - position.getX()) + Math.abs(initialPosition.getY() - position.getY());
 	}
 }
