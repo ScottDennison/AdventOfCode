@@ -113,25 +113,19 @@ public class Day04 {
 		boolean isValid(String data);
 	}
 
-	private static class FieldDefiniton {
+	private static class FieldDefinition {
 		private final String key;
-		private final String name;
 		private final boolean optional;
 		private final Validator validator;
 
-		public FieldDefiniton(String key, String name, boolean optional, Validator validator) {
+		public FieldDefinition(String key, boolean optional, Validator validator) {
 			this.key = key;
-			this.name = name;
 			this.optional = optional;
 			this.validator = validator;
 		}
 
 		public String getKey() {
 			return this.key;
-		}
-
-		public String getName() {
-			return this.name;
 		}
 
 		public boolean isOptional() {
@@ -143,22 +137,22 @@ public class Day04 {
 		}
 	}
 
-	private static final FieldDefiniton[] FIELD_DEFINITONS = {
-		new FieldDefiniton("byr", "Birth Year", false, new BasicNumberValidator(1920, 2002)),
-		new FieldDefiniton("iyr", "Issue Year", false, new BasicNumberValidator(2010, 2020)),
-		new FieldDefiniton("eyr", "Expiration Year", false, new BasicNumberValidator(2020, 2030)),
-		new FieldDefiniton("hgt", "Height", false, new HeightValidator()),
-		new FieldDefiniton("hcl", "Hair Color", false, new PatternValidator(Pattern.compile("^#[0-9a-f]{6}$"))),
-		new FieldDefiniton("ecl", "Eye Color", false, new ListValidator("amb", "blu", "brn", "gry", "grn", "hzl", "oth")),
-		new FieldDefiniton("pid", "Passport ID", false, new PatternValidator(Pattern.compile("^[0-9]{9}$"))),
-		new FieldDefiniton("cid", "Country ID", true, new AlwaysValidValidator())
+	private static final FieldDefinition[] FIELD_DEFINITIONS = {
+		new FieldDefinition("byr", false, new BasicNumberValidator(1920, 2002)),
+		new FieldDefinition("iyr", false, new BasicNumberValidator(2010, 2020)),
+		new FieldDefinition("eyr", false, new BasicNumberValidator(2020, 2030)),
+		new FieldDefinition("hgt", false, new HeightValidator()),
+		new FieldDefinition("hcl", false, new PatternValidator(Pattern.compile("^#[0-9a-f]{6}$"))),
+		new FieldDefinition("ecl", false, new ListValidator("amb", "blu", "brn", "gry", "grn", "hzl", "oth")),
+		new FieldDefinition("pid", false, new PatternValidator(Pattern.compile("^[0-9]{9}$"))),
+		new FieldDefinition("cid", true, new AlwaysValidValidator())
 	};
 
 	public static void main(String[] args) throws IOException {
 		List<String> fileLines = Files.readAllLines(InputFileUtils.getInputPath());
 		fileLines.add(""); // Add a blank line to the end to prevent having to do any special end-of-file handling.
-		Map<String, FieldDefiniton> fieldDefinitionsByKey = Stream.of(FIELD_DEFINITONS).collect(Collectors.toMap(FieldDefiniton::getKey, Function.identity()));
-		Set<String> requiredFieldKeys = Stream.of(FIELD_DEFINITONS).filter(fieldDefiniton -> !fieldDefiniton.isOptional()).map(FieldDefiniton::getKey).collect(Collectors.toSet());
+		Map<String, FieldDefinition> fieldDefinitionsByKey = Stream.of(FIELD_DEFINITIONS).collect(Collectors.toMap(FieldDefinition::getKey, Function.identity()));
+		Set<String> requiredFieldKeys = Stream.of(FIELD_DEFINITIONS).filter(fieldDefinition -> !fieldDefinition.isOptional()).map(FieldDefinition::getKey).collect(Collectors.toSet());
 		Set<String> foundFieldKeys = new HashSet<>();
 		boolean isPassportDataValid = true;
 		int validPassportsWithoutDataChecks = 0;
@@ -192,14 +186,14 @@ public class Day04 {
 						foundFieldKeys.add(key);
 						if (isPassportDataValid || LOG) {
 							String value = fieldParts[1].trim();
-							FieldDefiniton fieldDefiniton = fieldDefinitionsByKey.get(key);
-							if (fieldDefiniton == null) {
+							FieldDefinition fieldDefinition = fieldDefinitionsByKey.get(key);
+							if (fieldDefinition == null) {
 								if (LOG) {
 									System.out.format("Passport %d has unexpected field: %s%n", passportNumber, key);
 								}
 								isPassportDataValid = false;
 							}
-							else if (!fieldDefiniton.getValidator().isValid(value)) {
+							else if (!fieldDefinition.getValidator().isValid(value)) {
 								if (LOG) {
 									System.out.format("Passport %d has invalid value for field %s: %s%n", passportNumber, key, value);
 								}

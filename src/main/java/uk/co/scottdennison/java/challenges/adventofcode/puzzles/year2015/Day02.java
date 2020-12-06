@@ -28,6 +28,6 @@ public class Day02 {
 			requiredRibbon += (length * width * height) + (2 * length) + (2 * width) + (2 * height) - (2 * Math.max(length, Math.max(width, height)));
 		}
 		System.out.format("Square feet of paper  to be ordered: %d%n", requiredPaper);
-		System.out.format("       feet of ribbon to be ordered: %d%n", requiredRibbon);
+		System.out.format("       Feet of ribbon to be ordered: %d%n", requiredRibbon);
 	}
 }

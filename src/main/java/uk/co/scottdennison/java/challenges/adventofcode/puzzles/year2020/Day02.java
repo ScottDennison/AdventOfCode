@@ -36,7 +36,11 @@ public class Day02 {
 				correctPasswordsForPolicy2++;
 			}
 		}
-		System.out.format("Correct passwords for policy 1: %d%n", correctPasswordsForPolicy1);
-		System.out.format("Correct passwords for policy 2: %d%n", correctPasswordsForPolicy2);
+		outputSummary(1, correctPasswordsForPolicy1);
+		outputSummary(2, correctPasswordsForPolicy2);
+	}
+
+	private static void outputSummary(int policy, int correctPasswords) {
+		System.out.format("Correct passwords for policy %d: %d%n", policy, correctPasswords);
 	}
 }

@@ -27,7 +27,7 @@ public class Day03 {
 		public House(int relativeX, int relativeY, int initialPresentCount) {
 			this.relativeX = relativeX;
 			this.relativeY = relativeY;
-			this.presentCount = 0;
+			this.presentCount = initialPresentCount;
 		}
 
 		public void givePresents(int presentCount) {
@@ -60,8 +60,8 @@ public class Day03 {
 	}
 
 	private static class SantaPositionTracker {
-		private int relativeX = 0;
-		private int relativeY = 0;
+		private int relativeX;
+		private int relativeY;
 
 		public SantaPositionTracker() {
 			this(0, 0);

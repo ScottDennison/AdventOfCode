@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Day01 {
-	private static Pattern PATTERN = Pattern.compile("(?<rotation>[LR])(?<steps>[0-9]+)(?:$|(?:,?[\\s]*))");
+	private static final Pattern PATTERN = Pattern.compile("(?<rotation>[LR])(?<steps>[0-9]+)(?:$|(?:,?[\\s]*))");
 
 	private static final class Position {
 		private final int x;
