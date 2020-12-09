@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@SuppressWarnings("DuplicatedCode")
 public class Day04 {
 	private static final int MAX_REQUIRED_ZEROS = 6;
 

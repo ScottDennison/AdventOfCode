@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@SuppressWarnings("DuplicatedCode")
 public class Day05 {
 	private static final int PASSWORD_LENGTH = 8;
 	private static final int ZEROS_REQUIRED = 5;
