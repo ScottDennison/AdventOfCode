@@ -138,7 +138,7 @@ public class Day13 {
 			sum = Math.addExact(sum, Math.multiplyExact(Math.multiplyExact(lowerAi, mi), upperNi));
 		}
 		while (sum < 0) {
-			sum += upperN;
+			sum = Math.addExact(sum, upperN);
 		}
 		return sum % upperN;
 	}
