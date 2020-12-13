@@ -78,7 +78,9 @@ public class Day11 {
 			}
 			SeatState[][] newSeatStateArray;
 			int seatsFilled;
+			int iterationCount = 0;
 			while (true) {
+				iterationCount++;
 				seatsFilled = 0;
 				int newSeatStateArrayIndex = ((currentSeatStateArrayIndex + 1) % 2);
 				currentSeatStateArray = seatStateArrays[currentSeatStateArrayIndex];
@@ -147,7 +149,7 @@ public class Day11 {
 					break;
 				}
 			}
-			System.out.format("Seats filled once stable with maximumNeighboursFilledCount=%d and skipOverMissingSeats=%b: %d%n", maximumNeighboursFilledCount, skipOverMissingSeats, seatsFilled);
+			System.out.format("Seats filled once stable (after %d iterations) with maximumNeighboursFilledCount=%d and skipOverMissingSeats=%b: %d%n", iterationCount, maximumNeighboursFilledCount, skipOverMissingSeats, seatsFilled);
 		}
 	}
 }
