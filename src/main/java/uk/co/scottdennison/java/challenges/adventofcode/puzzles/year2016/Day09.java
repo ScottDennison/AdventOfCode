@@ -212,6 +212,10 @@ public class Day09 {
 	}
 
 	private static void outputSummary(char[] fileCharacters, String allowNestedInstructionsDescription, boolean allowNestedInstructions) {
+		System.out.format("Decompressed length when nested instructions are %s: %d%n", allowNestedInstructionsDescription, runModel(fileCharacters, allowNestedInstructions));
+	}
+
+	private static long runModel(char[] fileCharacters, boolean allowNestedInstructions) {
 		Model model = new Model(allowNestedInstructions);
 		for (char fileCharacter : fileCharacters) {
 			model.getNextState().process(model, fileCharacter);
@@ -220,6 +224,6 @@ public class Day09 {
 		if (!model.isInputAllowedToEnd()) {
 			throw new IllegalStateException("Unexpected EOF");
 		}
-		System.out.format("Decompressed length when nested instructions are %s: %d%n", allowNestedInstructionsDescription, model.getDecompressedLength());
+		return model.getDecompressedLength();
 	}
 }
