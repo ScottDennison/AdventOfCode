@@ -41,7 +41,7 @@ public class InputFileUtils {
 		return getInputPath(((y1 - '0') * 1000) + ((y2 - '0') * 100) + ((y3 - '0') * 10) + (y4 - '0'), ((d1 - '0') * 10) + (d2 - '0'));
 	}
 
-	private static Path getInputPath(int year, int day) {
+	public static Path getInputPath(int year, int day) {
 		if (year < 0 || year > 9999) {
 			throw new IllegalStateException("Invalid year.");
 		}
