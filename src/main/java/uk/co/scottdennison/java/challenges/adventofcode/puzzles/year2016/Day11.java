@@ -291,8 +291,8 @@ public class Day11 {
 	private static final Pattern PATTERN_DEVICE = Pattern.compile("^a (?<element>[a-z]+)(?:-compatible)? (?<deviceType>[a-z]+)$");
 
 	public static void main(String[] args) throws IOException {
-		if (Runtime.getRuntime().maxMemory() < (5L * 1024L * 1024L * 1024L)) {
-			System.out.println("WARNING: The implementation of this problem is NOT memory efficient, and it is recommended to use >=5GB of java heap to prevent excessive GC overhead");
+		if (Runtime.getRuntime().maxMemory() < (3L * 1024L * 1024L * 1024L)) {
+			System.out.println("WARNING: The implementation of this problem is NOT memory efficient, and it is recommended to use >=3GB of java heap to prevent excessive GC overhead");
 		}
 		Map<String, Integer> ordinalValues = new HashMap<>();
 		for (int index = 0; index < ORDINALS.length; index++) {
@@ -365,10 +365,13 @@ public class Day11 {
 					}
 					int currentFloorNumber = pendingFacility.getElevatorFloor();
 					if (currentFloorNumber > minimumFloorNumber) {
-						addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorNumber, currentFloorNumber - 1);
+						int targetFloorNumber = currentFloorNumber - 1;
+						if (pendingFacility.getDeviceCountForFloor(targetFloorNumber) > 0) {
+							addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorNumber, targetFloorNumber, 1);
+						}
 					}
 					if (currentFloorNumber < maximumFloorNumber) {
-						addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorNumber, currentFloorNumber + 1);
+						addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorNumber, currentFloorNumber + 1, Math.min(2, pendingFacility.getDeviceCountForFloor(currentFloorNumber)));
 					}
 				}
 			}
@@ -383,8 +386,8 @@ public class Day11 {
 		return stepsCompleted;
 	}
 
-	private static void addPossibleMovesAfterMovingElevator(Set<RadioisotopeTestingFacility> pendingFacilities, RadioisotopeTestingFacility currentFacility, int currentFloorNumber, int newFloorNumber) {
-		addPossibleMoves(pendingFacilities, currentFacility.createNewWithNewElevatorFloor(newFloorNumber), currentFloorNumber, newFloorNumber, new HashSet<>(), 2);
+	private static void addPossibleMovesAfterMovingElevator(Set<RadioisotopeTestingFacility> pendingFacilities, RadioisotopeTestingFacility currentFacility, int currentFloorNumber, int newFloorNumber, int allowedRecursion) {
+		addPossibleMoves(pendingFacilities, currentFacility.createNewWithNewElevatorFloor(newFloorNumber), currentFloorNumber, newFloorNumber, new HashSet<>(), allowedRecursion);
 	}
 
 	private static void addPossibleMoves(Set<RadioisotopeTestingFacility> pendingFacilities, RadioisotopeTestingFacility currentFacility, int currentFloorNumber, int newFloorNumber, Set<Device> devicesLookedAt, int recursionsLeft) {
@@ -395,11 +398,11 @@ public class Day11 {
 			Device device = deviceIterator.next();
 			if (newDevicesLookedAt.add(device)) {
 				RadioisotopeTestingFacility newFacility = currentFacility.createNewWithDeviceMovedBetweenFloors(device, currentFloorNumber, newFloorNumber);
-				if (currentFacility != newFacility) {
+				if (newRecursionsLeft > 0) {
+					addPossibleMoves(pendingFacilities, newFacility, currentFloorNumber, newFloorNumber, newDevicesLookedAt, newRecursionsLeft);
+				}
+				else {
 					pendingFacilities.add(newFacility);
-					if (newRecursionsLeft > 0) {
-						addPossibleMoves(pendingFacilities, newFacility, currentFloorNumber, newFloorNumber, newDevicesLookedAt, newRecursionsLeft);
-					}
 				}
 			}
 		}
