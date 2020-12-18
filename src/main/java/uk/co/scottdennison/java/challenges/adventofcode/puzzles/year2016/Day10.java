@@ -95,7 +95,8 @@ public class Day10 {
 				case 1:
 					if (value > this.value1) {
 						this.value2 = value;
-					} else {
+					}
+					else {
 						this.value2 = this.value1;
 						this.value1 = value;
 					}
@@ -130,8 +131,8 @@ public class Day10 {
 	}
 
 	private static class FactoryManager {
-		private final Map<Integer,Bot> registeredBots = new HashMap<>();
-		private final Map<Integer,OutputBin> registeredOutputBins = new HashMap<>();
+		private final Map<Integer, Bot> registeredBots = new HashMap<>();
+		private final Map<Integer, OutputBin> registeredOutputBins = new HashMap<>();
 
 		public void registerBot(int number, Bot bot) {
 			if (this.registeredBots.put(number, bot) != null) {
@@ -202,23 +203,25 @@ public class Day10 {
 		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
 			Matcher valueInputMatcher = PATTERN_VALUE_INPUT.matcher(fileLine);
 			if (valueInputMatcher.matches()) {
-				botInputs.computeIfAbsent(Integer.parseInt(valueInputMatcher.group("botNumber")),__->new HashSet<>()).add(Integer.parseInt(valueInputMatcher.group("value")));
-			} else {
+				botInputs.computeIfAbsent(Integer.parseInt(valueInputMatcher.group("botNumber")), __ -> new HashSet<>()).add(Integer.parseInt(valueInputMatcher.group("value")));
+			}
+			else {
 				Matcher botInstructionMatcher = PATTERN_BOT_INSTRUCTION.matcher(fileLine);
 				if (botInstructionMatcher.matches()) {
-					Map<String,ReceiverHolder> receiverHolders = new HashMap<>();
+					Map<String, ReceiverHolder> receiverHolders = new HashMap<>();
 					receiverHolders.put(LEVEL_LOW, new ReceiverHolder());
 					receiverHolders.put(LEVEL_HIGH, new ReceiverHolder());
-					parseBotInstruction(botInstructionMatcher,receiverHolders,factoryManager,"left");
-					parseBotInstruction(botInstructionMatcher,receiverHolders,factoryManager,"right");
+					parseBotInstruction(botInstructionMatcher, receiverHolders, factoryManager, "left");
+					parseBotInstruction(botInstructionMatcher, receiverHolders, factoryManager, "right");
 					int inputBotNumber = Integer.parseInt(botInstructionMatcher.group("inputBotNumber"));
-					factoryManager.registerBot(inputBotNumber, new Bot(inputBotNumber, receiverHolders.get(LEVEL_LOW).getReceiver(),receiverHolders.get(LEVEL_HIGH).getReceiver()));
-				} else {
+					factoryManager.registerBot(inputBotNumber, new Bot(inputBotNumber, receiverHolders.get(LEVEL_LOW).getReceiver(), receiverHolders.get(LEVEL_HIGH).getReceiver()));
+				}
+				else {
 					throw new IllegalStateException("Unparseable file line");
 				}
 			}
 		}
-		for (Map.Entry<Integer,Set<Integer>> botInputEntry : botInputs.entrySet()) {
+		for (Map.Entry<Integer, Set<Integer>> botInputEntry : botInputs.entrySet()) {
 			int botNumber = botInputEntry.getKey();
 			for (int value : botInputEntry.getValue()) {
 				factoryManager.getBot(botNumber).handleValue(value);
@@ -231,7 +234,8 @@ public class Day10 {
 			if (bot.hasBotDoneWork() && bot.getHighInputValue() == DESIRED_HIGH_VALUE && bot.getLowInputValue() == DESIRED_LOW_VALUE) {
 				if (desiredBotNumber == null) {
 					desiredBotNumber = bot.getNumber();
-				} else {
+				}
+				else {
 					throw new IllegalStateException("Multiple bots have handled the desired values.");
 				}
 			}
@@ -247,7 +251,7 @@ public class Day10 {
 		System.out.format("The products of output bins %d to %d (inclusive) is %d%n", MINIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT, MAXIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT, outputBinProduct);
 	}
 
-	private static void parseBotInstruction(Matcher matcher, Map<String,ReceiverHolder> receiverHolders, FactoryManager factoryManager, String prefix) {
+	private static void parseBotInstruction(Matcher matcher, Map<String, ReceiverHolder> receiverHolders, FactoryManager factoryManager, String prefix) {
 		ReceiverHolder receiverHolder = receiverHolders.get(matcher.group(prefix + "Level"));
 		if (receiverHolder == null) {
 			throw new IllegalStateException("No such receiver holder.");
