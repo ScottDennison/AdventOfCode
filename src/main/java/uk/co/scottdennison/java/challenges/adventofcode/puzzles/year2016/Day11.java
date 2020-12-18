@@ -4,30 +4,19 @@ import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Day11 {
-	/**
-	 The first floor contains a strontium generator, a strontium-compatible microchip, a plutonium generator, and a plutonium-compatible microchip.
-	 The second floor contains a thulium generator, a ruthenium generator, a ruthenium-compatible microchip, a curium generator, and a curium-compatible microchip.
-	 The third floor contains a thulium-compatible microchip.
-	 The fourth floor contains nothing relevant.
-	 */
-
 	private static final String[] ORDINALS = {
 		"zeroth",
 		"first",
@@ -57,54 +46,6 @@ public class Day11 {
 		MICROCHIP
 	}
 
-	private static class ImmutableIterator<T> implements Iterator<T> {
-		private final Iterator<T> iterator;
-
-		private ImmutableIterator(Iterator<T> iterator) {
-			this.iterator = iterator;
-		}
-
-		@Override
-		public boolean hasNext() {
-			return this.iterator.hasNext();
-		}
-
-		@Override
-		public T next() {
-			return this.iterator.next();
-		}
-
-		@Override
-		public void remove() {
-			throw new IllegalStateException("Items are not allowed to be removed.");
-		}
-
-		@Override
-		public void forEachRemaining(Consumer<? super T> action) {
-			this.iterator.forEachRemaining(action);
-		}
-	}
-
-	private static boolean equalsByHashCodeFirst(Object left, Object right) {
-		if (left.hashCode() == right.hashCode()) {
-			return left.equals(right);
-		} else {
-			return false;
-		}
-	}
-
-	private static boolean equalsByHashCodeFirstNullSafe(Object left, Object right) {
-		if (left == null) {
-			return right == null;
-		} else if (right == null) {
-			return false;
-		} else if (left.hashCode() == right.hashCode()) {
-			return left.equals(right);
-		} else {
-			return false;
-		}
-	}
-
 	private static final class Device {
 		private final String element;
 		private final DeviceType deviceType;
@@ -116,6 +57,12 @@ public class Day11 {
 		}
 
 		public static Device createNew(String element, DeviceType deviceType) {
+			if (element == null) {
+				throw new IllegalStateException("Element is NULL");
+			}
+			else if (deviceType == null) {
+				throw new IllegalStateException("Device type is NULL");
+			}
 			return new Device(element, deviceType);
 		}
 
@@ -135,7 +82,7 @@ public class Day11 {
 			if (otherObject == null || otherObject.getClass() != Device.class) {
 				return false;
 			}
-			Device otherDevice = (Device)otherObject;
+			Device otherDevice = (Device) otherObject;
 			return Objects.equals(this.element, otherDevice.element) && this.deviceType == otherDevice.deviceType;
 		}
 
@@ -151,127 +98,75 @@ public class Day11 {
 		}
 	}
 
-	private static final class Floor {
-		private final Set<Device> devices;
-		private transient int hashCode;
-
-		private Floor(Set<Device> devices) {
-			this.devices = devices;
-		}
-
-		@Override
-		public boolean equals(Object otherObject) {
-			if (this == otherObject) {
-				return true;
-			}
-			if (otherObject == null || otherObject.getClass() != Floor.class) {
-				return false;
-			}
-			Floor otherFloor = (Floor)otherObject;
-			return this.devices.equals(otherFloor.devices);
-		}
-
-		@Override
-		public int hashCode() {
-			int hashCode;
-			if ((hashCode = this.hashCode) == 0) {
-				hashCode = this.devices.hashCode();
-			}
-			return hashCode;
-		}
-
-		public boolean isValid() {
-			if (devices.isEmpty()) {
-				return true;
-			}
-			Set<String> microchipElements = new HashSet<>();
-			Set<String> generatorElements = new HashSet<>();
-			for (Device device : this.devices) {
-				switch (device.getDeviceType()) {
-					case GENERATOR:
-						generatorElements.add(device.getElement());
-						break;
-					case MICROCHIP:
-						microchipElements.add(device.getElement());
-						break;
-					default:
-						throw new IllegalStateException("Unexpected device type");
-				}
-			}
-			if (generatorElements.isEmpty() || microchipElements.isEmpty()) {
-				return true;
-			}
-			for (String microchipElement : microchipElements) {
-				if (!generatorElements.contains(microchipElement)) {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		public Iterator<Device> iterateDevices() {
-			return new ImmutableIterator<>(this.devices.iterator());
-		}
-
-		public static Floor createNew(Set<Device> devices) {
-			return new Floor(new HashSet<>(devices));
-		}
-
-		public Floor createNewWithDeviceRemoved(Device device) {
-			Set<Device> newDevices = new HashSet<>(this.devices);
-			if (newDevices.remove(device)) {
-				return new Floor(newDevices);
-			} else {
-				return this;
-			}
-		}
-
-		public Floor createNewWithDeviceAdded(Device device) {
-			Set<Device> newDevices = new HashSet<>(this.devices);
-			if (newDevices.add(device)) {
-				return new Floor(newDevices);
-			} else {
-				return this;
-			}
-		}
-
-		public int getDeviceCount() {
-			return this.devices.size();
-		}
-	}
-
 	private static final class RadioisotopeTestingFacility {
-		private final Floor[] floors;
-		private final int elevatorFloor;
+		private final Map<Device, Integer> deviceIndexLookup;
+		private final Device[] devices;
+		private final byte[] deviceFloorNumbers;
+		private final byte elevatorFloor;
 		private transient int hashCode;
 
-		private RadioisotopeTestingFacility(Floor[] floors, int elevatorFloor) {
-			this.floors = floors;
-			this.elevatorFloor = elevatorFloor;
+		private RadioisotopeTestingFacility(Map<Device, Integer> deviceIndexLookup, Device[] devices, byte[] deviceFloorNumbers, byte elevatorFloorNumber) {
+			this.deviceIndexLookup = deviceIndexLookup;
+			this.devices = devices;
+			this.deviceFloorNumbers = deviceFloorNumbers;
+			this.elevatorFloor = elevatorFloorNumber;
 		}
 
-		public static RadioisotopeTestingFacility createNew(Floor[] floors, int elevatorPosition) {
-			return new RadioisotopeTestingFacility(Arrays.copyOf(floors, floors.length), elevatorPosition);
-		}
-
-		public RadioisotopeTestingFacility createNewWithDeviceMovedBetweenFloors(Device device, int fromFloorIndex, int toFloorIndex) {
-			Floor existingFromFloor = this.floors[fromFloorIndex];
-			Floor modifiedFromFloor = existingFromFloor.createNewWithDeviceRemoved(device);
-			if (modifiedFromFloor != existingFromFloor) {
-				Floor existingToFloor = this.floors[toFloorIndex];
-				Floor modifiedToFloor = existingToFloor.createNewWithDeviceAdded(device);
-				if (modifiedToFloor != existingToFloor) {
-					Floor[] newFloors = Arrays.copyOf(this.floors, this.floors.length);
-					newFloors[fromFloorIndex] = modifiedFromFloor;
-					newFloors[toFloorIndex] = modifiedToFloor;
-					return new RadioisotopeTestingFacility(newFloors, this.elevatorFloor);
-				}
+		public static RadioisotopeTestingFacility createNew(Map<Device, Integer> deviceToFloorNumberMap, int elevatorFloorNumber) {
+			if (deviceToFloorNumberMap == null) {
+				throw new IllegalStateException("Device to floor map is NULL");
 			}
-			return this;
+			if (elevatorFloorNumber < 0 || elevatorFloorNumber > Byte.MAX_VALUE) {
+				throw new IllegalStateException("Elevator floor not in storable range");
+			}
+			Map<Device, Integer> deviceLookup = new HashMap<>();
+			int deviceCount = deviceToFloorNumberMap.size();
+			Device[] devices = new Device[deviceCount];
+			byte[] deviceFloorNumbers = new byte[deviceCount];
+			int deviceIndex = 0;
+			for (Map.Entry<Device, Integer> deviceEntry : deviceToFloorNumberMap.entrySet()) {
+				Device device = deviceEntry.getKey();
+				if (device == null) {
+					throw new IllegalStateException("Device is NULL");
+				}
+				devices[deviceIndex] = device;
+				deviceLookup.put(deviceEntry.getKey(), deviceIndex);
+				Integer deviceFloorIntBoxed = deviceEntry.getValue();
+				if (deviceFloorIntBoxed == null) {
+					throw new IllegalStateException("Device floor is NULL");
+				}
+				int deviceFloorInt = deviceFloorIntBoxed;
+				if (deviceFloorInt < 0 || deviceFloorInt > Byte.MAX_VALUE) {
+					throw new IllegalStateException("Device floor not in storable range");
+				}
+				deviceFloorNumbers[deviceIndex] = (byte) deviceFloorInt;
+				deviceIndex++;
+			}
+			return new RadioisotopeTestingFacility(deviceLookup, devices, deviceFloorNumbers, (byte) elevatorFloorNumber);
 		}
 
-		public RadioisotopeTestingFacility createNewWithNewElevatorFloor(int floorIndex) {
-			return new RadioisotopeTestingFacility(this.floors, floorIndex);
+		public RadioisotopeTestingFacility createNewWithDeviceMovedBetweenFloors(Device device, int fromFloorNumber, int toFloorNumber) {
+			Integer deviceIndexBoxed = this.deviceIndexLookup.get(device);
+			if (deviceIndexBoxed == null) {
+				throw new IllegalStateException("Device not known by factory");
+			}
+			int deviceIndex = deviceIndexBoxed;
+			if (this.deviceFloorNumbers[deviceIndex] != fromFloorNumber) {
+				throw new IllegalStateException("Device not on specified floor");
+			}
+			if (toFloorNumber < 0 || toFloorNumber > Byte.MAX_VALUE) {
+				throw new IllegalStateException("To floor not in storable range");
+			}
+			byte[] newDeviceFloorNumbers = Arrays.copyOf(this.deviceFloorNumbers, this.deviceFloorNumbers.length);
+			newDeviceFloorNumbers[deviceIndex] = (byte) toFloorNumber;
+			return new RadioisotopeTestingFacility(this.deviceIndexLookup, this.devices, newDeviceFloorNumbers, this.elevatorFloor);
+		}
+
+		public RadioisotopeTestingFacility createNewWithNewElevatorFloor(int floorNumber) {
+			if (floorNumber < 0 || floorNumber > Byte.MAX_VALUE) {
+				throw new IllegalStateException("Floor not in storable range");
+			}
+			return new RadioisotopeTestingFacility(this.deviceIndexLookup, this.devices, this.deviceFloorNumbers, (byte) floorNumber);
 		}
 
 		@Override
@@ -282,37 +177,105 @@ public class Day11 {
 			if (otherObject == null || otherObject.getClass() != RadioisotopeTestingFacility.class) {
 				return false;
 			}
-			RadioisotopeTestingFacility otherRadioisotopeTestingFacility = (RadioisotopeTestingFacility)otherObject;
-			if (this.elevatorFloor != otherRadioisotopeTestingFacility.elevatorFloor || this.floors.length != otherRadioisotopeTestingFacility.floors.length) {
-				return false;
-			}
-			int floorsCount = floors.length;
-			for (int floorIndex=0; floorIndex<floorsCount; floorIndex++) {
-				if (!equalsByHashCodeFirst(this.floors[floorIndex],otherRadioisotopeTestingFacility.floors[floorIndex])) {
-					return false;
-				}
-			}
-			return true;
+			RadioisotopeTestingFacility otherRadioisotopeTestingFacility = (RadioisotopeTestingFacility) otherObject;
+			return
+				this.elevatorFloor == otherRadioisotopeTestingFacility.elevatorFloor
+					&&
+					this.deviceIndexLookup == otherRadioisotopeTestingFacility.deviceIndexLookup // Same instance
+					&&
+					Arrays.equals(this.deviceFloorNumbers, otherRadioisotopeTestingFacility.deviceFloorNumbers);
 		}
 
 		@Override
 		public int hashCode() {
 			int hashCode;
 			if ((hashCode = this.hashCode) == 0) {
+				hashCode = 31 * hashCode + System.identityHashCode(this.deviceIndexLookup);
 				hashCode = 31 * hashCode + this.elevatorFloor;
-				hashCode = 31 * hashCode + Arrays.hashCode(this.floors);
+				hashCode = 31 * hashCode + Arrays.hashCode(this.deviceFloorNumbers);
+				this.hashCode = hashCode;
 			}
 			return hashCode;
 		}
 
-		public Floor getFloor(int floorIndex) {
-			return this.floors[floorIndex];
+		public int getDeviceCountForFloor(int floorNumber) {
+			if (floorNumber < 0 || floorNumber > Byte.MAX_VALUE) {
+				throw new IllegalStateException("Floor not in storable range");
+			}
+			byte floorNumberByte = (byte) floorNumber;
+			int matchingDeviceCount = 0;
+			for (byte deviceFloorNumber : this.deviceFloorNumbers) {
+				if (deviceFloorNumber == floorNumberByte) {
+					matchingDeviceCount++;
+				}
+			}
+			return matchingDeviceCount;
+		}
+
+		public Iterator<Device> iterateDevicesOnFloor(int floorNumber) {
+			if (floorNumber < 0 || floorNumber > Byte.MAX_VALUE) {
+				throw new IllegalStateException("Floor not in storable range");
+			}
+			byte floorNumberByte = (byte) floorNumber;
+			return new Iterator<Device>() {
+				private int deviceIndex = -1;
+
+				@Override
+				public boolean hasNext() {
+					if (this.deviceIndex < -1) {
+						return false;
+					}
+					while (true) {
+						if (++this.deviceIndex >= RadioisotopeTestingFacility.this.deviceFloorNumbers.length) {
+							this.deviceIndex = -2;
+							return false;
+						}
+						if (RadioisotopeTestingFacility.this.deviceFloorNumbers[this.deviceIndex] == floorNumberByte) {
+							return true;
+						}
+					}
+				}
+
+				@Override
+				public Device next() {
+					return RadioisotopeTestingFacility.this.devices[this.deviceIndex];
+				}
+			};
 		}
 
 		public boolean isValid() {
-			for (Floor floor : this.floors) {
-				if (!floor.isValid()) {
-					return false;
+			Set<Byte> floors = new HashSet<>();
+			Map<Byte, Set<String>> microchipElementsPerFloor = new HashMap<>();
+			Map<Byte, Set<String>> generatorElementsPerFloor = new HashMap<>();
+			int deviceCount = this.devices.length;
+			for (int deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
+				Byte floor = this.deviceFloorNumbers[deviceIndex];
+				if (floors.add(floor)) {
+					microchipElementsPerFloor.put(floor, new HashSet<>());
+					generatorElementsPerFloor.put(floor, new HashSet<>());
+				}
+				Device device = this.devices[deviceIndex];
+				String deviceElement = device.getElement();
+				switch (device.getDeviceType()) {
+					case MICROCHIP:
+						microchipElementsPerFloor.get(floor).add(deviceElement);
+						break;
+					case GENERATOR:
+						generatorElementsPerFloor.get(floor).add(deviceElement);
+						break;
+					default:
+						throw new IllegalStateException("Unexpected device type.");
+				}
+			}
+			for (Byte floor : floors) {
+				Set<String> microchipElementsForFloor = microchipElementsPerFloor.get(floor);
+				Set<String> generatorElementsForFloor = generatorElementsPerFloor.get(floor);
+				if (!microchipElementsForFloor.isEmpty() && !generatorElementsForFloor.isEmpty()) {
+					for (String microchipElement : microchipElementsForFloor) {
+						if (!generatorElementsForFloor.contains(microchipElement)) {
+							return false;
+						}
+					}
 				}
 			}
 			return true;
@@ -327,24 +290,17 @@ public class Day11 {
 	private static final Pattern PATTERN_DEVICES_SPLIT = Pattern.compile("(?: *, *and +)|(?: +and +)|(?: *, *)");
 	private static final Pattern PATTERN_DEVICE = Pattern.compile("^a (?<element>[a-z]+)(?:-compatible)? (?<deviceType>[a-z]+)$");
 
-	/*
-	//BEGIN DEBUG
-	private static Map<String, Device> deviceNamesUnorderedNameToDeviceMap;
-	private static Map<Device, String> deviceNamesUnorderedDeviceToNameMap;
-	private static List<String> deviceNamesOrderedList;
-	private static Map<RadioisotopeTestingFacility, List<RadioisotopeTestingFacility>> chains = new HashMap<>();
-	//END DEBUG
-	*/
-
 	public static void main(String[] args) throws IOException {
+		if (Runtime.getRuntime().maxMemory() < (5L * 1024L * 1024L * 1024L)) {
+			System.out.println("WARNING: The implementation of this problem is NOT memory efficient, and it is recommended to use >=5GB of java heap to prevent excessive GC overhead");
+		}
 		Map<String, Integer> ordinalValues = new HashMap<>();
-		for (int index=0; index< ORDINALS.length; index++) {
+		for (int index = 0; index < ORDINALS.length; index++) {
 			if (ordinalValues.put(ORDINALS[index], index) != null) {
 				throw new IllegalStateException("Duplicate ordinal.");
 			}
 		}
-		Map<Integer,Floor> floorsMap = new HashMap<>();
-		Set<Device> allDevices = new HashSet<>();
+		Map<Device, Integer> deviceToFloorNumberMap = new HashMap<>();
 		int minimumFloorNumber = Integer.MAX_VALUE;
 		int maximumFloorNumber = Integer.MIN_VALUE;
 		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
@@ -356,16 +312,9 @@ public class Day11 {
 			if (floorNumber == null) {
 				throw new IllegalStateException("Unmatched floor number.");
 			}
-			int floorNumberPrimitive = (int)floorNumber;
+			int floorNumberPrimitive = floorNumber;
 			minimumFloorNumber = Math.min(minimumFloorNumber, floorNumberPrimitive);
 			maximumFloorNumber = Math.max(maximumFloorNumber, floorNumberPrimitive);
-			Set<Device> devices = new HashSet<>();
-			if (floorNumber == 1) {
-				devices.add(new Device("elerium",DeviceType.GENERATOR));
-				devices.add(new Device("elerium",DeviceType.MICROCHIP));
-				devices.add(new Device("dilithium",DeviceType.GENERATOR));
-				devices.add(new Device("dilithium",DeviceType.MICROCHIP));
-			}
 			String devicesString = lineMatcher.group("devices");
 			if (!devicesString.isEmpty()) {
 				for (String deviceString : PATTERN_DEVICES_SPLIT.split(devicesString)) {
@@ -374,104 +323,53 @@ public class Day11 {
 						throw new IllegalStateException("Unparseable device");
 					}
 					Device device = Device.createNew(deviceMatcher.group("element"), DeviceType.valueOf(deviceMatcher.group("deviceType").toUpperCase(Locale.ENGLISH)));
-					if (!allDevices.add(device)) {
+					if (deviceToFloorNumberMap.put(device, floorNumber) != null) {
 						throw new IllegalStateException("Duplicate device.");
 					}
-					devices.add(device);
 				}
 			}
-			if (floorsMap.put(floorNumber, Floor.createNew(devices)) != null) {
-				throw new IllegalStateException("Duplicate floor");
-			}
 		}
-		/*
-		// BEGIN DEBUG
-		deviceNamesUnorderedNameToDeviceMap = new HashMap<>();
-		deviceNamesUnorderedDeviceToNameMap = new HashMap<>();
-		for (Device device : allDevices) {
-			String deviceName = device.getElement().toUpperCase(Locale.ENGLISH).charAt(0) + "" + device.getDeviceType().name().charAt(0);
-			deviceNamesUnorderedNameToDeviceMap.put(deviceName, device);
-			deviceNamesUnorderedDeviceToNameMap.put(device, deviceName);
-
-		}
-		deviceNamesOrderedList = deviceNamesUnorderedNameToDeviceMap.keySet().stream().sorted().collect(Collectors.toList());
-		// END DEBUG
-		*/
-		int floorsCount = maximumFloorNumber-minimumFloorNumber+1;
-		if (floorsCount < 2) {
+		if ((maximumFloorNumber - minimumFloorNumber + 1) < 2) {
 			throw new IllegalStateException("Invalid number of floors");
 		}
-		Floor[] floorsArray = new Floor[floorsCount];
-		for (int floorNumber=minimumFloorNumber; floorNumber<=maximumFloorNumber; floorNumber++) {
-			Floor floor = floorsMap.get(floorNumber);
-			if (floor == null) {
-				throw new IllegalStateException("Missing floors");
-			}
-			floorsArray[floorNumber-minimumFloorNumber] = floor;
-		}
-		RadioisotopeTestingFacility startingFacility = RadioisotopeTestingFacility.createNew(floorsArray, 0);
+		outputSummary(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber);
+		System.out.format("Adding new devices%n");
+		deviceToFloorNumberMap.put(new Device("elerium", DeviceType.GENERATOR), minimumFloorNumber);
+		deviceToFloorNumberMap.put(new Device("elerium", DeviceType.MICROCHIP), minimumFloorNumber);
+		deviceToFloorNumberMap.put(new Device("dilithium", DeviceType.GENERATOR), minimumFloorNumber);
+		deviceToFloorNumberMap.put(new Device("dilithium", DeviceType.MICROCHIP), minimumFloorNumber);
+		outputSummary(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber);
+	}
+
+	private static void outputSummary(Map<Device, Integer> deviceToFloorNumberMap, int minimumFloorNumber, int maximumFloorNumber) {
+		System.out.format("Running simulation for %d devices%n", deviceToFloorNumberMap.size());
+		int stepsRequired = runSimulation(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber);
+		System.out.format("Total moves required: %d%n", stepsRequired);
+	}
+
+	private static int runSimulation(Map<Device, Integer> deviceToFloorNumberMap, int minimumFloorNumber, int maximumFloorNumber) {
+		RadioisotopeTestingFacility startingFacility = RadioisotopeTestingFacility.createNew(deviceToFloorNumberMap, 1);
 		Set<RadioisotopeTestingFacility> seenFacilities = new HashSet<>();
 		Set<RadioisotopeTestingFacility> pendingFacilities = Collections.singleton(startingFacility);
-		int totalDeviceCount = allDevices.size();
+		int totalDeviceCount = deviceToFloorNumberMap.size();
 		int stepsCompleted = 0;
-		int topFloorIndex = floorsArray.length-1;
 		boolean solutionPending = true;
 		while (solutionPending && !pendingFacilities.isEmpty()) {
-			// BEGIN DEBUG
-			System.out.println("------");
-			System.out.println(stepsCompleted + "\t" + seenFacilities.size() + "\t" + pendingFacilities.size());
-			// END DEBUG
+			System.out.format("Simulation in progress. Steps completed: %3d, Valid solutions seen: %9d, Solutions to investigate: %9d%n", stepsCompleted, seenFacilities.size(), pendingFacilities.size());
 			Set<RadioisotopeTestingFacility> newPendingFacilities = new HashSet<>();
 			for (RadioisotopeTestingFacility pendingFacility : pendingFacilities) {
-				if (seenFacilities.add(pendingFacility) && pendingFacility.isValid()) {
-					/*
-					// BEGIN DEBUG
-					//System.out.println("---");
-					dumpFacility("",pendingFacility);
-					// END DEBUg
-					*/
-					if (pendingFacility.getFloor(topFloorIndex).getDeviceCount() == totalDeviceCount) {
-						/*
-						//BEGIN DEBUG
-						System.out.println("Dumping chain");
-						for (RadioisotopeTestingFacility chainFacility : chains.get(pendingFacility)) {
-							System.out.println("---");
-							dumpFacility("",chainFacility);
-						}
-						//END DEBUG
-						*/
+				if (pendingFacility.isValid() && seenFacilities.add(pendingFacility)) {
+					if (pendingFacility.getDeviceCountForFloor(maximumFloorNumber) == totalDeviceCount) {
 						solutionPending = false;
 						break;
 					}
-					/*
-					//BEGIN DEBUG
-					Set<RadioisotopeTestingFacility> existingAddedFacilites = new HashSet<>(newPendingFacilities);
-					//END DEBUG
-					*/
-					int currentFloorIndex = pendingFacility.getElevatorFloor();
-					if (currentFloorIndex > 0) {
-						addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorIndex, currentFloorIndex-1);
+					int currentFloorNumber = pendingFacility.getElevatorFloor();
+					if (currentFloorNumber > minimumFloorNumber) {
+						addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorNumber, currentFloorNumber - 1);
 					}
-					if (currentFloorIndex < topFloorIndex) {
-						addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorIndex, currentFloorIndex + 1);
+					if (currentFloorNumber < maximumFloorNumber) {
+						addPossibleMovesAfterMovingElevator(newPendingFacilities, pendingFacility, currentFloorNumber, currentFloorNumber + 1);
 					}
-					/*
-					//BEGIN DEBUG
-					Set<RadioisotopeTestingFacility> newlyAddedFacilites = new HashSet<>(newPendingFacilities);
-					newlyAddedFacilites.removeAll(existingAddedFacilites);
-					List<RadioisotopeTestingFacility> existingChain = chains.get(pendingFacility);
-					if (existingChain == null) {
-						existingChain = new ArrayList<>();
-					}
-					for (RadioisotopeTestingFacility newlyAdded : newlyAddedFacilites) {
-						if (!chains.containsKey(newlyAdded)) {
-							List<RadioisotopeTestingFacility> newChain = new ArrayList<>(existingChain);
-							newChain.add(newlyAdded);
-							chains.put(newlyAdded,newChain);
-						}
-					}
-					//END DEBUG
-					*/
 				}
 			}
 			pendingFacilities = newPendingFacilities;
@@ -482,67 +380,25 @@ public class Day11 {
 		if (solutionPending) {
 			throw new IllegalStateException("No solution.");
 		}
-		System.out.format("Total moves required: %d%n", stepsCompleted);
+		return stepsCompleted;
 	}
 
-	/*
-	// BEGIN DEBUG
-	private static void dumpFacility(String prefix, RadioisotopeTestingFacility facility) {
-		int currentFloorIndex = facility.getElevatorFloor();
-		for (int floorIndex=facility.floors.length-1; floorIndex>=0; floorIndex--) {
-			System.out.print(prefix+"F"+(floorIndex+1)+" "+(floorIndex==currentFloorIndex?"E":"."));
-			Set<Device> devices = new HashSet<>();
-			Iterator<Device> deviceIterator = facility.getFloor(floorIndex).iterateDevices();
-			while (deviceIterator.hasNext()) {
-				devices.add(deviceIterator.next());
-			}
-			System.out.print(" ");
-			for (String deviceName : deviceNamesOrderedList) {
-				Device device = deviceNamesUnorderedNameToDeviceMap.get(deviceName);
-				System.out.print(" ");
-				if (devices.contains(device)) {
-					System.out.print(deviceName);
-				} else {
-					System.out.print(". ");
-				}
-			}
-			System.out.println(" ");
-		}
-	}
-	*/
-
-	private static void addPossibleMovesAfterMovingElevator(Set<RadioisotopeTestingFacility> pendingFacilities, RadioisotopeTestingFacility currentFacility, int currentFloorIndex, int newFloorIndex) {
-		addPossibleMoves(pendingFacilities, currentFacility.createNewWithNewElevatorFloor(newFloorIndex), currentFloorIndex, currentFacility.getFloor(currentFloorIndex), newFloorIndex, new HashSet<>(), 2);
+	private static void addPossibleMovesAfterMovingElevator(Set<RadioisotopeTestingFacility> pendingFacilities, RadioisotopeTestingFacility currentFacility, int currentFloorNumber, int newFloorNumber) {
+		addPossibleMoves(pendingFacilities, currentFacility.createNewWithNewElevatorFloor(newFloorNumber), currentFloorNumber, newFloorNumber, new HashSet<>(), 2);
 	}
 
-	private static void addPossibleMoves(Set<RadioisotopeTestingFacility> pendingFacilities, RadioisotopeTestingFacility currentFacility, int currentFloorIndex, Floor currentFloor, int newFloorIndex, Set<Device> devicesLookedAt, int recursionsLeft) {
+	private static void addPossibleMoves(Set<RadioisotopeTestingFacility> pendingFacilities, RadioisotopeTestingFacility currentFacility, int currentFloorNumber, int newFloorNumber, Set<Device> devicesLookedAt, int recursionsLeft) {
 		int newRecursionsLeft = recursionsLeft - 1;
-		/*
-		//BEGIN DEBUG
-		StringBuilder prefixBuilder = new StringBuilder();
-		for (int prefixNumber=2; prefixNumber>=recursionsLeft; prefixNumber--) {
-			prefixBuilder.append("   ");
-		}
-		String prefix = prefixBuilder.toString();
-		//END DEBUG
-		*/
 		HashSet<Device> newDevicesLookedAt = new HashSet<>(devicesLookedAt);
-		Iterator<Device> deviceIterator = currentFloor.iterateDevices();
+		Iterator<Device> deviceIterator = currentFacility.iterateDevicesOnFloor(currentFloorNumber);
 		while (deviceIterator.hasNext()) {
 			Device device = deviceIterator.next();
 			if (newDevicesLookedAt.add(device)) {
-				RadioisotopeTestingFacility newFacility = currentFacility.createNewWithDeviceMovedBetweenFloors(device, currentFloorIndex, newFloorIndex);
-				/*
-				//BEGIN DEBUG
-				String info = prefix+"Moving " + deviceNamesUnorderedDeviceToNameMap.get(device) + " to floor " + newFloorIndex + " with newRecursionsLeft=" + newRecursionsLeft;
-				System.out.println(info);
-				dumpFacility(prefix+"  ",newFacility);
-				//END DEBUG
-				*/
+				RadioisotopeTestingFacility newFacility = currentFacility.createNewWithDeviceMovedBetweenFloors(device, currentFloorNumber, newFloorNumber);
 				if (currentFacility != newFacility) {
 					pendingFacilities.add(newFacility);
 					if (newRecursionsLeft > 0) {
-						addPossibleMoves(pendingFacilities, newFacility, currentFloorIndex, currentFloor, newFloorIndex, newDevicesLookedAt, newRecursionsLeft);
+						addPossibleMoves(pendingFacilities, newFacility, currentFloorNumber, newFloorNumber, newDevicesLookedAt, newRecursionsLeft);
 					}
 				}
 			}
