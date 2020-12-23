@@ -5,6 +5,7 @@ import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,6 +44,8 @@ public class Day19 {
 	Also, note: technically 'e' is an electron and not a atom, but for the ease of implementation, we'll consider it an atom.
 	*/
 
+	//TODO: Split all the re-usable grammar related code out to separate files, then possibly try to use for year2020/Day19 too.
+
 	private static final Pattern PATTERN_ATOM_TO_MOLECULE_REPLACEMENT = Pattern.compile("^(?<fromAtom>(?:(?:[A-Z][a-z]*)|e)) => (?<toMolecule>.+)$");
 	private static final Pattern PATTERN_ATOM = Pattern.compile("[A-Z][a-z]*");
 
@@ -58,7 +61,8 @@ public class Day19 {
 		public static Atom create(String representation) {
 			if (representation == null) {
 				throw new IllegalStateException("Representation is NULL.");
-			} else if (representation.isEmpty()) {
+			}
+			else if (representation.isEmpty()) {
 				throw new IllegalStateException("Representation is empty.");
 			}
 			return new Atom(representation);
@@ -102,9 +106,11 @@ public class Day19 {
 		private static void validateAtomsList(List<Atom> atoms) {
 			if (atoms == null) {
 				throw new IllegalStateException("Atoms list is NULL.");
-			} else if (atoms.contains(null)) {
+			}
+			else if (atoms.contains(null)) {
 				throw new IllegalStateException("Atoms list contains a NULL atom.");
-			} else if (atoms.isEmpty()) {
+			}
+			else if (atoms.isEmpty()) {
 				throw new IllegalStateException("Atoms list is empty.");
 			}
 		}
@@ -170,23 +176,24 @@ public class Day19 {
 		}
 	}
 
-	private static Atom createCanonicalizedAtom(Map<Atom,Atom> knownAtoms, String atomRepresentation) {
+	private static Atom createCanonicalizedAtom(Map<Atom, Atom> knownAtoms, String atomRepresentation) {
 		Atom newAtom = Atom.create(atomRepresentation);
 		Atom alreadyKnownAtom = knownAtoms.get(newAtom);
 		if (alreadyKnownAtom == null) {
 			knownAtoms.put(newAtom, newAtom);
 			return newAtom;
-		} else {
+		}
+		else {
 			return alreadyKnownAtom;
 		}
 	}
 
-	private static Molecule parseMoleculeString(Map<Atom,Atom> knownAtoms, String moleculeString) {
+	private static Molecule parseMoleculeString(Map<Atom, Atom> knownAtoms, String moleculeString) {
 		List<Atom> atoms = new ArrayList<>();
 		Matcher atomMatcher = PATTERN_ATOM.matcher(moleculeString);
 		while (atomMatcher.lookingAt()) {
-			atoms.add(createCanonicalizedAtom(knownAtoms,atomMatcher.group()));
-			atomMatcher.region(atomMatcher.end(),atomMatcher.regionEnd());
+			atoms.add(createCanonicalizedAtom(knownAtoms, atomMatcher.group()));
+			atomMatcher.region(atomMatcher.end(), atomMatcher.regionEnd());
 		}
 		if (!atomMatcher.hitEnd()) {
 			throw new IllegalStateException("Could not parse full molecule");
@@ -195,7 +202,7 @@ public class Day19 {
 	}
 
 	public static void main(String[] args) throws IOException {
-		Map<Atom,Atom> knownAtoms = new HashMap<>();
+		Map<Atom, Atom> knownAtoms = new HashMap<>();
 		Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms = new HashMap<>();
 		Iterator<String> fileLineIterator = Files.lines(InputFileUtils.getInputPath()).iterator();
 		while (fileLineIterator.hasNext()) {
@@ -209,10 +216,10 @@ public class Day19 {
 			}
 			possibleReplacementMoleculesForAtoms
 				.computeIfAbsent(createCanonicalizedAtom(
-					knownAtoms,replacementMatcher.group("fromAtom")),
+					knownAtoms, replacementMatcher.group("fromAtom")),
 					__ -> new HashSet<>()
 				)
-				.add(parseMoleculeString(knownAtoms,replacementMatcher.group("toMolecule")));
+				.add(parseMoleculeString(knownAtoms, replacementMatcher.group("toMolecule")));
 		}
 		Atom initialAtom = createCanonicalizedAtom(knownAtoms, INITIAL_MOLECULE);
 		if (!possibleReplacementMoleculesForAtoms.containsKey(initialAtom)) {
@@ -221,7 +228,7 @@ public class Day19 {
 		if (!fileLineIterator.hasNext()) {
 			throw new IllegalStateException("Missing the input molecule");
 		}
-		Molecule inputMolecule = parseMoleculeString(knownAtoms,fileLineIterator.next());
+		Molecule inputMolecule = parseMoleculeString(knownAtoms, fileLineIterator.next());
 		if (fileLineIterator.hasNext()) {
 			throw new IllegalStateException("Expected EOF, but saw more input");
 		}
@@ -232,33 +239,33 @@ public class Day19 {
 	private static int countSingleReplacementPossibilities(Molecule inputMolecule, Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms) {
 		Set<Molecule> possibleNewMolecules = new HashSet<>();
 		int inputMoleculeAtomCount = inputMolecule.getAtomCount();
-		for (int inputMoleculeAtomIndex=0; inputMoleculeAtomIndex<inputMoleculeAtomCount; inputMoleculeAtomIndex++) {
+		for (int inputMoleculeAtomIndex = 0; inputMoleculeAtomIndex < inputMoleculeAtomCount; inputMoleculeAtomIndex++) {
 			Atom inputMoleculeAtom = inputMolecule.getAtom(inputMoleculeAtomIndex);
 			Set<Molecule> possibleReplacementMoleculesForAtom = possibleReplacementMoleculesForAtoms.get(inputMoleculeAtom);
 			if (possibleReplacementMoleculesForAtom != null) {
 				for (Molecule possibleReplacementMolecule : possibleReplacementMoleculesForAtom) {
-					possibleNewMolecules.add(inputMolecule.replaceAtomWithAtoms(inputMoleculeAtomIndex,possibleReplacementMolecule.getAtomsView()));
+					possibleNewMolecules.add(inputMolecule.replaceAtomWithAtoms(inputMoleculeAtomIndex, possibleReplacementMolecule.getAtomsView()));
 				}
 			}
 		}
 		return possibleNewMolecules.size();
 	}
 
-	private static final class ChomskyReducedFormRules<K,RK extends K,V> {
-		private final Class<K> keyClass;
+	private static final class ChomskyReducedFormRules<K, V extends K> {
+		private final Class<V> valueClass;
 		private final Set<K> validStartRuleKeys;
-		private final Collection<ChomskyReducedFormTerminalRule<K,V>> terminalRules;
+		private final Collection<ChomskyReducedFormTerminalRule<K, V>> terminalRules;
 		private final Collection<ChomskyReducedFormNonTerminalRule<K>> nonTerminalRules;
 
-		public ChomskyReducedFormRules(Class<K> keyClass, Set<K> validStartRuleKeys, Collection<ChomskyReducedFormTerminalRule<K,V>> terminalRules, Collection<ChomskyReducedFormNonTerminalRule<K>> nonTerminalRules) {
-			this.keyClass = keyClass;
+		public ChomskyReducedFormRules(Class<V> valueClass, Set<K> validStartRuleKeys, Collection<ChomskyReducedFormTerminalRule<K, V>> terminalRules, Collection<ChomskyReducedFormNonTerminalRule<K>> nonTerminalRules) {
+			this.valueClass = valueClass;
 			this.validStartRuleKeys = new HashSet<>(validStartRuleKeys);
 			this.terminalRules = new ArrayList<>(terminalRules);
 			this.nonTerminalRules = new ArrayList<>(nonTerminalRules);
 		}
 
-		public Class<K> getKeyClass() {
-			return this.keyClass;
+		public Class<V> getValueClass() {
+			return this.valueClass;
 		}
 
 		public Set<K> getValidStartRuleKeys() {
@@ -274,7 +281,7 @@ public class Day19 {
 		}
 	}
 
-	private static final class ChomskyReducedFormTerminalRule<K,V> extends AbstractChomskyReducedFormRule<K> {
+	private static final class ChomskyReducedFormTerminalRule<K, V> extends AbstractChomskyReducedFormRule<K> {
 		private final V output;
 
 		protected ChomskyReducedFormTerminalRule(K ruleKey, boolean temporary, V output) {
@@ -328,6 +335,7 @@ public class Day19 {
 
 	private interface ChomskyReducedFormRule<K> {
 		K getRuleKey();
+
 		boolean isTemporary();
 	}
 
@@ -425,7 +433,7 @@ public class Day19 {
 		private final Set<Integer> reservedRuleNumbers;
 		private final Set<Integer> generatedRuleNumbers = new HashSet<>();
 		private final List<ChomskyReducedFormBuildingRule> rules = new ArrayList<>();
-		private final Map<Boolean,Map<Integer,ChomskyReducedFormBuildingRuleSymbol>> symbolCache = new HashMap<>();
+		private final Map<Boolean, Map<Integer, ChomskyReducedFormBuildingRuleSymbol>> symbolCache = new HashMap<>();
 		private int nextRuleNumber = 0;
 
 		public ChomskyReducedFormBuildingRuleNewRuleHelper(Set<Integer> reservedRuleNumbers) {
@@ -465,7 +473,7 @@ public class Day19 {
 			while (this.reservedRuleNumbers.contains(newRuleNumber)) {
 				newRuleNumber++;
 			}
-			this.nextRuleNumber = newRuleNumber+1;
+			this.nextRuleNumber = newRuleNumber + 1;
 			this.generatedRuleNumbers.add(newRuleNumber);
 			this.rules.add(
 				new ChomskyReducedFormBuildingRule(
@@ -474,7 +482,7 @@ public class Day19 {
 					true
 				)
 			);
-			return createChomskyReducedFormBuildingRuleSymbol(newRuleNumber,false,this.symbolCache);
+			return createChomskyReducedFormBuildingRuleSymbol(newRuleNumber, false, this.symbolCache);
 		}
 
 		public List<ChomskyReducedFormBuildingRule> getRulesCopy() {
@@ -482,21 +490,21 @@ public class Day19 {
 		}
 	}
 
-	private static <T,U> U createSymbol(T item, boolean terminal, Map<Boolean,Map<T,U>> symbolsCache, BiFunction<Boolean,T,U> symbolConstructor) {
+	private static <T, U> U createSymbol(T item, boolean terminal, Map<Boolean, Map<T, U>> symbolsCache, BiFunction<Boolean, T, U> symbolConstructor) {
 		return symbolsCache
 			.computeIfAbsent(terminal, k -> new HashMap<>())
-			.computeIfAbsent(item, k -> symbolConstructor.apply(terminal,k));
+			.computeIfAbsent(item, k -> symbolConstructor.apply(terminal, k));
 	}
 
-	private static <T> ContextFreeGrammarSymbol<T> createContextFreeGrammarSymbol(T item, boolean terminal, Map<Boolean,Map<T,ContextFreeGrammarSymbol<T>>> symbolsCache) {
-		return createSymbol(item,terminal,symbolsCache,ContextFreeGrammarSymbol::new);
+	private static <T> ContextFreeGrammarSymbol<T> createContextFreeGrammarSymbol(T item, boolean terminal, Map<Boolean, Map<T, ContextFreeGrammarSymbol<T>>> symbolsCache) {
+		return createSymbol(item, terminal, symbolsCache, ContextFreeGrammarSymbol::new);
 	}
 
-	private static ChomskyReducedFormBuildingRuleSymbol createChomskyReducedFormBuildingRuleSymbol(int item, boolean terminal, Map<Boolean,Map<Integer,ChomskyReducedFormBuildingRuleSymbol>> symbolsCache) {
-		return createSymbol(item,terminal,symbolsCache,ChomskyReducedFormBuildingRuleSymbol::new);
+	private static ChomskyReducedFormBuildingRuleSymbol createChomskyReducedFormBuildingRuleSymbol(int item, boolean terminal, Map<Boolean, Map<Integer, ChomskyReducedFormBuildingRuleSymbol>> symbolsCache) {
+		return createSymbol(item, terminal, symbolsCache, ChomskyReducedFormBuildingRuleSymbol::new);
 	}
 
-	private static ContextFreeGrammarRule<Atom> createContextFreeGrammarRuleForAtomReplacements(Atom atom, Set<Molecule> possibleReplacementMoleculesForAtom, Set<Atom> atomsWithRules, Map<Boolean,Map<Atom,ContextFreeGrammarSymbol<Atom>>> symbolsCache) {
+	private static ContextFreeGrammarRule<Atom> createContextFreeGrammarRuleForAtomReplacements(Atom atom, Set<Molecule> possibleReplacementMoleculesForAtom, Set<Atom> atomsWithRules, Map<Boolean, Map<Atom, ContextFreeGrammarSymbol<Atom>>> symbolsCache) {
 		List<ContextFreeGrammarSubRule<Atom>> subRules = new ArrayList<>();
 		if (possibleReplacementMoleculesForAtom != null) {
 			possibleReplacementMoleculesForAtom
@@ -506,7 +514,7 @@ public class Day19 {
 						molecule
 							.getAtomsView()
 							.stream()
-							.map(moleculeAtom -> createContextFreeGrammarSymbol(moleculeAtom,!atomsWithRules.contains(moleculeAtom),symbolsCache))
+							.map(moleculeAtom -> createContextFreeGrammarSymbol(moleculeAtom, !atomsWithRules.contains(moleculeAtom), symbolsCache))
 							.collect(Collectors.toList())
 					)
 				)
@@ -515,27 +523,27 @@ public class Day19 {
 		subRules.add(
 			new ContextFreeGrammarSubRule<>(
 				Collections.singletonList(
-					createContextFreeGrammarSymbol(atom,true, symbolsCache)
+					createContextFreeGrammarSymbol(atom, true, symbolsCache)
 				)
 			)
 		);
-		return new ContextFreeGrammarRule<>(atom,subRules);
+		return new ContextFreeGrammarRule<>(atom, subRules);
 	}
 
 	private static Collection<ContextFreeGrammarRule<Atom>> transformReplacementsIntoContextFreeGrammarRules(Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms) {
 		Set<Atom> atomsWithRules = possibleReplacementMoleculesForAtoms.keySet();
-		Map<Boolean,Map<Atom,ContextFreeGrammarSymbol<Atom>>> symbolsCache = new HashMap<>();
+		Map<Boolean, Map<Atom, ContextFreeGrammarSymbol<Atom>>> symbolsCache = new HashMap<>();
 		return
 			possibleReplacementMoleculesForAtoms
 				.entrySet()
 				.stream()
 				.map(
 					entry ->
-						createContextFreeGrammarRuleForAtomReplacements(entry.getKey(),entry.getValue(),atomsWithRules,symbolsCache))
-			.collect(Collectors.toList());
+						createContextFreeGrammarRuleForAtomReplacements(entry.getKey(), entry.getValue(), atomsWithRules, symbolsCache))
+				.collect(Collectors.toList());
 	}
 
-	private static <T> Collection<ChomskyReducedFormBuildingRule> createChomskyReducedFormBuildingRulesFromContextFreeGrammar(Collection<ContextFreeGrammarRule<T>> contextFreeGrammarRules, Map<Integer,T> indexToValueLookupSink) {
+	private static <T> Collection<ChomskyReducedFormBuildingRule> createChomskyReducedFormBuildingRulesFromContextFreeGrammar(Collection<ContextFreeGrammarRule<T>> contextFreeGrammarRules, Map<Integer, T> indexToValueLookupSink) {
 		Set<T> allValues =
 			Stream.concat(
 				contextFreeGrammarRules
@@ -550,14 +558,14 @@ public class Day19 {
 					.filter(ContextFreeGrammarSymbol::isTerminal)
 					.map(ContextFreeGrammarSymbol::getSymbol)
 			).collect(Collectors.toSet());
-		Map<T,Integer> valueToIndexLookup = new HashMap<>();
+		Map<T, Integer> valueToIndexLookup = new HashMap<>();
 		int index = 0;
 		for (T value : allValues) {
-			indexToValueLookupSink.put(index,value);
-			valueToIndexLookup.put(value,index);
+			indexToValueLookupSink.put(index, value);
+			valueToIndexLookup.put(value, index);
 			index++;
 		}
-		Map<Boolean,Map<Integer,ChomskyReducedFormBuildingRuleSymbol>> symbolsCache = new HashMap<>();
+		Map<Boolean, Map<Integer, ChomskyReducedFormBuildingRuleSymbol>> symbolsCache = new HashMap<>();
 		return
 			contextFreeGrammarRules
 				.stream()
@@ -583,7 +591,7 @@ public class Day19 {
 													)
 											)
 											.collect(Collectors.toList()),
-											false
+										false
 									)
 								);
 					}
@@ -592,7 +600,7 @@ public class Day19 {
 
 	private static Collection<ChomskyReducedFormBuildingRule> runChomskyReducedFormTransformationTerm(Collection<ChomskyReducedFormBuildingRule> rules) {
 		ChomskyReducedFormBuildingRuleNewRuleHelper newRuleHelper = ChomskyReducedFormBuildingRuleNewRuleHelper.createWithReservedRuleNumbersFromExistingRules(rules);
-		Map<Integer,ChomskyReducedFormBuildingRuleSymbol> newRuleReferencesForTerminalValues = new HashMap<>();
+		Map<Integer, ChomskyReducedFormBuildingRuleSymbol> newRuleReferencesForTerminalValues = new HashMap<>();
 		for (ChomskyReducedFormBuildingRule rule : rules) {
 			List<ChomskyReducedFormBuildingRuleSymbol> rightSide = rule.getRightSide();
 			if (rightSide.size() > 1 && rightSide.stream().anyMatch(ChomskyReducedFormBuildingRuleSymbol::isTerminal)) {
@@ -610,13 +618,15 @@ public class Day19 {
 										)
 									)
 							);
-					} else {
+					}
+					else {
 						newRightSideSymbol = rightSideSymbol;
 					}
 					newRightSide.add(newRightSideSymbol);
 				}
-				newRuleHelper.addRuleWithNewRightSide(rule,newRightSide);
-			} else {
+				newRuleHelper.addRuleWithNewRightSide(rule, newRightSide);
+			}
+			else {
 				newRuleHelper.addRule(rule);
 			}
 		}
@@ -643,8 +653,9 @@ public class Day19 {
 					newRightSide.addLast(newRuleHelper.createTemporaryRuleAndReturnReferencingSymbol(temporaryRightSide));
 					nonTerminalCount--; // We removed two, but added a new one back.
 				}
-				newRuleHelper.addRuleWithNewRightSide(rule,newRightSide);
-			} else {
+				newRuleHelper.addRuleWithNewRightSide(rule, newRightSide);
+			}
+			else {
 				newRuleHelper.addRule(rule);
 			}
 		}
@@ -696,21 +707,38 @@ public class Day19 {
 	}
 
 	private static Collection<ChomskyReducedFormBuildingRule> runChomskyReducedFormTransformationRemoveTemporaryDuplicates(Collection<ChomskyReducedFormBuildingRule> rules) {
-		//TODO
+		//TODO: Implement me
 		return rules;
 	}
 
 	private static Collection<ChomskyReducedFormBuildingRule> runChomskyReducedFormTransformationRemoveUnreachable(Collection<ChomskyReducedFormBuildingRule> rules) {
-		//TODO
+		//TODO: Implement me
 		return rules;
 	}
 
-	// A class needed so that temporary keys don't match any T
-	private static class TemporaryRuleKey {
+	// A class needed so that temporary keys don't match any real key by accident.
+	private static final class TemporaryRuleKey {
 		private final int number;
 
 		public TemporaryRuleKey(int number) {
 			this.number = number;
+		}
+
+		@Override
+		public boolean equals(Object otherObject) {
+			if (otherObject == this) {
+				return true;
+			}
+			if (otherObject == null || otherObject.getClass() != TemporaryRuleKey.class) {
+				return false;
+			}
+			TemporaryRuleKey otherTemporaryRuleKey = (TemporaryRuleKey) otherObject;
+			return this.number == otherTemporaryRuleKey.number;
+		}
+
+		@Override
+		public int hashCode() {
+			return this.number;
 		}
 
 		@Override
@@ -719,8 +747,8 @@ public class Day19 {
 		}
 	}
 
-	private static <T> ChomskyReducedFormRules<Object,T,T> createChomskyReducedFormRules(Collection<ChomskyReducedFormBuildingRule> buildingRules, T startingRule, Map<Integer,T> intValueToRealValueLookup) {
-		Function<Integer,T> intValueToRealValueMapper = intValue -> {
+	private static <T> ChomskyReducedFormRules<Object, T> createChomskyReducedFormRules(Collection<ChomskyReducedFormBuildingRule> buildingRules, T startingRule, Map<Integer, T> intValueToRealValueLookup, Class<T> ruleClazz) {
+		Function<Integer, T> intValueToRealValueMapper = intValue -> {
 			T value = intValueToRealValueLookup.get(intValue);
 			if (value == null) {
 				throw new IllegalStateException("Could not reverse integer mapping back to real key");
@@ -729,37 +757,40 @@ public class Day19 {
 				return value;
 			}
 		};
-		Function<ChomskyReducedFormBuildingRule,Object> ruleToKeyMapper;
+		Function<ChomskyReducedFormBuildingRule, Object> ruleToKeyMapper;
 		if (startingRule instanceof TemporaryRuleKey) {
 			throw new IllegalStateException("T must not be " + TemporaryRuleKey.class.getName());
-		} else {
+		}
+		else {
 			ruleToKeyMapper = rule -> {
 				int ruleLeftSide = rule.getLeftSide();
 				if (rule.isTemporary()) {
 					return new TemporaryRuleKey(ruleLeftSide);
-				} else {
+				}
+				else {
 					return intValueToRealValueMapper.apply(ruleLeftSide);
 				}
 			};
 		}
-		Map<Integer,Object> ruleLeftSideToKeyMap =
+		Map<Integer, Object> ruleLeftSideToKeyMap =
 			buildingRules
 				.stream()
 				.collect(
 					Collectors.toMap(
 						ChomskyReducedFormBuildingRule::getLeftSide,
 						ruleToKeyMapper,
-						(value1,value2) -> {
-							if (Objects.equals(value1,value2)) {
+						(value1, value2) -> {
+							if (Objects.equals(value1, value2)) {
 								return value1;
-							} else {
+							}
+							else {
 								throw new IllegalStateException("Differing keys for what appears to be the same rule. Something went wrong.");
 							}
-						} ,
+						},
 						IdentityHashMap::new
 					)
 				);
-		List<ChomskyReducedFormTerminalRule<Object,T>> terminalRules = new ArrayList<>();
+		List<ChomskyReducedFormTerminalRule<Object, T>> terminalRules = new ArrayList<>();
 		List<ChomskyReducedFormNonTerminalRule<Object>> nonTerminalRules = new ArrayList<>();
 		for (ChomskyReducedFormBuildingRule buildingRule : buildingRules) {
 			Object ruleKey = ruleLeftSideToKeyMap.get(buildingRule.getLeftSide());
@@ -773,7 +804,8 @@ public class Day19 {
 						intValueToRealValueMapper.apply(rightSide.get(0).getValue())
 					)
 				);
-			} else if (rightSide.size() == 2 && rightSide.stream().noneMatch(ChomskyReducedFormBuildingRuleSymbol::isTerminal)) {
+			}
+			else if (rightSide.size() == 2 && rightSide.stream().noneMatch(ChomskyReducedFormBuildingRuleSymbol::isTerminal)) {
 				nonTerminalRules.add(
 					new ChomskyReducedFormNonTerminalRule<>(
 						ruleKey,
@@ -782,23 +814,24 @@ public class Day19 {
 						ruleLeftSideToKeyMap.get(rightSide.get(1).getValue())
 					)
 				);
-			} else {
+			}
+			else {
 				throw new IllegalStateException("Building rule is not a valid chomsky reduced form rule");
 			}
 		}
-		return new ChomskyReducedFormRules<>(Object.class,Collections.singleton(startingRule),terminalRules,nonTerminalRules);
+		return new ChomskyReducedFormRules<>(ruleClazz, Collections.singleton(startingRule), terminalRules, nonTerminalRules);
 	}
 
-	private static <T> ChomskyReducedFormRules<Object,T,T> transformContextFreeGrammarIntoChomskyReducedForm(Collection<ContextFreeGrammarRule<T>> contextFreeGrammarRules, T startingRule) {
-		if (contextFreeGrammarRules.stream().noneMatch(contextFreeGrammarRule -> Objects.equals(contextFreeGrammarRule.getLeftSide(),startingRule))) {
+	private static <T> ChomskyReducedFormRules<Object, T> transformContextFreeGrammarIntoChomskyReducedForm(Collection<ContextFreeGrammarRule<T>> contextFreeGrammarRules, T startingRule, @SuppressWarnings("SameParameterValue") Class<T> ruleClazz) {
+		if (contextFreeGrammarRules.stream().noneMatch(contextFreeGrammarRule -> Objects.equals(contextFreeGrammarRule.getLeftSide(), startingRule))) {
 			throw new IllegalStateException("Starting rule does not exist in rules collection");
 		}
 		if (contextFreeGrammarRules.stream().map(ContextFreeGrammarRule::getSubRules).flatMap(Collection::stream).map(ContextFreeGrammarSubRule::getSymbols).anyMatch(List::isEmpty)) {
 			throw new IllegalStateException("Chomsky reduced form does not support empty sets.");
 		}
-		Map<Integer,T> intValueToRealValueLookup = new HashMap<>();
+		Map<Integer, T> intValueToRealValueLookup = new HashMap<>();
 		Collection<ChomskyReducedFormBuildingRule> buildingRules;
-		buildingRules = createChomskyReducedFormBuildingRulesFromContextFreeGrammar(contextFreeGrammarRules,intValueToRealValueLookup);
+		buildingRules = createChomskyReducedFormBuildingRulesFromContextFreeGrammar(contextFreeGrammarRules, intValueToRealValueLookup);
 		// Transformation START is not needed for reduced form
 		buildingRules = runChomskyReducedFormTransformationTerm(buildingRules);
 		buildingRules = runChomskyReducedFormTransformationBin(buildingRules);
@@ -807,57 +840,113 @@ public class Day19 {
 		buildingRules = runChomskyReducedFormTransformationRemoveTemporaryDuplicates(buildingRules);
 		buildingRules = runChomskyReducedFormTransformationRemoveUnreachable(buildingRules);
 		// Final step is to convert this into proper chomsky classes.
-		return createChomskyReducedFormRules(buildingRules, startingRule, intValueToRealValueLookup);
+		return createChomskyReducedFormRules(buildingRules, startingRule, intValueToRealValueLookup, ruleClazz);
 	}
 
 	private static class ParseTree<K> {
-		//private final K rule;
-		//private final Set<Set<ParseTree<K>>> childrenOfPossibilities;
+		private final List<ParseForest<K>> children;
+
+		private ParseTree(List<ParseForest<K>> children) {
+			this.children = new ArrayList<>(children);
+		}
+
+		public List<ParseForest<K>> getChildrenView() {
+			return Collections.unmodifiableList(this.children);
+		}
 	}
 
-	private static <K,RK extends K,V> Set<ParseTree<RK>> runCYKAndProduceParseTrees(ChomskyReducedFormRules<K,RK,V> chomskyReducedFormRules, List<V> input) {
-		final class MatchCoordinate {
-			private final int i;
-			private final int j;
-			private final K matchedChildRuleKey;
+	private static class ParseForest<K> {
+		private final K rule;
+		private final Collection<ParseTree<K>> possibilities;
 
-			public MatchCoordinate(int i, int j, K matchedChildRuleKey) {
-				this.matchedChildRuleKey = matchedChildRuleKey;
-				this.i = i;
-				this.j = j;
-			}
+		private ParseForest(K rule, List<ParseTree<K>> possibilities) {
+			this.rule = rule;
+			this.possibilities = new ArrayList<>(possibilities);
 		}
 
-		final class MatchCoordinatePair {
-			private final MatchCoordinate leftCoordinate;
-			private final MatchCoordinate rightCoordinate;
-
-			public MatchCoordinatePair(MatchCoordinate leftCoordinate, MatchCoordinate rightCoordinate) {
-				this.leftCoordinate = leftCoordinate;
-				this.rightCoordinate = rightCoordinate;
-			}
+		public K getRule() {
+			return this.rule;
 		}
 
+		public Collection<ParseTree<K>> getPossibilitiesView() {
+			return Collections.unmodifiableCollection(this.possibilities);
+		}
+	}
+
+	private static <K, V extends K> Collection<ParseForest<K>> runCYKAndProduceParseTrees(ChomskyReducedFormRules<K, V> chomskyReducedFormRules, List<V> input) {
 		final class RuleMatch {
+			final class MatchCoordinatePair {
+				private final RuleMatch leftMatch;
+				private final RuleMatch rightMatch;
+
+				public MatchCoordinatePair(RuleMatch leftMatch, RuleMatch rightMatch) {
+					this.leftMatch = leftMatch;
+					this.rightMatch = rightMatch;
+				}
+
+				public RuleMatch getLeftMatch() {
+					return this.leftMatch;
+				}
+
+				public RuleMatch getRightMatch() {
+					return this.rightMatch;
+				}
+			}
+
 			private final K matchedRuleKey;
 			private final List<MatchCoordinatePair> matchCoordinatePairs = new ArrayList<>();
+			private transient ParseForest<K> parseForest;
 
 			public RuleMatch(K matchedRuleKey) {
 				this.matchedRuleKey = matchedRuleKey;
 			}
 
-			public void addMatchCoordinatePair(MatchCoordinatePair matchCoordinatePair) {
-				this.matchCoordinatePairs.add(matchCoordinatePair);
+			public void registerMatchSource(RuleMatch leftMatch, RuleMatch rightMatch) {
+				this.matchCoordinatePairs.add(new MatchCoordinatePair(leftMatch, rightMatch));
 			}
 
 			public K getMatchedRuleKey() {
 				return this.matchedRuleKey;
 			}
+
+			public ParseForest<K> getOrBuildParseForest() {
+				ParseForest<K> parseForest;
+				if ((parseForest = this.parseForest) == null) {
+					parseForest = new ParseForest<>(
+						this.matchedRuleKey,
+						this.matchCoordinatePairs
+							.stream()
+							.map(
+								matchCoordinatePair -> new ParseTree<>(
+									Arrays.asList(
+										matchCoordinatePair.getLeftMatch().getOrBuildParseForest(),
+										matchCoordinatePair.getRightMatch().getOrBuildParseForest()
+									)
+								)
+							)
+							.collect(Collectors.toList())
+					);
+					this.parseForest = parseForest;
+				}
+				return parseForest;
+			}
 		}
 
-		Collection<ChomskyReducedFormTerminalRule<K,V>> terminalRules = chomskyReducedFormRules.getTerminalRulesView();
+		final class RuleMatchHolder {
+			private final Map<K, RuleMatch> matches = new HashMap<>();
+
+			public RuleMatch getOrCreateRuleMatch(K rule) {
+				return this.matches.computeIfAbsent(rule, RuleMatch::new);
+			}
+
+			public Collection<RuleMatch> getRuleMatches() {
+				return this.matches.values();
+			}
+		}
+
+		Collection<ChomskyReducedFormTerminalRule<K, V>> terminalRules = chomskyReducedFormRules.getTerminalRulesView();
 		Collection<ChomskyReducedFormNonTerminalRule<K>> nonTerminalRules = chomskyReducedFormRules.getNonTerminalRulesView();
-		Map<V,Set<K>> ruleKeysThatProduceValues =
+		Map<V, Set<K>> ruleKeysThatProduceValues =
 			terminalRules
 				.stream()
 				.collect(
@@ -869,7 +958,7 @@ public class Day19 {
 						)
 					)
 				);
-		Map<K,Map<K,Set<K>>> parentRuleKeysThatMatchChildKeys =
+		Map<K, Map<K, Set<K>>> parentRuleKeysThatMatchChildKeys =
 			nonTerminalRules
 				.stream()
 				.collect(
@@ -886,72 +975,273 @@ public class Day19 {
 				);
 		int inputSize = input.size();
 
-		RuleMatch[][][] rulesMatched = new RuleMatch[inputSize][][];
-		RuleMatch[] emptyRuleMatchArray = new RuleMatch[0];
-		System.out.println("hi");
-		rulesMatched[0] = new RuleMatch[inputSize][];
-		for (int inputIndex=0; inputIndex<inputSize; inputIndex++) {
+		RuleMatchHolder[][] rulesMatched = new RuleMatchHolder[inputSize][];
+		rulesMatched[0] = new RuleMatchHolder[inputSize];
+		for (int inputIndex = 0; inputIndex < inputSize; inputIndex++) {
 			Set<K> ruleKeysThatProduceInputValue = ruleKeysThatProduceValues.get(input.get(inputIndex));
-			RuleMatch[] rulesMatchedForInputValue;
+			RuleMatchHolder ruleMatchHolder = new RuleMatchHolder();
 			if (ruleKeysThatProduceInputValue != null) {
-				int matchCount = ruleKeysThatProduceInputValue.size();
-				rulesMatchedForInputValue = new RuleMatch[matchCount];
-				int matchIndex = 0;
 				for (K ruleKey : ruleKeysThatProduceInputValue) {
-					rulesMatchedForInputValue[matchIndex] = new RuleMatch(ruleKey);
+					ruleMatchHolder.getOrCreateRuleMatch(ruleKey);
 				}
-			} else {
-				rulesMatchedForInputValue = emptyRuleMatchArray;
 			}
-			rulesMatched[0][inputIndex] = rulesMatchedForInputValue;
+			rulesMatched[0][inputIndex] = ruleMatchHolder;
 		}
-		for (int targetI=1; targetI<inputSize; targetI++) {
-			rulesMatched[targetI] = new RuleMatch[inputSize-targetI][];
-			for (int targetJ=0; targetJ<inputSize-targetI; targetJ++) {
-				Map<K,RuleMatch> ruleMatchesForNewCell = new HashMap<>();
+		for (int targetI = 1; targetI < inputSize; targetI++) {
+			rulesMatched[targetI] = new RuleMatchHolder[inputSize - targetI];
+			for (int targetJ = 0; targetJ < inputSize - targetI; targetJ++) {
+				RuleMatchHolder ruleMatchesForNewCell = new RuleMatchHolder();
 				for (
 					int
-					check1I=targetI-1,
-					check2I=0,
-					check2J=targetI+targetJ;
-					check1I>=0;
+					check1I = targetI - 1,
+					check2I = 0,
+					check2J = targetI + targetJ;
+					check1I >= 0;
 					check1I--,
-					check2I++,
-					check2J--
+						check2I++,
+						check2J--
 				) {
-					RuleMatch[] leftRuleMatches = rulesMatched[check1I][targetJ];
-					RuleMatch[] rightRuleMatches = rulesMatched[check2I][check2J];
-					for (RuleMatch leftRuleMatch : leftRuleMatches) {
+					RuleMatchHolder leftRuleMatches = rulesMatched[check1I][targetJ];
+					RuleMatchHolder rightRuleMatches = rulesMatched[check2I][check2J];
+					for (RuleMatch leftRuleMatch : leftRuleMatches.getRuleMatches()) {
 						K leftRuleMatchedKey = leftRuleMatch.getMatchedRuleKey();
-						MatchCoordinate leftMatchCoordinate = new MatchCoordinate(check1I,targetJ,leftRuleMatchedKey);
-						Map<K,Set<K>> parentRuleKeysThatMatchLeftRuleKey = parentRuleKeysThatMatchChildKeys.get(leftRuleMatchedKey);
+						Map<K, Set<K>> parentRuleKeysThatMatchLeftRuleKey = parentRuleKeysThatMatchChildKeys.get(leftRuleMatchedKey);
 						if (parentRuleKeysThatMatchLeftRuleKey != null) {
-							for (RuleMatch rightRuleMatch : rightRuleMatches) {
+							for (RuleMatch rightRuleMatch : rightRuleMatches.getRuleMatches()) {
 								K rightRuleMatchedKey = rightRuleMatch.getMatchedRuleKey();
-								MatchCoordinate rightMatchCoordinate = new MatchCoordinate(check2I,check2J,rightRuleMatchedKey);
 								Set<K> ruleKeysThatMatchBothKeys = parentRuleKeysThatMatchLeftRuleKey.get(rightRuleMatchedKey);
 								if (ruleKeysThatMatchBothKeys != null) {
-									MatchCoordinatePair matchCoordinatePair = new MatchCoordinatePair(leftMatchCoordinate,rightMatchCoordinate);
 									for (K ruleKey : ruleKeysThatMatchBothKeys) {
-										ruleMatchesForNewCell.computeIfAbsent(ruleKey, RuleMatch::new).addMatchCoordinatePair(matchCoordinatePair);
+										ruleMatchesForNewCell.getOrCreateRuleMatch(ruleKey).registerMatchSource(leftRuleMatch, rightRuleMatch);
 									}
 								}
 							}
 						}
 					}
 				}
-				rulesMatched[targetI][targetJ] = ruleMatchesForNewCell.values().toArray(emptyRuleMatchArray);
+				rulesMatched[targetI][targetJ] = ruleMatchesForNewCell;
 			}
 		}
-		System.out.println("bye");
-		return null;
+		RuleMatchHolder rootRuleMatchHolder = rulesMatched[inputSize - 1][0];
+		Set<K> validStartKeys = chomskyReducedFormRules.getValidStartRuleKeys();
+		return
+			rootRuleMatchHolder
+				.getRuleMatches()
+				.stream()
+				.filter(ruleMatch -> validStartKeys.contains(ruleMatch.getMatchedRuleKey()))
+				.map(RuleMatch::getOrBuildParseForest)
+				.collect(Collectors.toList());
+	}
+
+	private static <K> void tempDumpFirstParseRouteRecurseTree(ParseTree<K> parseTree, String parentNodeName, Set<String> nodeDefinitions, Set<String> nodeLinks) {
+		//TODO: Remove me
+		for (ParseForest<K> parseForest : parseTree.getChildrenView()) {
+			tempDumpFirstParseRouteRecurseForest(parseForest, parentNodeName, nodeDefinitions, nodeLinks);
+		}
+	}
+
+	private static <K> void tempDumpFirstParseRouteRecurseForest(ParseForest<K> parseForest, String parentNodeName, Set<String> nodeDefinitions, Set<String> nodeLinks) {
+		//TODO: Remove me
+		String nodeName = "node_" + nodeDefinitions.size();
+		nodeDefinitions.add(nodeName + " [label=\"" + parseForest.getRule() + "\"];");
+		nodeLinks.add(parentNodeName + " -> " + nodeName + ";");
+		Iterator<ParseTree<K>> parseTreeIterator = parseForest.getPossibilitiesView().iterator();
+		if (parseTreeIterator.hasNext()) {
+			tempDumpFirstParseRouteRecurseTree(parseTreeIterator.next(), nodeName, nodeDefinitions, nodeLinks);
+		}
+	}
+
+	private static <K> void tempDumpFirstParseRoute(Collection<ParseForest<K>> parseForests) {
+		//TODO: Remove me
+		String rootNodeName = "root";
+		Set<String> nodeDefinitions = new HashSet<>();
+		Set<String> nodeLinks = new HashSet<>();
+		nodeDefinitions.add(rootNodeName);
+		Iterator<ParseForest<K>> parseForestIterator = parseForests.iterator();
+		if (parseForestIterator.hasNext()) {
+			tempDumpFirstParseRouteRecurseForest(parseForestIterator.next(), rootNodeName, nodeDefinitions, nodeLinks);
+		}
+		System.out.println("digraph {\n" + String.join("\n", nodeDefinitions) + "\n" + String.join("\n", nodeLinks) + "\n}");
+	}
+
+	private static <K, T extends ChomskyReducedFormRule<K>, R> Map<K, R> computeChomskyReducedFormRuleKeyMapping(Collection<? extends Collection<? extends T>> ruleCollections, Function<T, R> ruleMapper, String reasoning) {
+		Map<K, R> keyStates = new HashMap<>();
+		Set<K> badKeys = new HashSet<>();
+		for (Collection<? extends T> rulesCollection : ruleCollections) {
+			for (T rule : rulesCollection) {
+				K key = rule.getRuleKey();
+				R newResult = ruleMapper.apply(rule);
+				R existingResult = keyStates.put(key, newResult);
+				if (existingResult != null && newResult != existingResult) {
+					badKeys.add(key);
+				}
+			}
+		}
+		if (!badKeys.isEmpty()) {
+			//have differing output values associated with the same rule key
+			throw new IllegalStateException("Flattening cannot occur as the following rule keys " + reasoning + ": " + badKeys);
+		}
+		return keyStates;
+	}
+
+	private static <K, V extends K> ParseForest<V> flattenTemporariesOfParseForest(IdentityHashMap<ParseForest<K>, ParseForest<V>> alreadyFlattenedParseForests, Map<K, Boolean> ruleKeysAreTemporaryMap, Map<K, V> terminalRuleKeyValuesMap, Map<K, V> nonTerminalRuleKeyValuesMap, ParseForest<K> unflattenedParseForest) {
+		ParseForest<V> flattenedParseForest = alreadyFlattenedParseForests.get(unflattenedParseForest);
+		if (flattenedParseForest == null) {
+			K key = unflattenedParseForest.getRule();
+			Collection<ParseTree<K>> unflattenedParseForestPossibilities = unflattenedParseForest.getPossibilitiesView();
+			if (unflattenedParseForestPossibilities.isEmpty()) {
+				V value = terminalRuleKeyValuesMap.get(key);
+				if (value == null) {
+					throw new IllegalStateException("Non-terminal leaf node.");
+				}
+				flattenedParseForest = new ParseForest<>(
+					value,
+					Collections.emptyList()
+				);
+			}
+			else {
+				//TODO: Code here
+			}
+			alreadyFlattenedParseForests.put(unflattenedParseForest, flattenedParseForest);
+		}
+		return flattenedParseForest;
+	}
+
+	private static <K, V extends K> Collection<ParseForest<V>> flattenTemporariesOfParseForests(Collection<ParseForest<K>> parseForests, ChomskyReducedFormRules<K, V> chomskyReducedFormRules) {
+		Collection<ChomskyReducedFormNonTerminalRule<K>> nonTerminalRules = chomskyReducedFormRules.getNonTerminalRulesView();
+		Collection<ChomskyReducedFormTerminalRule<K, V>> terminalRules = chomskyReducedFormRules.getTerminalRulesView();
+		Map<K, Boolean> ruleKeysAreTemporaryMap = computeChomskyReducedFormRuleKeyMapping(Arrays.asList(nonTerminalRules, terminalRules), ChomskyReducedFormRule::isTemporary, "have both associated temporary rules and associated non-temporary rules");
+		Map<K, V> terminalRuleKeyValuesMap = computeChomskyReducedFormRuleKeyMapping(Collections.singleton(terminalRules), ChomskyReducedFormTerminalRule::getOutput, "have multiple associated terminal rules which produce differing outputs");
+		Map<K, V> nonTerminalRuleKeyValuesMap = new HashMap<>();
+		Map<K, ClassCastException> failedCastExceptions = new HashMap<>();
+		Class<V> valueClazz = chomskyReducedFormRules.getValueClass();
+		for (ChomskyReducedFormNonTerminalRule<K> nonTerminalRule : nonTerminalRules) {
+			if (!nonTerminalRule.isTemporary()) {
+				K key = nonTerminalRule.getRuleKey();
+				if (!nonTerminalRuleKeyValuesMap.containsKey(key) && !failedCastExceptions.containsKey(key)) {
+					try {
+						nonTerminalRuleKeyValuesMap.put(key, valueClazz.cast(key));
+					} catch (ClassCastException ex) {
+						failedCastExceptions.put(key, ex);
+					}
+				}
+			}
+		}
+		if (!failedCastExceptions.isEmpty()) {
+			IllegalStateException rootException = new IllegalStateException("Could not convert the following keys back into their values");
+			for (Map.Entry<K, ClassCastException> failedCastExceptionEntry : failedCastExceptions.entrySet()) {
+				rootException.addSuppressed(
+					new IllegalStateException(
+						"Unable to convert key " + failedCastExceptionEntry.getKey(),
+						failedCastExceptionEntry.getValue()
+					)
+				);
+			}
+			throw rootException;
+		}
+		IdentityHashMap<ParseForest<K>, ParseForest<V>> alreadyFlattenedParseForests = new IdentityHashMap<>();
+		List<ParseForest<V>> flattenedParseForests = new ArrayList<>();
+		for (ParseForest<K> rootParseForest : parseForests) {
+			if (ruleKeysAreTemporaryMap.get(rootParseForest.getRule())) {
+				throw new IllegalStateException("Flattening cannot occur as one or more root rules is temporary.");
+			}
+			flattenedParseForests.add(flattenTemporariesOfParseForest(alreadyFlattenedParseForests, ruleKeysAreTemporaryMap, terminalRuleKeyValuesMap, nonTerminalRuleKeyValuesMap, rootParseForest));
+		}
+		return flattenedParseForests;
+	}
+
+	private static class ParseForestStats {
+		private final int minDepth;
+		private final int maxDepth;
+		private final int ways;
+
+		public ParseForestStats(int minDepth, int maxDepth, int ways) {
+			this.minDepth = minDepth;
+			this.maxDepth = maxDepth;
+			this.ways = ways;
+		}
+
+		public int getMinDepth() {
+			return this.minDepth;
+		}
+
+		public int getMaxDepth() {
+			return this.maxDepth;
+		}
+
+		public int getWays() {
+			return this.ways;
+		}
+
+		public ParseForestStats combineMax(ParseForestStats otherParseForestStats) {
+			int maxDepth = Math.max(this.maxDepth, otherParseForestStats.maxDepth);
+			return new ParseForestStats(
+				maxDepth,
+				maxDepth,
+				this.ways + otherParseForestStats.ways
+			);
+		}
+
+		public ParseForestStats combineMinMax(ParseForestStats otherParseForestStats) {
+			return new ParseForestStats(
+				Math.min(this.minDepth, otherParseForestStats.minDepth),
+				Math.max(this.maxDepth, otherParseForestStats.maxDepth),
+				this.ways + otherParseForestStats.ways
+			);
+		}
+	}
+
+	private static <K> ParseForestStats computeParseForestStats(IdentityHashMap<ParseForest<K>, ParseForestStats> alreadyComputedParseForestStats, int depth, ParseForest<K> parseForest) {
+		ParseForestStats parseForestStats = alreadyComputedParseForestStats.get(parseForest);
+		if (parseForestStats == null) {
+			Collection<ParseTree<K>> parseForestPossibilities = parseForest.getPossibilitiesView();
+			if (parseForestPossibilities.isEmpty()) {
+				parseForestStats = new ParseForestStats(depth, depth, 1);
+			}
+			else {
+				//TODO: Doesn't actually produce the right answer. Fix.
+				int nextDepth = depth + 1;
+				parseForestStats =
+					parseForestPossibilities
+						.stream()
+						.map(
+							parseTree ->
+								parseTree
+									.getChildrenView()
+									.stream()
+									.map(childParseForest -> computeParseForestStats(alreadyComputedParseForestStats, nextDepth, childParseForest))
+									.reduce(ParseForestStats::combineMax)
+									.orElseThrow(() -> new IllegalStateException("No children"))
+						)
+						.reduce(ParseForestStats::combineMinMax)
+						.get();
+			}
+			alreadyComputedParseForestStats.put(parseForest, parseForestStats);
+		}
+		return parseForestStats;
+	}
+
+	private static <K> ParseForestStats computeParseForestStats(Collection<ParseForest<K>> parseForests) {
+		IdentityHashMap<ParseForest<K>, ParseForestStats> alreadyComputedParseForestStats = new IdentityHashMap<>();
+		return
+			parseForests
+				.stream()
+				.map(parseForest -> computeParseForestStats(alreadyComputedParseForestStats, 0, parseForest))
+				.reduce(ParseForestStats::combineMinMax)
+				.orElseThrow(() -> new IllegalStateException("No parse forests."));
 	}
 
 	private static int calculateStepsRequired(Atom initialAtom, Molecule inputMolecule, Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms) {
 		Collection<ContextFreeGrammarRule<Atom>> contextFreeGrammarRules = transformReplacementsIntoContextFreeGrammarRules(possibleReplacementMoleculesForAtoms);
-		ChomskyReducedFormRules<Object,Atom,Atom> chomskyReducedFormRules = transformContextFreeGrammarIntoChomskyReducedForm(contextFreeGrammarRules, initialAtom);
-		Set<ParseTree<Atom>> possibleParseTrees = runCYKAndProduceParseTrees(chomskyReducedFormRules, inputMolecule.getAtomsView()); // The ParseTrees should flatten temporary nodes into their parents
-		//recurseParseTreesToCountWaysAndMaximumSize;
-		throw new IllegalStateException("Not yet finished being implemented.");
+		ChomskyReducedFormRules<Object, Atom> chomskyReducedFormRules = transformContextFreeGrammarIntoChomskyReducedForm(contextFreeGrammarRules, initialAtom, Atom.class);
+		Collection<ParseForest<Object>> unflattenedParseForests = runCYKAndProduceParseTrees(chomskyReducedFormRules, inputMolecule.getAtomsView()); // The ParseTrees should flatten temporary nodes into their parents
+		if (unflattenedParseForests.isEmpty()) {
+			throw new IllegalStateException("Could not parse input.");
+		}
+		Collection<ParseForest<Atom>> flattenedParseForests = flattenTemporariesOfParseForests(unflattenedParseForests, chomskyReducedFormRules);
+		tempDumpFirstParseRoute(unflattenedParseForests);
+		ParseForestStats parseForestStats = computeParseForestStats(flattenedParseForests);
+		tempDumpFirstParseRoute(flattenedParseForests);
+		return parseForestStats.getMinDepth();
 	}
 }

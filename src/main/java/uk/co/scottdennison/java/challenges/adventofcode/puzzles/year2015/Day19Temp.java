@@ -15,7 +15,8 @@ public class Day19Temp {
 		private int i;
 		private int j;
 
-		public Coordinate() {}
+		public Coordinate() {
+		}
 
 		public Coordinate(int i, int j) {
 			this.i = i;
@@ -183,11 +184,12 @@ public class Day19Temp {
 		}
 	}
 
-	private static void recurse(Map<Coordinate,List<Entry>> entriesGroupedByChangedCellCoordinate, List<String> dotGraphs, StringBuilder dotNodeDefinitionsGraphBuilder, StringBuilder dotEdgesGraphBuilder, String parentName, Coordinate thisCoordinate, boolean addToOutput) {
+	private static void recurse(Map<Coordinate, List<Entry>> entriesGroupedByChangedCellCoordinate, List<String> dotGraphs, StringBuilder dotNodeDefinitionsGraphBuilder, StringBuilder dotEdgesGraphBuilder, String parentName, Coordinate thisCoordinate, boolean addToOutput) {
 		List<Entry> entries = entriesGroupedByChangedCellCoordinate.get(thisCoordinate);
 		if (entries == null || entries.isEmpty()) {
 			throw new IllegalStateException("Something went wrong.");
-		} else {
+		}
+		else {
 			String thisLabel = null;
 			for (Entry entry : entries) {
 				List<String> entryNames = entry.getRuleMatched();
@@ -220,11 +222,13 @@ public class Day19Temp {
 			}
 			if (thisLabel.startsWith("Temp_")) {
 				nameToPass = parentName;
-			} else {
+			}
+			else {
 				if (entries.size() == 1 && entries.get(0).getCoordinates().getContextCells().size() == 0) {
 					if (thisLabel.startsWith("Rule_")) {
 						thisLabel = "out_" + thisLabel.substring(5);
-					} else if (!thisLabel.startsWith("out_")) {
+					}
+					else if (!thisLabel.startsWith("out_")) {
 						throw new IllegalStateException("Unexpected label");
 					}
 				}
@@ -236,14 +240,15 @@ public class Day19Temp {
 			int baseDotEdgesGraphBuilderLength = dotEdgesGraphBuilder.length();
 			for (Entry entry : entries) {
 				List<Coordinate> entryContextCoordinates = entry.getCoordinates().getContextCells();
-				int lastEntryContextCoordinateIndex = entryContextCoordinates.size()-1;
+				int lastEntryContextCoordinateIndex = entryContextCoordinates.size() - 1;
 				if (lastEntryContextCoordinateIndex < 0) {
 					if (addToOutput) {
 						dotGraphs.add("digraph G {\n" + dotNodeDefinitionsGraphBuilder.toString() + dotEdgesGraphBuilder.toString() + "}");
 					}
-				} else {
-					for (int entryContextCoordinateIndex=0; entryContextCoordinateIndex<=lastEntryContextCoordinateIndex; entryContextCoordinateIndex++) {
-						recurse(entriesGroupedByChangedCellCoordinate, dotGraphs, dotNodeDefinitionsGraphBuilder, dotEdgesGraphBuilder, nameToPass, entryContextCoordinates.get(entryContextCoordinateIndex),addToOutput&&(entryContextCoordinateIndex==lastEntryContextCoordinateIndex));
+				}
+				else {
+					for (int entryContextCoordinateIndex = 0; entryContextCoordinateIndex <= lastEntryContextCoordinateIndex; entryContextCoordinateIndex++) {
+						recurse(entriesGroupedByChangedCellCoordinate, dotGraphs, dotNodeDefinitionsGraphBuilder, dotEdgesGraphBuilder, nameToPass, entryContextCoordinates.get(entryContextCoordinateIndex), addToOutput && (entryContextCoordinateIndex == lastEntryContextCoordinateIndex));
 					}
 					//dotNodeDefinitionsGraphBuilder.setLength(baseDotNodeDefinitionsGraphBuilderLength);
 					//dotEdgesGraphBuilder.setLength(baseDotEdgesGraphBuilderLength);
@@ -255,8 +260,9 @@ public class Day19Temp {
 
 	public static void main(String[] args) throws IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
-		List<Entry> entries = objectMapper.readValue(new FileInputStream("C:\\Users\\scott_dennison\\Downloads\\broken.json"),objectMapper.getTypeFactory().constructCollectionType(List.class,Entry.class));
-		Map<Coordinate,List<Entry>> entriesGroupedByChangedCellCoordinate =
+		// Load data captured from lxmls.it.pt/2015/cky.html
+		List<Entry> entries = objectMapper.readValue(new FileInputStream("data/year2015/day19/temp/lxmls_it_pt_cyk/captured_output.json"), objectMapper.getTypeFactory().constructCollectionType(List.class, Entry.class));
+		Map<Coordinate, List<Entry>> entriesGroupedByChangedCellCoordinate =
 			entries
 				.stream()
 				.collect(
@@ -265,7 +271,7 @@ public class Day19Temp {
 					)
 				);
 		List<String> dotGraphs = new ArrayList<>();
-		recurse(entriesGroupedByChangedCellCoordinate,dotGraphs,new StringBuilder("root\n"),new StringBuilder(),"root",new Coordinate(284,0),true);
+		recurse(entriesGroupedByChangedCellCoordinate, dotGraphs, new StringBuilder("root\n"), new StringBuilder(), "root", new Coordinate(284, 0), true);
 		System.out.println(dotGraphs);
 	}
 }
