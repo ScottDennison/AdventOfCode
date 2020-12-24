@@ -45,7 +45,7 @@ public class Day19 {
 	*/
 
 	//TODO: Split all the re-usable grammar related code out to separate files, then possibly try to use for year2020/Day19 too.
-	//TODO: Create a contrived example that can produce different levels of depth to test ParseForestStats
+	//TODO: The current mechanism of only recording matched keys instead of exactly which rule means some otherwise perfectly flattenable parse trees cannot be flattened. Try and make a way for these to be flattenable.
 
 	private static final Pattern PATTERN_ATOM_TO_MOLECULE_REPLACEMENT = Pattern.compile("^(?<fromAtom>(?:(?:[A-Z][a-z]*)|e)) => (?<toMolecule>.+)$");
 	private static final Pattern PATTERN_ATOM = Pattern.compile("[A-Z][a-z]*");
@@ -708,7 +708,7 @@ public class Day19 {
 	}
 
 	private static Collection<ChomskyReducedFormBuildingRule> runChomskyReducedFormTransformationRemoveTemporaryDuplicates(Collection<ChomskyReducedFormBuildingRule> rules) {
-		//TODO: Implement me
+		//TODO: Implement me. Once done, maybe the ways count will be more reasonable?
 		return rules;
 	}
 
@@ -1034,37 +1034,6 @@ public class Day19 {
 				.collect(Collectors.toList());
 	}
 
-	private static <K> void tempDumpFirstParseRouteRecurseTree(ParseTree<K> parseTree, String parentNodeName, Set<String> nodeDefinitions, Set<String> nodeLinks) {
-		//TODO: Remove me
-		for (ParseForest<K> parseForest : parseTree.getChildrenView()) {
-			tempDumpFirstParseRouteRecurseForest(parseForest, parentNodeName, nodeDefinitions, nodeLinks);
-		}
-	}
-
-	private static <K> void tempDumpFirstParseRouteRecurseForest(ParseForest<K> parseForest, String parentNodeName, Set<String> nodeDefinitions, Set<String> nodeLinks) {
-		//TODO: Remove me
-		String nodeName = "node_" + nodeDefinitions.size();
-		nodeDefinitions.add(nodeName + " [label=\"" + parseForest.getRule() + "\"];");
-		nodeLinks.add(parentNodeName + " -> " + nodeName + ";");
-		Iterator<ParseTree<K>> parseTreeIterator = parseForest.getPossibilitiesView().iterator();
-		if (parseTreeIterator.hasNext()) {
-			tempDumpFirstParseRouteRecurseTree(parseTreeIterator.next(), nodeName, nodeDefinitions, nodeLinks);
-		}
-	}
-
-	private static <K> void tempDumpFirstParseRoute(Collection<ParseForest<K>> parseForests) {
-		//TODO: Remove me
-		String rootNodeName = "root";
-		Set<String> nodeDefinitions = new HashSet<>();
-		Set<String> nodeLinks = new HashSet<>();
-		nodeDefinitions.add(rootNodeName);
-		Iterator<ParseForest<K>> parseForestIterator = parseForests.iterator();
-		if (parseForestIterator.hasNext()) {
-			tempDumpFirstParseRouteRecurseForest(parseForestIterator.next(), rootNodeName, nodeDefinitions, nodeLinks);
-		}
-		System.out.println("digraph {\n" + String.join("\n", nodeDefinitions) + "\n" + String.join("\n", nodeLinks) + "\n}");
-	}
-
 	private static <K, T extends ChomskyReducedFormRule<K>, R> Map<K, R> computeChomskyReducedFormRuleKeyMapping(Collection<? extends Collection<? extends T>> ruleCollections, Function<T, R> ruleMapper, String reasoning) {
 		Map<K, R> keyStates = new HashMap<>();
 		Set<K> badKeys = new HashSet<>();
@@ -1079,40 +1048,70 @@ public class Day19 {
 			}
 		}
 		if (!badKeys.isEmpty()) {
-			//have differing output values associated with the same rule key
 			throw new IllegalStateException("Flattening cannot occur as the following rule keys " + reasoning + ": " + badKeys);
 		}
 		return keyStates;
 	}
 
+	private static <V> List<ParseTree<V>> combinateParseTreeLists(List<List<List<ParseForest<V>>>> parseForestListsToCombinate, int index, List<List<ParseForest<V>>> currentCombinations) {
+		if (index >= parseForestListsToCombinate.size()) {
+			return
+				currentCombinations
+					.stream()
+					.map(ParseTree::new)
+					.collect(Collectors.toList());
+		}
+		else {
+			int nextIndex = index + 1;
+			List<List<ParseForest<V>>> newCombinations = new ArrayList<>();
+			for (List<ParseForest<V>> newParseForests : parseForestListsToCombinate.get(index)) {
+				for (List<ParseForest<V>> existingParseForests : currentCombinations) {
+					List<ParseForest<V>> combinedParseForests = new ArrayList<>(existingParseForests);
+					combinedParseForests.addAll(newParseForests);
+					newCombinations.add(combinedParseForests);
+				}
+			}
+			return combinateParseTreeLists(parseForestListsToCombinate, nextIndex, newCombinations);
+		}
+	}
+
 	private static <K, V extends K> List<ParseTree<V>> flattenTemporariesOfParseTree(IdentityHashMap<ParseForest<K>, ParseForest<V>> alreadyFlattenedParseForests, IdentityHashMap<ParseTree<K>, List<ParseTree<V>>> alreadyFlattenedParseTrees, Map<K, Boolean> ruleKeysAreTemporaryMap, Map<K, ParseForest<V>> terminalRuleKeyParseForestsMap, Map<K, V> nonTerminalRuleKeyValuesMap, ParseTree<K> unflattenedParseTree) {
 		List<ParseTree<V>> flattenedParseTrees = alreadyFlattenedParseTrees.get(unflattenedParseTree);
 		if (flattenedParseTrees == null) {
-			List<List<List<ParseForest<V>>>> nodesToCombinate = new ArrayList<>();
+			List<List<List<ParseForest<V>>>> parseForestListsToCombinate = new ArrayList<>();
 			List<ParseForest<K>> unflattenedParseForests = unflattenedParseTree.getChildrenView();
-			boolean recursionNeeded = false;
 			for (ParseForest<K> unflattenedParseForest : unflattenedParseForests) {
 				Boolean isUnflattenedParseForestTemporary = ruleKeysAreTemporaryMap.get(unflattenedParseForest.getRule());
-				List<List<ParseForest<V>>> nodesToCombinateForThisUnflattenedParseForest;
-				if (Boolean.TRUE.equals(isUnflattenedParseForestTemporary)) {
-					nodesToCombinateForThisUnflattenedParseForest = new ArrayList<>();
-					for (ParseTree<K> childUnflattenedParseTree : unflattenedParseForest.getPossibilitiesView()) {
-						nodesToCombinateForThisUnflattenedParseForest.addAll(
-							flattenTemporariesOfParseTree(alreadyFlattenedParseForests,alreadyFlattenedParseTrees,ruleKeysAreTemporaryMap,terminalRuleKeyParseForestsMap,nonTerminalRuleKeyValuesMap,childUnflattenedParseTree)
+				List<List<ParseForest<V>>> parseForestListsToCombinateForThisUnflattenedParseForest;
+				K key = unflattenedParseForest.getRule();
+				Collection<ParseTree<K>> unflattenedParseForestPossibilities = unflattenedParseForest.getPossibilitiesView();
+				if (unflattenedParseForestPossibilities.isEmpty()) {
+					ParseForest<V> valueParseForest = terminalRuleKeyParseForestsMap.get(key);
+					if (valueParseForest == null) {
+						throw new IllegalStateException("Non-terminal leaf node.");
+					}
+					parseForestListsToCombinateForThisUnflattenedParseForest = Collections.singletonList(Collections.singletonList(valueParseForest));
+				}
+				else if (Boolean.TRUE.equals(isUnflattenedParseForestTemporary)) {
+					parseForestListsToCombinateForThisUnflattenedParseForest = new ArrayList<>();
+					for (ParseTree<K> childUnflattenedParseTree : unflattenedParseForestPossibilities) {
+						parseForestListsToCombinateForThisUnflattenedParseForest.addAll(
+							flattenTemporariesOfParseTree(alreadyFlattenedParseForests, alreadyFlattenedParseTrees, ruleKeysAreTemporaryMap, terminalRuleKeyParseForestsMap, nonTerminalRuleKeyValuesMap, childUnflattenedParseTree)
 								.stream()
 								.map(ParseTree::getChildrenView)
 								.collect(Collectors.toList())
 						);
 					}
-				} else if (Boolean.FALSE.equals(isUnflattenedParseForestTemporary)) {
-					nodesToCombinateForThisUnflattenedParseForest = Collections.singletonList(Collections.singletonList(flattenTemporariesOfNonTemporaryParseForest(alreadyFlattenedParseForests,alreadyFlattenedParseTrees,ruleKeysAreTemporaryMap,terminalRuleKeyParseForestsMap,nonTerminalRuleKeyValuesMap,unflattenedParseForest)));
-				} else {
+				}
+				else if (Boolean.FALSE.equals(isUnflattenedParseForestTemporary)) {
+					parseForestListsToCombinateForThisUnflattenedParseForest = Collections.singletonList(Collections.singletonList(flattenTemporariesOfNonTemporaryParseForest(alreadyFlattenedParseForests, alreadyFlattenedParseTrees, ruleKeysAreTemporaryMap, terminalRuleKeyParseForestsMap, nonTerminalRuleKeyValuesMap, unflattenedParseForest)));
+				}
+				else {
 					throw new IllegalStateException("Unexpected temporariness.");
 				}
-				//TODO: Update recursionNeeded
-				nodesToCombinate.add(nodesToCombinateForThisUnflattenedParseForest);
+				parseForestListsToCombinate.add(parseForestListsToCombinateForThisUnflattenedParseForest);
 			}
-			//TODO: Do the recursion if nesecarry
+			flattenedParseTrees = combinateParseTreeLists(parseForestListsToCombinate, 0, Collections.singletonList(Collections.emptyList()));
 			alreadyFlattenedParseTrees.put(unflattenedParseTree, flattenedParseTrees);
 		}
 		return flattenedParseTrees;
@@ -1157,7 +1156,7 @@ public class Day19 {
 		Collection<ChomskyReducedFormTerminalRule<K, V>> terminalRules = chomskyReducedFormRules.getTerminalRulesView();
 		Map<K, Boolean> ruleKeysAreTemporaryMap = computeChomskyReducedFormRuleKeyMapping(Arrays.asList(nonTerminalRules, terminalRules), ChomskyReducedFormRule::isTemporary, "have both associated temporary rules and associated non-temporary rules");
 		List<ParseTree<V>> emptyParseForestTreeList = Collections.emptyList();
-		Map<K, ParseForest<V>> terminalRuleKeyParseForestsMap = computeChomskyReducedFormRuleKeyMapping(Collections.singleton(terminalRules), terminalRule -> new ParseForest<>(terminalRule.getOutput(),emptyParseForestTreeList), "have multiple associated terminal rules which produce differing outputs");
+		Map<K, ParseForest<V>> terminalRuleKeyParseForestsMap = computeChomskyReducedFormRuleKeyMapping(Collections.singleton(terminalRules), terminalRule -> new ParseForest<>(terminalRule.getOutput(), emptyParseForestTreeList), "have multiple associated terminal rules which produce differing outputs");
 		Map<K, V> nonTerminalRuleKeyValuesMap = new HashMap<>();
 		Map<K, ClassCastException> failedCastExceptions = new HashMap<>();
 		Class<V> valueClazz = chomskyReducedFormRules.getValueClass();
@@ -1233,13 +1232,37 @@ public class Day19 {
 		}
 	}
 
+	private static long multiplyWays(long left, long right) {
+		if (left == -1 || right == -1) {
+			return -1;
+		}
+		else {
+			try {
+				return Math.multiplyExact(left, right);
+			} catch (ArithmeticException ex) {
+				// This result is getting far too large, and converting to BigInteger just results in 99% of time being spent multiplying. The input grammar was probably not deduplicated.
+				return -1;
+			}
+		}
+	}
+
 	private static ParseForestStats combineParseForestStatsForForest(ParseForestStats leftParseForestStats, ParseForestStats rightParseForestStats) {
 		return new ParseForestStats(
-			Math.min(leftParseForestStats.getMinNodes(),rightParseForestStats.getMinNodes()),
-			Math.max(leftParseForestStats.getMaxNodes(),rightParseForestStats.getMaxNodes()),
-			Math.min(leftParseForestStats.getMinDepth(),rightParseForestStats.getMinDepth()),
-			Math.max(leftParseForestStats.getMaxDepth(),rightParseForestStats.getMaxDepth()),
-			leftParseForestStats.getWays() + rightParseForestStats.getWays()
+			Math.min(leftParseForestStats.getMinNodes(), rightParseForestStats.getMinNodes()),
+			Math.max(leftParseForestStats.getMaxNodes(), rightParseForestStats.getMaxNodes()),
+			Math.min(leftParseForestStats.getMinDepth(), rightParseForestStats.getMinDepth()),
+			Math.max(leftParseForestStats.getMaxDepth(), rightParseForestStats.getMaxDepth()),
+			multiplyWays(leftParseForestStats.getWays(), rightParseForestStats.getWays())
+		);
+	}
+
+	private static ParseForestStats updateParseForestStatsForForests(ParseForestStats parseForestStats, int count) {
+		return new ParseForestStats(
+			parseForestStats.getMinNodes(),
+			parseForestStats.getMaxNodes(),
+			parseForestStats.getMinDepth(),
+			parseForestStats.getMaxDepth(),
+			multiplyWays(parseForestStats.getWays(), count)
 		);
 	}
 
@@ -1250,14 +1273,14 @@ public class Day19 {
 			leftParseForestStats.getMaxNodes() + rightParseForestStats.getMaxNodes(),
 			maxDepth,
 			maxDepth,
-			leftParseForestStats.getWays() + rightParseForestStats.getWays()
+			multiplyWays(leftParseForestStats.getWays(), rightParseForestStats.getWays())
 		);
 	}
 
 	private static ParseForestStats updateParseForestStatsForTrees(ParseForestStats parseForestStats) {
 		return new ParseForestStats(
-			parseForestStats.getMinNodes()+1,
-			parseForestStats.getMaxNodes()+1,
+			parseForestStats.getMinNodes() + 1,
+			parseForestStats.getMaxNodes() + 1,
 			parseForestStats.getMinDepth(),
 			parseForestStats.getMaxDepth(),
 			parseForestStats.getWays()
@@ -1269,7 +1292,7 @@ public class Day19 {
 		if (parseForestStats == null) {
 			Collection<ParseTree<K>> parseForestPossibilities = parseForest.getPossibilitiesView();
 			if (parseForestPossibilities.isEmpty()) {
-				parseForestStats = new ParseForestStats(1, 1, depth, depth, 1);
+				parseForestStats = new ParseForestStats(0, 0, depth, depth, 1);
 			}
 			else {
 				int nextDepth = depth + 1;
@@ -1287,6 +1310,7 @@ public class Day19 {
 									.orElseThrow(() -> new IllegalStateException("No children"))
 						)
 						.reduce(Day19::combineParseForestStatsForForest)
+						.map(parseTreeStats -> updateParseForestStatsForForests(parseTreeStats, parseForestPossibilities.size()))
 						.get();
 			}
 			alreadyComputedParseForestStats.put(parseForest, parseForestStats);
@@ -1307,14 +1331,12 @@ public class Day19 {
 	private static int calculateStepsRequired(Atom initialAtom, Molecule inputMolecule, Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms) {
 		Collection<ContextFreeGrammarRule<Atom>> contextFreeGrammarRules = transformReplacementsIntoContextFreeGrammarRules(possibleReplacementMoleculesForAtoms);
 		ChomskyReducedFormRules<Object, Atom> chomskyReducedFormRules = transformContextFreeGrammarIntoChomskyReducedForm(contextFreeGrammarRules, initialAtom, Atom.class);
-		Collection<ParseForest<Object>> unflattenedParseForests = runCYKAndProduceParseTrees(chomskyReducedFormRules, inputMolecule.getAtomsView()); // The ParseTrees should flatten temporary nodes into their parents
+		Collection<ParseForest<Object>> unflattenedParseForests = runCYKAndProduceParseTrees(chomskyReducedFormRules, inputMolecule.getAtomsView());
 		if (unflattenedParseForests.isEmpty()) {
 			throw new IllegalStateException("Could not parse input.");
 		}
 		Collection<ParseForest<Atom>> flattenedParseForests = flattenTemporariesOfParseForests(unflattenedParseForests, chomskyReducedFormRules);
-		tempDumpFirstParseRoute(unflattenedParseForests);
 		ParseForestStats parseForestStats = computeParseForestStats(flattenedParseForests);
-		tempDumpFirstParseRoute(flattenedParseForests);
-		return parseForestStats.getMinDepth();
+		return parseForestStats.getMinNodes();
 	}
 }

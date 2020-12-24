@@ -1,0 +1,12 @@
+e => AZ
+A => BC
+A => DE
+A => VGYZ
+B => F
+C => XY
+D => FX
+E => Y
+F => VW
+G => WX
+
+VWXYZ
