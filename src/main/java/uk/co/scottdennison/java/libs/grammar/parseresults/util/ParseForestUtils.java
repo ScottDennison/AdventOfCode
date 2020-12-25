@@ -24,7 +24,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ParseForestUtils {
-	private ParseForestUtils() {}
+	private ParseForestUtils() {
+	}
 
 	private static <K, T extends ChomskyReducedFormRule<K>, R> Map<K, R> computeChomskyReducedFormRuleKeyMapping(Collection<? extends Collection<? extends T>> ruleCollections, Function<T, R> ruleMapper, String reasoning) throws UnflattenableParseForestsException {
 		Map<K, R> keyStates = new HashMap<>();
