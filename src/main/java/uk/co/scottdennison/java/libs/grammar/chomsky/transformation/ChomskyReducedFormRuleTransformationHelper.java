@@ -389,7 +389,7 @@ public class ChomskyReducedFormRuleTransformationHelper {
 								throw new IllegalStateException("Differing keys for what appears to be the same rule. Something went wrong.");
 							}
 						},
-						IdentityHashMap::new
+						HashMap::new
 					)
 				);
 		List<ChomskyReducedFormTerminalRule<Object, T>> terminalRules = new ArrayList<>();
