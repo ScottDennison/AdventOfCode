@@ -1,15 +1,18 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day07 {
+public class Day07 implements IPuzzle {
 	private static final int BITS = 16;
 	private static final String VARIABLE_NAME_WANTED = "a";
 	private static final String VARIABLE_NAME_TO_REPLACE = "b";
@@ -140,10 +143,11 @@ public class Day07 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		Map<String, Expression> expressions = new HashMap<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Unable to parse line.");
 			}
@@ -167,8 +171,10 @@ public class Day07 {
 		expressions.put(VARIABLE_NAME_TO_REPLACE, new SingularExpression(false, new ConstantValue(originalWantedValue)));
 		ExpressionManager expressionManager2 = new ExpressionManager(expressions);
 		long newWantedValue = expressionManager2.getValue(VARIABLE_NAME_WANTED);
-		System.out.format("Variable %s has value %d%n", VARIABLE_NAME_WANTED, originalWantedValue);
-		System.out.format("Replacing variable %s with %d, %s now has value %d%n", VARIABLE_NAME_TO_REPLACE, originalWantedValue, VARIABLE_NAME_WANTED, newWantedValue);
+		return new BasicPuzzleResults<>(
+			originalWantedValue,
+			newWantedValue
+		);
 	}
 
 	private static Value createValue(Matcher matcher, String groupPrefix) {

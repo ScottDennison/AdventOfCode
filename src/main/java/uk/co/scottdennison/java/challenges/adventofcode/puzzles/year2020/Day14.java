@@ -1,15 +1,18 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day14 {
+public class Day14 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^(?:mask = (?<mask>[01X]+))|(?:mem\\[(?<address>[0-9]+)] = (?<value>[0-9]+))$");
 
 	private static final int BITS = 36;
@@ -31,14 +34,15 @@ public class Day14 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		long maskAnd = 0xFFFFFFFFFFFFFFFFL;
 		long maskOr = 0x0000000000000000L;
 		long maskFloating = 0x0000000000000000L;
 		Map<Long, Long> memoryV1 = new HashMap<>();
 		Map<Long, Long> memoryV2 = new HashMap<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Unable to parse line");
 			}
@@ -71,12 +75,10 @@ public class Day14 {
 				}
 			}
 		}
-		outputSummary(1, memoryV1);
-		outputSummary(2, memoryV2);
-	}
-
-	private static void outputSummary(int version, Map<Long, Long> memory) {
-		System.out.format("Memory sum for version %d: %d%n", version, sumMemory(memory));
+		return new BasicPuzzleResults<>(
+			sumMemory(memoryV1),
+			sumMemory(memoryV2)
+		);
 	}
 
 	private static long sumMemory(Map<Long, Long> memory) {

@@ -1,20 +1,25 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class Day15 {
-	private static final int[] TARGET_MOVE_COUNTS = {2020, 30000000};
+public class Day15 implements IPuzzle {
+	private static final int PART_A_TARGET_MOVE_COUNT = 2020;
+	private static final int PART_B_TARGET_MOVE_COUNT = 30000000;
 
-	public static void main(String[] args) throws IOException {
-		int[] targetMoveCountsOrdered = Arrays.stream(TARGET_MOVE_COUNTS).distinct().sorted().toArray();
-		int[] inputNumbers = Arrays.stream(Pattern.compile(",").split(new String(Files.readAllBytes(InputFileUtils.getInputPath())).trim())).mapToInt(Integer::parseInt).toArray();
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		int[] targetMoveCountsUnordered = {PART_A_TARGET_MOVE_COUNT, PART_B_TARGET_MOVE_COUNT};
+		int[] targetMoveCountsOrdered = Arrays.stream(targetMoveCountsUnordered).distinct().sorted().toArray();
+		int[] inputNumbers = Arrays.stream(Pattern.compile(",").split(new String(inputCharacters).trim())).mapToInt(Integer::parseInt).toArray();
 		if (inputNumbers.length > targetMoveCountsOrdered[0]) {
 			throw new IllegalStateException("Target move count is more than the amount of input numbers!");
 		}
@@ -27,6 +32,7 @@ public class Day15 {
 		}
 		int lastNumber = inputNumbers[seedNumberCount];
 		int numberSpokenCount = inputNumbers.length;
+		Map<Integer, Integer> results = new HashMap<>();
 		for (int targetMoveCount : targetMoveCountsOrdered) {
 			while (numberSpokenCount < targetMoveCount) {
 				Integer lastNumberCalledWhen = movesCalledWhen.get(lastNumber);
@@ -39,7 +45,11 @@ public class Day15 {
 				}
 				numberSpokenCount++;
 			}
-			System.out.format("Spoken number %d: %d%n", targetMoveCount, lastNumber);
+			results.put(targetMoveCount, lastNumber);
 		}
+		return new BasicPuzzleResults<>(
+			results.get(PART_A_TARGET_MOVE_COUNT),
+			results.get(PART_B_TARGET_MOVE_COUNT)
+		);
 	}
 }

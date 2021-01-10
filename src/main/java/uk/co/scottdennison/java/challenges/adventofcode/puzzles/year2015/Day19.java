@@ -1,6 +1,10 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 import uk.co.scottdennison.java.libs.grammar.chomsky.algorithms.ChomskyReducedFormRuleCYKAlgorithm;
 import uk.co.scottdennison.java.libs.grammar.chomsky.model.ChomskyReducedFormRules;
 import uk.co.scottdennison.java.libs.grammar.chomsky.transformation.ChomskyReducedFormRuleTransformationHelper;
@@ -12,8 +16,7 @@ import uk.co.scottdennison.java.libs.grammar.parseresults.model.ParseForest;
 import uk.co.scottdennison.java.libs.grammar.parseresults.model.ParseForestStats;
 import uk.co.scottdennison.java.libs.grammar.parseresults.util.ParseForestUtils;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -27,7 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Day19 {
+public class Day19 implements IPuzzle {
 	/*
 	Unfortunately, my earlier forward and reverse breadth first search approaches failed, so I turned to reddit for this one
 	As such, I turned to reddit for inspiration.
@@ -67,10 +70,6 @@ public class Day19 {
 				throw new IllegalStateException("Representation is empty.");
 			}
 			return new Atom(representation);
-		}
-
-		public String getRepresentation() {
-			return this.representation;
 		}
 
 		@Override
@@ -202,16 +201,17 @@ public class Day19 {
 		return Molecule.create(atoms);
 	}
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		Map<Atom, Atom> knownAtoms = new HashMap<>();
 		Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms = new HashMap<>();
-		Iterator<String> fileLineIterator = Files.lines(InputFileUtils.getInputPath()).iterator();
-		while (fileLineIterator.hasNext()) {
-			String fileLine = fileLineIterator.next();
-			if (fileLine.isEmpty()) {
+		Iterator<String> inputLineIterator = LineReader.stringsIterator(inputCharacters);
+		while (inputLineIterator.hasNext()) {
+			String inputLine = inputLineIterator.next();
+			if (inputLine.isEmpty()) {
 				break;
 			}
-			Matcher replacementMatcher = PATTERN_ATOM_TO_MOLECULE_REPLACEMENT.matcher(fileLine);
+			Matcher replacementMatcher = PATTERN_ATOM_TO_MOLECULE_REPLACEMENT.matcher(inputLine);
 			if (!replacementMatcher.matches()) {
 				throw new IllegalStateException("Could not parse molecule replacement.");
 			}
@@ -226,15 +226,17 @@ public class Day19 {
 		if (!possibleReplacementMoleculesForAtoms.containsKey(initialAtom)) {
 			throw new IllegalStateException("Initial molecule has no possible replacements");
 		}
-		if (!fileLineIterator.hasNext()) {
+		if (!inputLineIterator.hasNext()) {
 			throw new IllegalStateException("Missing the input molecule");
 		}
-		Molecule inputMolecule = parseMoleculeString(knownAtoms, fileLineIterator.next());
-		if (fileLineIterator.hasNext()) {
+		Molecule inputMolecule = parseMoleculeString(knownAtoms, inputLineIterator.next());
+		if (inputLineIterator.hasNext()) {
 			throw new IllegalStateException("Expected EOF, but saw more input");
 		}
-		System.out.format("Number of possible molecules that can result by doing a single replacement to the input molecule: %d%n", countSingleReplacementPossibilities(inputMolecule, possibleReplacementMoleculesForAtoms));
-		System.out.format("Number of steps to get from %s to the input molecule: %d", initialAtom.getRepresentation(), calculateStepsRequired(initialAtom, inputMolecule, possibleReplacementMoleculesForAtoms));
+		return new BasicPuzzleResults<>(
+			countSingleReplacementPossibilities(inputMolecule, possibleReplacementMoleculesForAtoms),
+			calculateStepsRequired(initialAtom, inputMolecule, possibleReplacementMoleculesForAtoms)
+		);
 	}
 
 	private static int countSingleReplacementPossibilities(Molecule inputMolecule, Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms) {

@@ -1,19 +1,23 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day02 {
+public class Day02 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^([0-9]+)-([0-9]+) ([a-z]): ([a-z]+)$");
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		int correctPasswordsForPolicy1 = 0;
 		int correctPasswordsForPolicy2 = 0;
-		for (String line : Files.readAllLines(InputFileUtils.getInputPath())) {
+		for (String line : LineReader.strings(inputCharacters)) {
 			Matcher matcher = PATTERN.matcher(line);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Unparsable line: " + line);
@@ -36,11 +40,9 @@ public class Day02 {
 				correctPasswordsForPolicy2++;
 			}
 		}
-		outputSummary(1, correctPasswordsForPolicy1);
-		outputSummary(2, correctPasswordsForPolicy2);
-	}
-
-	private static void outputSummary(int policy, int correctPasswords) {
-		System.out.format("Correct passwords for policy %d: %d%n", policy, correctPasswords);
+		return new BasicPuzzleResults<>(
+			correctPasswordsForPolicy1,
+			correctPasswordsForPolicy2
+		);
 	}
 }

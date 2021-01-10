@@ -1,16 +1,17 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day01 {
+public class Day01 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("(?<rotation>[LR])(?<steps>[0-9]+)(?:$|(?:,?[\\s]*))");
 
 	private static final class Position {
@@ -85,8 +86,9 @@ public class Day01 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		String input = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8);
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		String input = new String(inputCharacters).trim();
 		int inputLength = input.length();
 		Matcher matcher = PATTERN.matcher(input);
 		Direction direction = Direction.NORTH;
@@ -136,12 +138,10 @@ public class Day01 {
 		if (firstDuplicatePosition == null) {
 			throw new IllegalStateException("No duplicate position.");
 		}
-		outputAnswer(1, initialPosition, currentPosition);
-		outputAnswer(2, initialPosition, firstDuplicatePosition);
-	}
-
-	private static void outputAnswer(int answer, Position initialPosition, Position position) {
-		System.out.format("Easter bunny HQ #%d is %d block(s) away%n", answer, calculateBlocksAway(initialPosition, position));
+		return new BasicPuzzleResults<>(
+			calculateBlocksAway(initialPosition, currentPosition),
+			calculateBlocksAway(initialPosition, firstDuplicatePosition)
+		);
 	}
 
 	private static int calculateBlocksAway(Position initialPosition, Position position) {

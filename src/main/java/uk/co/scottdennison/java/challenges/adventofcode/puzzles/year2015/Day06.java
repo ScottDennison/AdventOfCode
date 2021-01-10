@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -12,7 +15,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Day06 {
+public class Day06 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^(?<action>[a-z ]+) (?<x1>[0-9]+),(?<y1>[0-9]+) through (?<x2>[0-9]+),(?<y2>[0-9]+)$");
 
 	private enum Action {
@@ -74,12 +77,12 @@ public class Day06 {
 	private static final int GRID_WIDTH = 1000;
 	private static final int GRID_HEIGHT = 1000;
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		boolean[][] grid1On = new boolean[GRID_HEIGHT][GRID_WIDTH];
 		int[][] grid2Brightness = new int[GRID_HEIGHT][GRID_WIDTH];
-
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Could not parse line.");
 			}
@@ -113,7 +116,9 @@ public class Day06 {
 				lightBrightnessInGrid2 += grid2Brightness[y][x];
 			}
 		}
-		System.out.format("%d lights are on in grid 1%n", lightsOnInGrid1);
-		System.out.format("The brightness of grid 2 is %d%n", lightBrightnessInGrid2);
+		return new BasicPuzzleResults<>(
+			lightsOnInGrid1,
+			lightBrightnessInGrid2
+		);
 	}
 }

@@ -1,14 +1,15 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
-public class Day11 {
-	private static final Pattern FILE_VALIDATION_PATTERN = Pattern.compile("^[a-z]+$");
+public class Day11 implements IPuzzle {
+	private static final Pattern PASSWORD_VALIDATION_PATTERN = Pattern.compile("^[a-z]+$");
 
 	private static final Pattern[] PATTERNS = {
 		Pattern.compile("^[a-z]*(?:abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)[a-z]*$"),
@@ -16,22 +17,23 @@ public class Day11 {
 		Pattern.compile("^[a-z]*([a-z])\\1[a-z]*((?!\\1)[a-z])\\2[a-z]*$")
 	};
 
-	private static final int PASSWORDS_NEEDED = 2;
-
-	public static void main(String[] args) throws IOException {
-		String currentPasswordString = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8).trim();
-		if (!FILE_VALIDATION_PATTERN.matcher(currentPasswordString).matches()) {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		String currentPasswordString = new String(inputCharacters).trim();
+		if (!PASSWORD_VALIDATION_PATTERN.matcher(currentPasswordString).matches()) {
 			throw new IllegalStateException("Current password is not as expected.");
 		}
 		char[] password = currentPasswordString.toCharArray();
 		int passwordEndIndex = password.length - 1;
 		char continueChar = 'z' + 1;
-		for (int passwordNumber = 1; passwordNumber <= PASSWORDS_NEEDED; passwordNumber++) {
+		String[] newPasswords = new String[2];
+		int newPasswordCount = newPasswords.length;
+		for (int newPasswordIndex = 0; newPasswordIndex <= newPasswordCount; newPasswordIndex++) {
 			while (true) {
-				for (int passwordIndex = passwordEndIndex; passwordIndex >= -1; passwordIndex--) {
+				for (int passwordCharacterIndex = passwordEndIndex; passwordCharacterIndex >= -1; passwordCharacterIndex--) {
 					// We'll get an ArrayIndexOutOfBoundsException if this is unsolvable.
-					if (++password[passwordIndex] == continueChar) {
-						password[passwordIndex] = 'a';
+					if (++password[passwordCharacterIndex] == continueChar) {
+						password[passwordCharacterIndex] = 'a';
 					}
 					else {
 						break;
@@ -45,10 +47,14 @@ public class Day11 {
 					}
 				}
 				if (isValid) {
-					System.out.format("Santa's new password %d: %s%n", passwordNumber, passwordString);
+					newPasswords[newPasswordIndex] = passwordString;
 					break;
 				}
 			}
 		}
+		return new BasicPuzzleResults<>(
+			newPasswords[0],
+			newPasswords[1]
+		);
 	}
 }

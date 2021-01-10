@@ -28,14 +28,4 @@ public final class MultiPartPuzzleResults<PuzzlePartResultsType extends IPuzzleP
 	public String getPartBAnswerString() {
 		return this.partBPuzzlePartResults.getAnswerString();
 	}
-
-	@Override
-	public String getPartASummary() {
-		return this.partAPuzzlePartResults.getSummary();
-	}
-
-	@Override
-	public String getPartBSummary() {
-		return this.partBPuzzlePartResults.getSummary();
-	}
 }

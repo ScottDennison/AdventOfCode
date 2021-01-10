@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -12,7 +15,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day08 {
+public class Day08 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^(?<operation>[a-z]+) (?<operand>[+\\-][0-9]+)$");
 
 	private static class State {
@@ -127,10 +130,11 @@ public class Day08 {
 		return new ProgramResult(state, programMode);
 	}
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		List<Instruction> instructions = new ArrayList<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Unable to parse line.");
 			}
@@ -175,7 +179,9 @@ public class Day08 {
 		if (terminatingNormallyProgramResult == null) {
 			throw new IllegalStateException("Did not find a program that terminated normally in all modified programs.");
 		}
-		System.out.format("Accumulator at %d for unmodified program when it reaches an infinite loop%n", standardProgramResult.getState().getAccumulator());
-		System.out.format("Accumulator at %d for modified terminating-normally program%n", terminatingNormallyProgramResult.getState().getAccumulator());
+		return new BasicPuzzleResults<>(
+			standardProgramResult.getState().getAccumulator(),
+			terminatingNormallyProgramResult.getState().getAccumulator()
+		);
 	}
 }

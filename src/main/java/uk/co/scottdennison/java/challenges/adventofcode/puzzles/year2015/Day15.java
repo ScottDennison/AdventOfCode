@@ -1,11 +1,13 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,8 +17,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-public class Day15 {
+public class Day15 implements IPuzzle {
 	private static final Pattern PATTERN_LEVEL_1 = Pattern.compile("^(?<ingredient>[a-z]+): (?<properties>.+)$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern PATTERN_LEVEL_2_SPLIT = Pattern.compile(",");
 	private static final Pattern PATTERN_LEVEL_2 = Pattern.compile("^ *(?<propertyName>[a-z]+) (?<propertyAmount>-?[0-9]+) *$");
@@ -41,11 +44,6 @@ public class Day15 {
 		}
 	}
 
-	private static final RunInfo[] RUN_INFO = {
-		new RunInfo(100, null),
-		new RunInfo(100, 500),
-	};
-
 	@SuppressWarnings("unused")
 	private enum ContinueResult {
 		STOP,
@@ -53,15 +51,19 @@ public class Day15 {
 		CONTINUE
 	}
 
-	public static void main(String[] args) throws IOException {
+	private static final RunInfo RUN_INFO_PART_A = new RunInfo(100, null);
+	private static final RunInfo RUN_INFO_PART_B = new RunInfo(100, 500);
+
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		Map<String, Integer> propertyNameIndices = null;
 		Set<String> propertyNames = null;
 		List<int[][]> ingredientsTeaspoonsIndexedPropertiesList = new ArrayList<>();
 		int propertyCount = -1;
 		int caloriesIndex = -1;
-		int maximumRequiredTeaspoons = Arrays.stream(RUN_INFO).mapToInt(RunInfo::getRequiredTeaspoons).max().orElseThrow(() -> new IllegalStateException("No runs"));
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcherLevel1 = PATTERN_LEVEL_1.matcher(fileLine);
+		int maximumRequiredTeaspoons = Stream.of(RUN_INFO_PART_A, RUN_INFO_PART_B).mapToInt(RunInfo::getRequiredTeaspoons).max().orElseThrow(() -> new IllegalStateException("No runs"));
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcherLevel1 = PATTERN_LEVEL_1.matcher(inputLine);
 			if (!matcherLevel1.matches()) {
 				throw new IllegalStateException("Unparsable line");
 			}
@@ -121,23 +123,28 @@ public class Day15 {
 			throw new IllegalStateException("No input.");
 		}
 		int[][][] ingredientsTeaspoonsIndexedProperties = ingredientsTeaspoonsIndexedPropertiesList.toArray(new int[0][][]);
-		for (RunInfo runInfo : RUN_INFO) {
-			outputSummary(ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, runInfo.getRequiredTeaspoons(), runInfo.getRequiredCalories());
-		}
+		return new BasicPuzzleResults<>(
+			calculateBestScore(ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, RUN_INFO_PART_A),
+			calculateBestScore(ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, RUN_INFO_PART_B)
+		);
 	}
 
-	private static void outputSummary(int[][][] ingredientsTeaspoonsIndexedProperties, int propertyCount, int caloriesIndex, int requiredTeaspoons, Integer requiredCalories) {
+	private static int calculateBestScore(int[][][] ingredientsTeaspoonsIndexedProperties, int propertyCount, int caloriesIndex, RunInfo runInfo) {
+		return calculateBestScore(ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, runInfo.getRequiredTeaspoons(), runInfo.getRequiredCalories());
+	}
+
+	private static int calculateBestScore(int[][][] ingredientsTeaspoonsIndexedProperties, int propertyCount, int caloriesIndex, int requiredTeaspoons, Integer requiredCalories) {
 		if (requiredCalories == null) {
-			outputSummary("calories are not counted", ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, requiredTeaspoons, null, null);
+			return calculateBestScore(ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, requiredTeaspoons, null, null);
 		}
 		else {
 			int requiredCaloriesPrimitive = requiredCalories;
-			outputSummary(String.format("calories must equal exactly %d", requiredCalories), ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, requiredTeaspoons, indexedPropertyAmounts -> indexedPropertyAmounts[caloriesIndex] <= requiredCaloriesPrimitive ? ContinueResult.CONTINUE : ContinueResult.STOP, indexedPropertyAmounts -> indexedPropertyAmounts[caloriesIndex] == requiredCaloriesPrimitive);
+			return calculateBestScore(ingredientsTeaspoonsIndexedProperties, propertyCount, caloriesIndex, requiredTeaspoons, indexedPropertyAmounts -> indexedPropertyAmounts[caloriesIndex] <= requiredCaloriesPrimitive ? ContinueResult.CONTINUE : ContinueResult.STOP, indexedPropertyAmounts -> indexedPropertyAmounts[caloriesIndex] == requiredCaloriesPrimitive);
 		}
 	}
 
-	private static void outputSummary(String restrictionDescription, int[][][] ingredientsTeaspoonsIndexedProperties, int propertyCount, int caloriesIndex, int requiredTeaspoons, Function<int[], ContinueResult> ongoingRestriction, Predicate<int[]> finalRestriction) {
-		System.out.format("Best score for %d teaspoon(s) of ingredients when %s is: %d%n", requiredTeaspoons, restrictionDescription, recurseChoices(ingredientsTeaspoonsIndexedProperties, caloriesIndex, requiredTeaspoons, 0, new int[propertyCount], ongoingRestriction, finalRestriction));
+	private static int calculateBestScore(int[][][] ingredientsTeaspoonsIndexedProperties, int propertyCount, int caloriesIndex, int requiredTeaspoons, Function<int[], ContinueResult> ongoingRestriction, Predicate<int[]> finalRestriction) {
+		return recurseChoices(ingredientsTeaspoonsIndexedProperties, caloriesIndex, requiredTeaspoons, 0, new int[propertyCount], ongoingRestriction, finalRestriction);
 	}
 
 	private static int recurseChoices(int[][][] ingredientsTeaspoonsIndexedProperties, int caloriesIndex, int teaspoonsRemaining, int ingredientIndex, int[] indexedPropertyAmounts, Function<int[], ContinueResult> ongoingRestriction, Predicate<int[]> finalRestriction) {

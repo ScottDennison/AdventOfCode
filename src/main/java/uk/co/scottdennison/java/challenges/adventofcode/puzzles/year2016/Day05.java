@@ -1,22 +1,30 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @SuppressWarnings("DuplicatedCode")
-public class Day05 {
+public class Day05 implements IPuzzle {
 	private static final int PASSWORD_LENGTH = 8;
 	private static final int ZEROS_REQUIRED = 5;
 
-	public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-		String secretKeyString = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8).trim();
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		String secretKeyString = new String(inputCharacters).trim();
 		byte[] secretKey = secretKeyString.getBytes(StandardCharsets.UTF_8);
-		MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+		MessageDigest messageDigest;
+		try {
+			messageDigest = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException ex) {
+			throw new IllegalStateException("Could not instantiate MD5", ex);
+		}
 		byte[] value = new byte[]{'0'};
 		int startIndex = -1;
 		int digestLength = messageDigest.getDigestLength();
@@ -84,12 +92,10 @@ public class Day05 {
 				}
 			}
 		}
-		outputSummary(1, password1);
-		outputSummary(2, password2);
-	}
-
-	private static void outputSummary(int passwordNumber, char[] password) {
-		System.out.format("Password %d is %s%n", passwordNumber, new String(password));
+		return new BasicPuzzleResults<>(
+			new String(password1),
+			new String(password2)
+		);
 	}
 
 	private static int getPasswordValue(byte[] resultDigest, int byteIndex, int byteBitshift) {

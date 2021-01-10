@@ -5,11 +5,14 @@ plugins {
 group 'uk.co.scottdennison.java'
 version '1.0-SNAPSHOT'
 
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+javadoc.options.encoding = 'UTF-8'
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     compile group: 'args4j', name: 'args4j', version: '2.33'
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.0'
 }

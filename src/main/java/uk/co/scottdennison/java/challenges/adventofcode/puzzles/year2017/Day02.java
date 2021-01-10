@@ -1,21 +1,25 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2017;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
-public class Day02 {
+public class Day02 implements IPuzzle {
 	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		int checksum1 = 0;
 		int checksum2 = 0;
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
+		for (String inputLine : LineReader.strings(inputCharacters)) {
 			int minimumValue = Integer.MAX_VALUE;
 			int maximumValue = Integer.MIN_VALUE;
-			String[] values = SPACE_PATTERN.split(fileLine);
+			String[] values = SPACE_PATTERN.split(inputLine);
 			int valueCount = values.length;
 			int[] intValues = new int[valueCount];
 			int cleanDivisionResult = -1;
@@ -45,11 +49,9 @@ public class Day02 {
 			checksum1 += (maximumValue - minimumValue);
 			checksum2 += cleanDivisionResult;
 		}
-		outputSummary(1, checksum1);
-		outputSummary(2, checksum2);
-	}
-
-	private static void outputSummary(int checksumNumber, int checksum) {
-		System.out.format("Checksum %d is %d%n", checksumNumber, checksum);
+		return new BasicPuzzleResults<>(
+			checksum1,
+			checksum2
+		);
 	}
 }

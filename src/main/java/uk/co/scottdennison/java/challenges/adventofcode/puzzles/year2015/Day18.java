@@ -1,12 +1,15 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.List;
 
-public class Day18 {
+public class Day18 implements IPuzzle {
 	public enum LightState {
 		ON(true),
 		OFF(false),
@@ -23,22 +26,21 @@ public class Day18 {
 		}
 	}
 
-	private static final int ITERATIONS = 100;
-
-	public static void main(String[] args) throws IOException {
-		List<String> fileLines = Files.readAllLines(InputFileUtils.getInputPath());
-		int rowCount = fileLines.size();
-		int columnCount = fileLines.get(0).length();
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		char[][] inputLines = LineReader.charArraysArray(inputCharacters, true);
+		int rowCount = inputLines.length;
+		int columnCount = inputLines[0].length;
 		LightState[][] initialLightStateArray = new LightState[rowCount][columnCount];
 		for (int y = 0; y < rowCount; y++) {
-			char[] fileLineCharacters = fileLines.get(y).toCharArray();
-			if (fileLineCharacters.length != columnCount) {
-				throw new IllegalStateException("Incorrect file line length.");
+			char[] inputLineCharacters = inputLines[y];
+			if (inputLineCharacters.length != columnCount) {
+				throw new IllegalStateException("Incorrect input line length.");
 			}
 			LightState[] initialLightStateRow = initialLightStateArray[y];
 			for (int x = 0; x < columnCount; x++) {
 				LightState lightState;
-				switch (fileLineCharacters[x]) {
+				switch (inputLineCharacters[x]) {
 					case '#':
 						lightState = LightState.ON;
 						break;
@@ -51,16 +53,16 @@ public class Day18 {
 				initialLightStateRow[x] = lightState;
 			}
 		}
-		outputSummary("", initialLightStateArray, rowCount, columnCount);
+		int partALightOnCount = runSimulation(initialLightStateArray, rowCount, columnCount);
 		initialLightStateArray[0][0] = LightState.FIXED_ON;
 		initialLightStateArray[0][columnCount - 1] = LightState.FIXED_ON;
 		initialLightStateArray[rowCount - 1][0] = LightState.FIXED_ON;
 		initialLightStateArray[rowCount - 1][columnCount - 1] = LightState.FIXED_ON;
-		outputSummary(" with the 4 corner lights fixed on", initialLightStateArray, rowCount, columnCount);
-	}
-
-	private static void outputSummary(String summaryAddition, LightState[][] initialLightStateArray, int rowCount, int columnCount) {
-		System.out.format("There are %d lights on after %d iterations%s%n", runSimulation(initialLightStateArray, rowCount, columnCount), ITERATIONS, summaryAddition);
+		int partBLightOnCount = runSimulation(initialLightStateArray, rowCount, columnCount);
+		return new BasicPuzzleResults<>(
+			partALightOnCount,
+			partBLightOnCount
+		);
 	}
 
 	private static int runSimulation(LightState[][] initialLightStateArray, int rowCount, int columnCount) {

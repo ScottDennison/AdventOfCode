@@ -20,10 +20,6 @@ public class ChomskyReducedFormRuleCYKAlgorithm {
 	private ChomskyReducedFormRuleCYKAlgorithm() {
 	}
 
-	public static <K, V extends K> boolean runCYKAndCheckAStartRuleMatches(ChomskyReducedFormRules<K, V> chomskyReducedFormRules, List<V> input) {
-		return !runCYKAndProduceParseTrees(chomskyReducedFormRules, input).isEmpty();
-	}
-
 	public static <K, V extends K> Collection<ParseForest<K>> runCYKAndProduceParseTrees(ChomskyReducedFormRules<K, V> chomskyReducedFormRules, List<V> input) {
 		final class RuleMatch {
 			final class RuleMatchInstance {

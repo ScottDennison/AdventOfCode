@@ -1,11 +1,14 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 
-public class Day02 {
+public class Day02 implements IPuzzle {
 	private static final class PadDefinition {
 		private final char[][] characters;
 		private final int rows;
@@ -95,7 +98,7 @@ public class Day02 {
 		}
 	}
 
-	private static final PadDefinition[] PAD_DEFINITIONS = {
+	private static final PadDefinition PART_A_PAD_DEFINITION =
 		new PadDefinition(
 			new char[][]{
 				// @formatter:off
@@ -108,7 +111,9 @@ public class Day02 {
 			},
 			2,
 			2
-		),
+		);
+
+	private static final PadDefinition PART_B_PAD_DEFINITION =
 		new PadDefinition(
 			new char[][]{
 				// @formatter:off
@@ -123,17 +128,21 @@ public class Day02 {
 			},
 			3,
 			3
-		)
-	};
+		);
 
-	public static void main(String[] args) throws IOException {
-		int padCount = PAD_DEFINITIONS.length;
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		PadDefinition[] padDefinitions = {
+			PART_A_PAD_DEFINITION,
+			PART_B_PAD_DEFINITION
+		};
+		int padCount = padDefinitions.length;
 		PadState[] padStates = new PadState[padCount];
 		for (int padIndex = 0; padIndex < padCount; padIndex++) {
-			padStates[padIndex] = new PadState(PAD_DEFINITIONS[padIndex]);
+			padStates[padIndex] = new PadState(padDefinitions[padIndex]);
 		}
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			for (char character : fileLine.toCharArray()) {
+		for (char[] inputLine : LineReader.charArrays(inputCharacters)) {
+			for (char character : inputLine) {
 				final int xAddition, yAddition;
 				switch (character) {
 					case 'U':
@@ -163,8 +172,9 @@ public class Day02 {
 				padState.press();
 			}
 		}
-		for (int padIndex = 0; padIndex < padCount; padIndex++) {
-			System.out.format("The code to the bathroom using keypad %d is %s%n", padIndex + 1, padStates[padIndex].getCurrentCode());
-		}
+		return new BasicPuzzleResults<>(
+			padStates[0].getCurrentCode(),
+			padStates[1].getCurrentCode()
+		);
 	}
 }

@@ -1,25 +1,27 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
-public class Day10 {
+public class Day10 implements IPuzzle {
 	private static final Pattern VERIFICATION_PATTERN = Pattern.compile("^[0-9]+$");
 	private static final char END_OF_INPUT = '_';
 
-	private static final int[] ITERATIONS = {40, 50};
+	private static final int PART_A_ITERATIONS = 40;
+	private static final int PART_B_ITERATIONS = 50;
 
-	public static void main(String[] args) throws IOException {
-		String inputString = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8).trim();
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		String inputString = new String(inputCharacters).trim();
 		if (!VERIFICATION_PATTERN.matcher(inputString).matches()) {
 			throw new IllegalStateException("Input string does not match.");
 		}
-		int maximumIterations = IntStream.of(ITERATIONS).max().getAsInt();
+		int maximumIterations = Math.max(PART_A_ITERATIONS, PART_B_ITERATIONS);
 		char[] input = (inputString + END_OF_INPUT).toCharArray();
 		int[] sequenceLengths = new int[maximumIterations + 1];
 		sequenceLengths[0] = input.length;
@@ -46,8 +48,9 @@ public class Day10 {
 			input = new char[newInputLength];
 			newInputBuilder.getChars(0, newInputLength, input, 0);
 		}
-		for (int desiredIterations : ITERATIONS) {
-			System.out.format("%d iterations results in a length of: %d%n", desiredIterations, sequenceLengths[desiredIterations]);
-		}
+		return new BasicPuzzleResults<>(
+			sequenceLengths[PART_A_ITERATIONS],
+			sequenceLengths[PART_B_ITERATIONS]
+		);
 	}
 }

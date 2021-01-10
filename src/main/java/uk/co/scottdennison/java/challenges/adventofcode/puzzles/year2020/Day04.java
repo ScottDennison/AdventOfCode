@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -14,7 +17,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Day04 {
+public class Day04 implements IPuzzle {
 	private static final boolean LOG = false;
 
 	private static class BasicNumberValidator implements Validator {
@@ -148,9 +151,10 @@ public class Day04 {
 		new FieldDefinition("cid", true, new AlwaysValidValidator())
 	};
 
-	public static void main(String[] args) throws IOException {
-		List<String> fileLines = Files.readAllLines(InputFileUtils.getInputPath());
-		fileLines.add(""); // Add a blank line to the end to prevent having to do any special end-of-file handling.
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		List<String> inputLines = LineReader.stringsList(inputCharacters, true);
+		inputLines.add(""); // Add a blank line to the end to prevent having to do any special end-of-input handling.
 		Map<String, FieldDefinition> fieldDefinitionsByKey = Stream.of(FIELD_DEFINITIONS).collect(Collectors.toMap(FieldDefinition::getKey, Function.identity()));
 		Set<String> requiredFieldKeys = Stream.of(FIELD_DEFINITIONS).filter(fieldDefinition -> !fieldDefinition.isOptional()).map(FieldDefinition::getKey).collect(Collectors.toSet());
 		Set<String> foundFieldKeys = new HashSet<>();
@@ -158,9 +162,9 @@ public class Day04 {
 		int validPassportsWithoutDataChecks = 0;
 		int validPassportsWithDataChecks = 0;
 		int passportNumber = 1;
-		for (String fileLine : fileLines) {
-			String trimmedFileLine = fileLine.trim();
-			if (trimmedFileLine.isEmpty()) {
+		for (String inputLine : inputLines) {
+			String trimmedInputLine = inputLine.trim();
+			if (trimmedInputLine.isEmpty()) {
 				Set<String> missingFieldKeys = new HashSet<>(requiredFieldKeys);
 				missingFieldKeys.removeAll(foundFieldKeys);
 				if (missingFieldKeys.isEmpty()) {
@@ -170,7 +174,8 @@ public class Day04 {
 					}
 				}
 				else if (LOG) {
-					System.out.format("Passport %d has missing fields: %s%n", passportNumber, missingFieldKeys);
+					printWriter.format("Passport %d has missing fields: %s%n", passportNumber, missingFieldKeys);
+					printWriter.flush();
 				}
 				// Reset
 				isPassportDataValid = true;
@@ -178,7 +183,7 @@ public class Day04 {
 				foundFieldKeys.clear();
 			}
 			else {
-				String[] fields = trimmedFileLine.split(" ");
+				String[] fields = trimmedInputLine.split(" ");
 				for (String field : fields) {
 					String[] fieldParts = field.split(":");
 					if (fieldParts.length == 2) {
@@ -189,13 +194,15 @@ public class Day04 {
 							FieldDefinition fieldDefinition = fieldDefinitionsByKey.get(key);
 							if (fieldDefinition == null) {
 								if (LOG) {
-									System.out.format("Passport %d has unexpected field: %s%n", passportNumber, key);
+									printWriter.format("Passport %d has unexpected field: %s%n", passportNumber, key);
+									printWriter.flush();
 								}
 								isPassportDataValid = false;
 							}
 							else if (!fieldDefinition.getValidator().isValid(value)) {
 								if (LOG) {
-									System.out.format("Passport %d has invalid value for field %s: %s%n", passportNumber, key, value);
+									printWriter.format("Passport %d has invalid value for field %s: %s%n", passportNumber, key, value);
+									printWriter.flush();
 								}
 								isPassportDataValid = false;
 							}
@@ -207,7 +214,9 @@ public class Day04 {
 				}
 			}
 		}
-		System.out.format("Valid passports without data check: %d%n", validPassportsWithoutDataChecks);
-		System.out.format("Valid passports with    data check: %d%n", validPassportsWithDataChecks);
+		return new BasicPuzzleResults<>(
+			validPassportsWithoutDataChecks,
+			validPassportsWithDataChecks
+		);
 	}
 }

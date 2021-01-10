@@ -1,20 +1,24 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class Day03 {
+public class Day03 implements IPuzzle {
 	private static final Pattern SPACE_PATTERN = Pattern.compile("\\s+");
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		List<int[]> allSideIntsList = new ArrayList<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			String[] sideStrings = SPACE_PATTERN.split(fileLine.trim());
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			String[] sideStrings = SPACE_PATTERN.split(inputLine.trim());
 			if (sideStrings.length != 3) {
 				throw new IllegalStateException("Invalid amount of columns of data.");
 			}
@@ -39,12 +43,10 @@ public class Day03 {
 				}
 			}
 		}
-		outputSummary("horizontally", "", validTriangleCount1);
-		outputSummary("vertically", "  ", validTriangleCount2);
-	}
-
-	private static void outputSummary(String reason, String padding, int validTriangleCount) {
-		System.out.format("The number of valid triangles reading data %s%s is %d%n", reason, padding, validTriangleCount);
+		return new BasicPuzzleResults<>(
+			validTriangleCount1,
+			validTriangleCount2
+		);
 	}
 
 	private static int isValidTriangleInt(int side1, int side2, int side3) {

@@ -1,10 +1,11 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,8 +14,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day16 {
-	private static final Pattern PATTERN_FILE = Pattern.compile("^\\s*(?<rules>(?:.+\\n)*.+)\\n{2,}your ticket *: *\\n(?<myTicket>.+)\\n{2,}nearby tickets *: *\\n(?<nearbyTickets>(?:.+\\n)*.+)\\s*$", Pattern.CASE_INSENSITIVE);
+public class Day16 implements IPuzzle {
+	private static final Pattern PATTERN_FULL_INPUT = Pattern.compile("^\\s*(?<rules>(?:.+\\n)*.+)\\n{2,}your ticket *: *\\n(?<myTicket>.+)\\n{2,}nearby tickets *: *\\n(?<nearbyTickets>(?:.+\\n)*.+)\\s*$", Pattern.CASE_INSENSITIVE);
 	private static final Pattern PATTERN_NEWLINE = Pattern.compile("\\n");
 	private static final Pattern PATTERN_SUB_RULE = Pattern.compile("(?<min>[0-9]+) *- *(?<max>[0-9]+)(?<continuation> *(?:(?: or )|,) *)?", Pattern.CASE_INSENSITIVE);
 	private static final Pattern PATTERN_RULE = Pattern.compile("^(?<name>[a-z ]+?) *: *(?<subRules>.*)$");
@@ -59,16 +60,17 @@ public class Day16 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		Matcher fileMatcher = PATTERN_FILE.matcher(new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8));
-		if (!fileMatcher.matches()) {
-			throw new IllegalStateException("Unparseable file");
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		Matcher inputMatcher = PATTERN_FULL_INPUT.matcher(new String(inputCharacters));
+		if (!inputMatcher.matches()) {
+			throw new IllegalStateException("Unparseable input.");
 		}
 		List<Rule> rulesList = new ArrayList<>();
-		for (String ruleString : PATTERN_NEWLINE.split(fileMatcher.group("rules"))) {
+		for (String ruleString : PATTERN_NEWLINE.split(inputMatcher.group("rules"))) {
 			Matcher ruleMatcher = PATTERN_RULE.matcher(ruleString);
 			if (!ruleMatcher.matches()) {
-				throw new IllegalStateException("Unparseable rule");
+				throw new IllegalStateException("Unparseable rule.");
 			}
 			String subRulesString = ruleMatcher.group("subRules");
 			int subRulesStringLength = subRulesString.length();
@@ -76,7 +78,7 @@ public class Day16 {
 			List<SubRule> subRules = new ArrayList<>();
 			while (true) {
 				if (!subRuleMatcher.lookingAt()) {
-					throw new IllegalStateException("Unparseable sub rule");
+					throw new IllegalStateException("Unparseable sub rule.");
 				}
 				int min = Integer.parseInt(subRuleMatcher.group("min"));
 				int max = Integer.parseInt(subRuleMatcher.group("max"));
@@ -104,7 +106,7 @@ public class Day16 {
 		int totalErrorRate = 0;
 		List<int[]> ticketsList = new ArrayList<>();
 		int fieldCount = -1;
-		for (String nearbyTicketString : PATTERN_NEWLINE.split(fileMatcher.group("nearbyTickets"))) {
+		for (String nearbyTicketString : PATTERN_NEWLINE.split(inputMatcher.group("nearbyTickets"))) {
 			int[] nearbyTicket = parseTicket(nearbyTicketString);
 			if (fieldCount < 0) {
 				fieldCount = nearbyTicket.length;
@@ -117,7 +119,7 @@ public class Day16 {
 				totalErrorRate += errorRate;
 			}
 		}
-		int[] myTicket = parseTicket(fileMatcher.group("myTicket"));
+		int[] myTicket = parseTicket(inputMatcher.group("myTicket"));
 		if (validateTicket(rulesArray, fieldCount, myTicket) != null) {
 			throw new IllegalStateException("My ticket must be valid");
 		}
@@ -154,8 +156,10 @@ public class Day16 {
 				myTicketInterestedFieldProduct *= myTicket[fieldIndex];
 			}
 		}
-		System.out.format("Error rate is %d%n", totalErrorRate);
-		System.out.format("The product of all interesting fields on my ticket is %d%n", myTicketInterestedFieldProduct);
+		return new BasicPuzzleResults<>(
+			totalErrorRate,
+			myTicketInterestedFieldProduct
+		);
 	}
 
 	private static int[] assignFieldRuleIds(int[][] possibleFieldRuleIds, boolean[] rulesAssigned, int[] currentFieldRuleIds, int fieldIndex) {

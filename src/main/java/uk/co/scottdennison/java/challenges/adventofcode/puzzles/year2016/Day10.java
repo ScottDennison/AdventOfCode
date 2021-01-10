@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -12,7 +15,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day10 {
+public class Day10 implements IPuzzle {
 	private interface Receiver {
 		void receive(int value);
 	}
@@ -197,16 +200,17 @@ public class Day10 {
 	private static final int MINIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT = 0;
 	private static final int MAXIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT = 2;
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		FactoryManager factoryManager = new FactoryManager();
 		Map<Integer, Set<Integer>> botInputs = new HashMap<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher valueInputMatcher = PATTERN_VALUE_INPUT.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher valueInputMatcher = PATTERN_VALUE_INPUT.matcher(inputLine);
 			if (valueInputMatcher.matches()) {
 				botInputs.computeIfAbsent(Integer.parseInt(valueInputMatcher.group("botNumber")), __ -> new HashSet<>()).add(Integer.parseInt(valueInputMatcher.group("value")));
 			}
 			else {
-				Matcher botInstructionMatcher = PATTERN_BOT_INSTRUCTION.matcher(fileLine);
+				Matcher botInstructionMatcher = PATTERN_BOT_INSTRUCTION.matcher(inputLine);
 				if (botInstructionMatcher.matches()) {
 					Map<String, ReceiverHolder> receiverHolders = new HashMap<>();
 					receiverHolders.put(LEVEL_LOW, new ReceiverHolder());
@@ -217,7 +221,7 @@ public class Day10 {
 					factoryManager.registerBot(inputBotNumber, new Bot(inputBotNumber, receiverHolders.get(LEVEL_LOW).getReceiver(), receiverHolders.get(LEVEL_HIGH).getReceiver()));
 				}
 				else {
-					throw new IllegalStateException("Unparseable file line");
+					throw new IllegalStateException("Unparseable input line");
 				}
 			}
 		}
@@ -243,12 +247,14 @@ public class Day10 {
 		if (desiredBotNumber == null) {
 			throw new IllegalStateException("No bots have handled the desired values");
 		}
-		System.out.format("The bot that has handled %d and %d is %d%n", DESIRED_LOW_VALUE, DESIRED_HIGH_VALUE, desiredBotNumber);
 		int outputBinProduct = 1;
 		for (int outputBinNumber = MINIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT; outputBinNumber <= MAXIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT; outputBinNumber++) {
 			outputBinProduct *= factoryManager.getOutputBin(outputBinNumber).getValue();
 		}
-		System.out.format("The products of output bins %d to %d (inclusive) is %d%n", MINIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT, MAXIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT, outputBinProduct);
+		return new BasicPuzzleResults<>(
+			desiredBotNumber,
+			outputBinProduct
+		);
 	}
 
 	private static void parseBotInstruction(Matcher matcher, Map<String, ReceiverHolder> receiverHolders, FactoryManager factoryManager, String prefix) {

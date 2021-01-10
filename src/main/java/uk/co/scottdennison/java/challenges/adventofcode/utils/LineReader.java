@@ -3,17 +3,23 @@ package uk.co.scottdennison.java.challenges.adventofcode.utils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public final class LineReader {
 	private interface Processor<T> {
 		T process(char[] chars, int offset, int count);
+
 		boolean isEmpty(T t);
 	}
 
-	public static class StringProcessor implements Processor<String> {
+	private static class StringProcessor implements Processor<String> {
 		public static final StringProcessor INSTANCE = new StringProcessor();
 
-		private StringProcessor() {}
+		private StringProcessor() {
+		}
 
 		@Override
 		public String process(char[] chars, int offset, int count) {
@@ -26,10 +32,11 @@ public final class LineReader {
 		}
 	}
 
-	public static class CharArrayProcessor implements Processor<char[]> {
+	private static class CharArrayProcessor implements Processor<char[]> {
 		public static final CharArrayProcessor INSTANCE = new CharArrayProcessor();
 
-		private CharArrayProcessor() {}
+		private CharArrayProcessor() {
+		}
 
 		@Override
 		public char[] process(char[] chars, int offset, int count) {
@@ -85,7 +92,8 @@ public final class LineReader {
 				T value = this.next;
 				this.update();
 				return value;
-			} else {
+			}
+			else {
 				throw new NoSuchElementException("No more lines.");
 			}
 		}
@@ -96,17 +104,18 @@ public final class LineReader {
 			int startIndex = this.index;
 			if (startIndex >= charCount) {
 				this.hasNextLine = false;
-			} else {
+			}
+			else {
 				int stopIndex = startIndex;
 				int nextStartIndex = charCount;
 				while (stopIndex < charCount) {
 					boolean shouldStop = false;
 					switch (chars[stopIndex]) {
-						case '\r':
+						case '\n':
 							shouldStop = true;
 							nextStartIndex = stopIndex + 1;
 							break;
-						case '\n':
+						case '\r':
 							shouldStop = true;
 							int potentialCRIndex = stopIndex + 1;
 							if (potentialCRIndex < charCount && chars[potentialCRIndex] == '\n') {
@@ -136,19 +145,19 @@ public final class LineReader {
 	}
 
 	public java.util.Iterator<char[]> charArraysIterator() {
-		return new Iterator<>(this.chars,CharArrayProcessor.INSTANCE);
+		return this.iterator(CharArrayProcessor.INSTANCE);
 	}
 
 	private <T> Iterator<T> iterator(Processor<T> processor) {
-		return new Iterator<>(this.chars,processor);
+		return new Iterator<>(this.chars, processor);
 	}
 
 	public List<String> stringsList(boolean trimEmpty) {
-		return this.list(StringProcessor.INSTANCE,trimEmpty);
+		return this.list(StringProcessor.INSTANCE, trimEmpty);
 	}
 
 	public List<char[]> charArraysList(boolean trimEmpty) {
-		return this.list(CharArrayProcessor.INSTANCE,trimEmpty);
+		return this.list(CharArrayProcessor.INSTANCE, trimEmpty);
 	}
 
 	public String[] stringsArray(boolean trimEmpty) {
@@ -167,7 +176,7 @@ public final class LineReader {
 		}
 		if (trimEmpty) {
 			int itemsToRemove = 0;
-			for (int index=items.size()-1; index>=0 && processor.isEmpty(items.get(index)); index++) {
+			for (int index = items.size() - 1; index >= 0 && processor.isEmpty(items.get(index)); index++) {
 				itemsToRemove++;
 			}
 			if (itemsToRemove > 0) {
@@ -183,6 +192,18 @@ public final class LineReader {
 
 	public Iterable<char[]> charArrays() {
 		return LineReader.this::charArraysIterator;
+	}
+
+	public Stream<String> stringsStream() {
+		return stream(this.stringsIterator());
+	}
+
+	public Stream<char[]> charArraysStream() {
+		return stream(this.charArraysIterator());
+	}
+
+	private static <T> Stream<T> stream(java.util.Iterator<T> iterator) {
+		return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator, Spliterator.ORDERED), false);
 	}
 
 	public static java.util.Iterator<String> stringsIterator(char[] chars) {
@@ -215,5 +236,13 @@ public final class LineReader {
 
 	public static Iterable<char[]> charArrays(char[] chars) {
 		return LineReader.create(chars).charArrays();
+	}
+
+	public static Stream<String> stringsStream(char[] chars) {
+		return LineReader.create(chars).stringsStream();
+	}
+
+	public static Stream<char[]> charArraysStream(char[] chars) {
+		return LineReader.create(chars).charArraysStream();
 	}
 }

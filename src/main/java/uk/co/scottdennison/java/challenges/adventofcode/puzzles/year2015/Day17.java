@@ -1,18 +1,28 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 
-public class Day17 {
+public class Day17 implements IPuzzle {
 	private static final int TOTAL_LITERS = 150;
 
-	public static void main(String[] args) throws IOException {
-		int[] containerSizes = Files.lines(InputFileUtils.getInputPath()).mapToInt(Integer::parseInt).toArray();
-		int minimumContainers = recurseContainersForMinimumContainers(containerSizes, 0, 0, 0);
-		System.out.format("Ways to make %d liters of eggnog: %d%n", TOTAL_LITERS, recurseContainersForWays(containerSizes, 0, 0, 0, Integer.MAX_VALUE));
-		System.out.format("Ways to make %d liters of eggnog when limited to %d containers (the minimum amount possible): %d%n", TOTAL_LITERS, minimumContainers, recurseContainersForWays(containerSizes, 0, 0, 0, minimumContainers));
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		int[] containerSizes = LineReader.stringsStream(inputCharacters).mapToInt(Integer::parseInt).toArray();
+		int minimumContainers = recurseContainersForMinimumContainers(containerSizes);
+		return new BasicPuzzleResults<>(
+			recurseContainersForWays(containerSizes, Integer.MAX_VALUE),
+			recurseContainersForWays(containerSizes, minimumContainers)
+		);
+	}
+
+	private static int recurseContainersForMinimumContainers(int[] containerSizes) {
+		return recurseContainersForMinimumContainers(containerSizes, 0, 0, 0);
 	}
 
 	private static int recurseContainersForMinimumContainers(int[] containerSizes, int index, int currentLiters, int currentContainers) {
@@ -26,6 +36,10 @@ public class Day17 {
 				recurseContainersForMinimumContainers(containerSizes, nextIndex, currentLiters, currentContainers)
 			);
 		}
+	}
+
+	private static int recurseContainersForWays(int[] containerSizes, int maximumAllowableContainers) {
+		return recurseContainersForWays(containerSizes, 0, 0, 0, maximumAllowableContainers);
 	}
 
 	private static int recurseContainersForWays(int[] containerSizes, int index, int currentLiters, int currentContainers, int maximumAllowableContainers) {

@@ -1,24 +1,28 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class Day05 {
+public class Day05 implements IPuzzle {
 	private static final int ROW_BSP_LENGTH = 7;
 	private static final int COLUMN_BSP_LENGTH = 3;
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		int minimumSeatId = Integer.MAX_VALUE;
 		int maximumSeatId = Integer.MIN_VALUE;
 		Integer mySeatId = null;
 		Set<Integer> filledSeatIds = new HashSet<>();
-		for (String line : Files.readAllLines(InputFileUtils.getInputPath())) {
+		for (String line : LineReader.strings(inputCharacters)) {
 			if (line.length() != 10) {
 				throw new IllegalStateException("Unexpected line length");
 			}
@@ -47,8 +51,10 @@ public class Day05 {
 		if (mySeatId == null) {
 			throw new IllegalStateException("No possible seat ID found for my seat.");
 		}
-		System.out.format("Largest seat id: %d%n", maximumSeatId);
-		System.out.format("     My seat id: %d%n", mySeatId);
+		return new BasicPuzzleResults<>(
+			maximumSeatId,
+			mySeatId
+		);
 	}
 
 	private static int readBSP(String line, int startCharIndex, int size, char lowerRangeCharacter, char upperRangeCharacter) {

@@ -1,43 +1,51 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzlePartResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzlePartResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.MultiPartPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.regex.Pattern;
 
-public class Day05 {
-	private static final Pattern[][] RULESETS = {
-		{
-			Pattern.compile("[aeiou].*[aeiou].*[aeiou]"),
-			Pattern.compile("(.)\\1"),
-			Pattern.compile("^((?!(ab|cd|pq|xy)).)*$")
-		},
-		{
-			Pattern.compile("(..).*\\1"),
-			Pattern.compile("(.).\\1")
-		}
+public class Day05 implements IPuzzle {
+	private static final Pattern[] RULESET_A = {
+		Pattern.compile("[aeiou].*[aeiou].*[aeiou]"),
+		Pattern.compile("(.)\\1"),
+		Pattern.compile("^((?!(ab|cd|pq|xy)).)*$")
 	};
 
-	public static void main(String[] args) throws IOException {
-		int rulesetCount = RULESETS.length;
-		int[] niceStringCounts = new int[rulesetCount];
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			for (int rulesetIndex = 0; rulesetIndex < rulesetCount; rulesetIndex++) {
-				boolean isValid = true;
-				for (Pattern rule : RULESETS[rulesetIndex]) {
-					if (!rule.matcher(fileLine).find()) {
-						isValid = false;
-						break;
-					}
-				}
-				if (isValid) {
-					niceStringCounts[rulesetIndex]++;
+	private static final Pattern[] RULESET_B = {
+		Pattern.compile("(..).*\\1"),
+		Pattern.compile("(.).\\1")
+	};
+
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		String[] inputLines = LineReader.stringsArray(inputCharacters, true);
+		return new MultiPartPuzzleResults<>(
+			runPuzzlePart(inputLines, RULESET_A),
+			runPuzzlePart(inputLines, RULESET_B)
+		);
+	}
+
+	private static IPuzzlePartResults runPuzzlePart(String[] inputLines, Pattern[] ruleSet) {
+		int niceStringCount = 0;
+		for (String inputLine : inputLines) {
+			boolean isValid = true;
+			for (Pattern rule : ruleSet) {
+				if (!rule.matcher(inputLine).find()) {
+					isValid = false;
+					break;
 				}
 			}
+			if (isValid) {
+				niceStringCount++;
+			}
 		}
-		for (int rulesetIndex = 0; rulesetIndex < rulesetCount; rulesetIndex++) {
-			System.out.format("Nice string count for ruleset %d: %d%n", rulesetIndex + 1, niceStringCounts[rulesetIndex]);
-		}
+		return new BasicPuzzlePartResults<>(niceStringCount);
 	}
 }

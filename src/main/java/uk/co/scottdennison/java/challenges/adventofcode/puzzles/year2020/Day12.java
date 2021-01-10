@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -12,7 +15,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Day12 {
+public class Day12 implements IPuzzle {
 	private static final class Position {
 		private final int x;
 		private final int y;
@@ -91,8 +94,6 @@ public class Day12 {
 		void rotate(int count);
 
 		Position getShipPosition();
-
-		String getName();
 	}
 
 	private static class DirectNavigationSystem implements NavigationSystem {
@@ -129,11 +130,6 @@ public class Day12 {
 		@Override
 		public Position getShipPosition() {
 			return this.shipPosition;
-		}
-
-		@Override
-		public String getName() {
-			return "Direction navigation system";
 		}
 	}
 
@@ -189,11 +185,6 @@ public class Day12 {
 		public Position getShipPosition() {
 			return this.shipPosition;
 		}
-
-		@Override
-		public String getName() {
-			return "Waypoint navigation system";
-		}
 	}
 
 	private static <T extends Enum<T>> Map<String, T> createLookup(Class<T> clazz) {
@@ -204,13 +195,13 @@ public class Day12 {
 	private static final Map<String, Direction> DIRECTION_LOOKUP = createLookup(Direction.class);
 	private static final Map<String, Rotation> ROTATION_LOOKUP = createLookup(Rotation.class);
 
-	public static void main(String[] args) throws IOException {
-		NavigationSystem[] navigationSystems = {
-			new DirectNavigationSystem(new Position(0, 0), Direction.EAST),
-			new WaypointNavigationSystem(new Position(0, 0), new Position(10, -1))
-		};
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		NavigationSystem partANavigationSystem = new DirectNavigationSystem(new Position(0, 0), Direction.EAST);
+		NavigationSystem partBNavigationSystem = new WaypointNavigationSystem(new Position(0, 0), new Position(10, -1));
+		NavigationSystem[] navigationSystems = {partANavigationSystem, partBNavigationSystem};
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Unparsable line.");
 			}
@@ -243,9 +234,14 @@ public class Day12 {
 				action.accept(navigationSystem);
 			}
 		}
-		for (NavigationSystem navigationSystem : navigationSystems) {
-			Position shipPosition = navigationSystem.getShipPosition();
-			System.out.format("Distance away from start after following instructions using navigation system \"%s\" is %d%n", navigationSystem.getName(), Math.abs(shipPosition.getX()) + Math.abs(shipPosition.getY()));
-		}
+		return new BasicPuzzleResults<>(
+			calculateDistanceTravelled(partANavigationSystem),
+			calculateDistanceTravelled(partBNavigationSystem)
+		);
+	}
+
+	private static int calculateDistanceTravelled(NavigationSystem navigationSystem) {
+		Position shipPosition = navigationSystem.getShipPosition();
+		return Math.abs(shipPosition.getX()) + Math.abs(shipPosition.getY());
 	}
 }

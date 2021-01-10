@@ -1,13 +1,16 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
 
-public class Day17 {
+public class Day17 implements IPuzzle {
 	private static class State {
 		private final int dimensionCount;
 		private final int[] dimensionSizes;
@@ -98,25 +101,26 @@ public class Day17 {
 
 	private static final int CYCLES = 6;
 
-	public static void main(String[] args) throws IOException {
-		List<String> fileLines = Files.readAllLines(InputFileUtils.getInputPath());
-		int height = fileLines.size();
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		char[][] inputLines = LineReader.charArraysArray(inputCharacters, true);
+		int height = inputLines.length;
 		if (height < 1) {
 			throw new IllegalStateException("No height.");
 		}
-		int width = fileLines.get(0).length();
+		int width = inputLines[0].length;
 		if (width < 1) {
 			throw new IllegalStateException("No width.");
 		}
 		boolean[][] initialState = new boolean[height][width];
 		for (int y = 0; y < height; y++) {
-			char[] fileLineCharacters = fileLines.get(y).toCharArray();
-			if (fileLineCharacters.length != width) {
+			char[] inputLineCharacters = inputLines[y];
+			if (inputLineCharacters.length != width) {
 				throw new IllegalStateException("Unexpected width.");
 			}
 			for (int x = 0; x < width; x++) {
 				boolean cellState;
-				switch (fileLineCharacters[x]) {
+				switch (inputLineCharacters[x]) {
 					case '#':
 						cellState = true;
 						break;
@@ -129,12 +133,10 @@ public class Day17 {
 				initialState[y][x] = cellState;
 			}
 		}
-		outputSummary(initialState, height, width, 3);
-		outputSummary(initialState, height, width, 6);
-	}
-
-	private static void outputSummary(boolean[][] initialState, int height, int width, int dimensionCount) {
-		System.out.format("Cells on in %dD space after %d cycles: %d%n", dimensionCount, CYCLES, simulateEnergySource(initialState, height, width, dimensionCount));
+		return new BasicPuzzleResults<>(
+			simulateEnergySource(initialState, height, width, 3),
+			simulateEnergySource(initialState, height, width, 4)
+		);
 	}
 
 	private static int simulateEnergySource(boolean[][] initialState, int height, int width, int dimensionCount) {

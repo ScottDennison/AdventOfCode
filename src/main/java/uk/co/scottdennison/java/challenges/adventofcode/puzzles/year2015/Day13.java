@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,14 +14,15 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day13 {
+public class Day13 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^(?<name1>(.+)) would (?<happinessModifier>gain|lose) (?<happiness>([0-9]+)) happiness unit(?:s)? by sitting next to (?<name2>(.+))\\.$");
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		Set<String> namesSet = new HashSet<>();
 		Map<String, Map<String, Integer>> happinesses = new HashMap<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Could not parse line.");
 			}
@@ -41,7 +45,7 @@ public class Day13 {
 				}
 			}
 		}
-		outputSummary("excluding", namesSet, happinesses);
+		int happinessesExcludingMe = recurseHappinesses(namesSet, happinesses);
 		StringBuilder myNameBuilder = new StringBuilder();
 		String myName;
 		do {
@@ -52,13 +56,17 @@ public class Day13 {
 			addHappiness(namesSet, happinesses, myName, otherName, 0);
 			addHappiness(namesSet, happinesses, otherName, myName, 0);
 		}
-		outputSummary("including", namesSet, happinesses);
+		int happinessesIncludingMe = recurseHappinesses(namesSet, happinesses);
+		return new BasicPuzzleResults<>(
+			happinessesExcludingMe,
+			happinessesIncludingMe
+		);
 	}
 
-	private static void outputSummary(String myState, Set<String> namesSet, Map<String, Map<String, Integer>> happinesses) {
+	private static int recurseHappinesses(Set<String> namesSet, Map<String, Map<String, Integer>> happinesses) {
 		String[] namesArray = namesSet.toArray(new String[0]);
 		boolean[] namesUsed = new boolean[namesArray.length];
-		System.out.format("Best happiness %s me: %d%n", myState, recurseHappinesses(namesArray, happinesses, namesUsed, null, null, 0, 0));
+		return recurseHappinesses(namesArray, happinesses, namesUsed, null, null, 0, 0);
 	}
 
 	private static int recurseHappinesses(String[] names, Map<String, Map<String, Integer>> happinesses, boolean[] namesUsed, String firstName, String previousName, int depth, int currentHappiness) {

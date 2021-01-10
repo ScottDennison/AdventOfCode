@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,7 +19,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day20 {
+public class Day20 implements IPuzzle {
 	private enum Edge {
 		TOP(-1, 0) {
 			@Override
@@ -310,17 +313,16 @@ public class Day20 {
 		private boolean hasTileId = false;
 		private int tileId;
 
-		public void acceptLine(String inputLine) {
-			if (!inputLine.isEmpty()) {
-				Matcher tileIdMatcher = PATTERN_TILE_ID.matcher(inputLine);
+		public void acceptLine(char[] inputLine) {
+			if (inputLine.length != 0) {
+				Matcher tileIdMatcher = PATTERN_TILE_ID.matcher(new String(inputLine));
 				if (tileIdMatcher.matches()) {
 					this.finishTile(this.tileSize == -1);
 					this.tileId = Integer.parseInt(tileIdMatcher.group("id"));
 					this.hasTileId = true;
 				}
 				else {
-					char[] inputLineCharacters = inputLine.toCharArray();
-					int inputLineWidth = inputLineCharacters.length;
+					int inputLineWidth = inputLine.length;
 					if (this.tileSize == -1) {
 						this.tileSize = inputLineWidth;
 					}
@@ -330,7 +332,7 @@ public class Day20 {
 					boolean[] inputLineTileData = new boolean[inputLineWidth];
 					for (int inputCharacterIndex = 0; inputCharacterIndex < inputLineWidth; inputCharacterIndex++) {
 						boolean value;
-						switch (inputLineCharacters[inputCharacterIndex]) {
+						switch (inputLine[inputCharacterIndex]) {
 							case '#':
 								value = true;
 								break;
@@ -379,9 +381,10 @@ public class Day20 {
 		{___, SMP, ___, ___, SMP, ___, ___, SMP, ___, ___, SMP, ___, ___, SMP, ___, ___, SMP, ___, ___, ___}
 	};
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		TileBuildHelper tileBuildHelper = new TileBuildHelper();
-		Files.lines(InputFileUtils.getInputPath()).forEachOrdered(tileBuildHelper::acceptLine);
+		LineReader.charArraysIterator(inputCharacters).forEachRemaining(tileBuildHelper::acceptLine);
 		Collection<Tile> tiles = tileBuildHelper.produceTiles();
 		int tileCount = tiles.size();
 		int tileTileSize = (int) Math.sqrt(tileCount);
@@ -512,8 +515,10 @@ public class Day20 {
 				gridCornerIdProduct *= modifiedTileGrid[tileY][tileX].getTile().getId();
 			}
 		}
-		System.out.format("Grid corner ID product: %d%n", gridCornerIdProduct);
-		System.out.format("Water roughness: %d%n", waveCount - (seaMonstersFound * fakeWaveCountPerSeaMonster));
+		return new BasicPuzzleResults<>(
+			gridCornerIdProduct,
+			waveCount - (seaMonstersFound * fakeWaveCountPerSeaMonster)
+		);
 	}
 
 	private static int sumGridPositives(boolean[][] grid) {

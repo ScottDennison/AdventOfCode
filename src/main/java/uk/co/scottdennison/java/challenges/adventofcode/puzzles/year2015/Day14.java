@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -12,7 +15,7 @@ import java.util.function.ToIntFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day14 {
+public class Day14 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^(?<name>[a-z]+) can fly (?<distance>[0-9]+) km/s for (?<activeSeconds>[0-9]+) seconds, but then must rest for (?<restSeconds>[0-9]+) seconds\\.$", Pattern.CASE_INSENSITIVE);
 
 	private static class Reindeer {
@@ -57,10 +60,6 @@ public class Day14 {
 			this.points++;
 		}
 
-		public String getName() {
-			return this.name;
-		}
-
 		public int getDistanceTravelled() {
 			return this.distanceTravelled;
 		}
@@ -68,14 +67,20 @@ public class Day14 {
 		public int getPoints() {
 			return this.points;
 		}
+
+		@Override
+		public String toString() {
+			return this.name;
+		}
 	}
 
 	private static final int TARGET_SECONDS = 2503;
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		List<Reindeer> reindeerList = new ArrayList<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Unparsable line");
 			}
@@ -93,12 +98,13 @@ public class Day14 {
 				}
 			}
 		}
-		outputSummary(reindeerArray, "distance", Reindeer::getDistanceTravelled);
-		outputSummary(reindeerArray, "points", Reindeer::getPoints);
+		return new BasicPuzzleResults<>(
+			calculateAnswer(reindeerArray, Reindeer::getDistanceTravelled),
+			calculateAnswer(reindeerArray, Reindeer::getPoints)
+		);
 	}
 
-	private static void outputSummary(Reindeer[] reindeerArray, String measurement, ToIntFunction<Reindeer> measurementGetter) {
-		Reindeer winningReindeer = Arrays.stream(reindeerArray).max(Comparator.comparingInt(measurementGetter)).orElseThrow(() -> new IllegalStateException("No reindeer"));
-		System.out.format("The winning reindeer when measured by %s is %s with %d %s%n", measurement, winningReindeer.getName(), measurementGetter.applyAsInt(winningReindeer), measurement);
+	private static int calculateAnswer(Reindeer[] reindeerArray, ToIntFunction<Reindeer> measurementGetter) {
+		return measurementGetter.applyAsInt(Arrays.stream(reindeerArray).max(Comparator.comparingInt(measurementGetter)).orElseThrow(() -> new IllegalStateException("No reindeer")));
 	}
 }

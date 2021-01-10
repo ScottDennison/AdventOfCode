@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,7 +14,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day19 {
+public class Day19 implements IPuzzle {
 	private static final String[] EXTRA_RULE_LINES = {
 		"8: 42 | 42 8",
 		"11: 42 31 | 42 11 31"
@@ -203,44 +206,46 @@ public class Day19 {
 		numberedRuleComponentManager.addRuleComponent(Integer.parseInt(ruleMatcher.group("ruleNumber")), ruleComponent, allowOverride);
 	}
 
-	private static int matchLinesAgainstRule(NumberedRuleComponentManager numberedRuleComponentManager, int ruleNumber, List<String> inputLines) {
+	private static int matchLinesAgainstRule(NumberedRuleComponentManager numberedRuleComponentManager, @SuppressWarnings("SameParameterValue") int ruleNumber, char[][] inputLines) {
 		RuleComponent ruleComponent = numberedRuleComponentManager.getRuleComponent(ruleNumber);
 		int matchCount = 0;
-		for (String inputLine : inputLines) {
-			if (ruleComponent.test(inputLine.toCharArray(), 0, EndRuleComponent.INSTANCE, numberedRuleComponentManager)) {
+		for (char[] inputLine : inputLines) {
+			if (ruleComponent.test(inputLine, 0, EndRuleComponent.INSTANCE, numberedRuleComponentManager)) {
 				matchCount++;
 			}
 		}
 		return matchCount;
 	}
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		NumberedRuleComponentManager numberedRuleComponentManager = new NumberedRuleComponentManager();
-		List<String> inputLines = new ArrayList<>();
+		List<char[]> inputLines = new ArrayList<>();
 		boolean rulesFinished = false;
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
+		for (char[] inputLine : LineReader.charArrays(inputCharacters)) {
 			if (rulesFinished) {
-				if (!fileLine.isEmpty()) {
-					inputLines.add(fileLine);
+				if (inputLine.length != 0) {
+					inputLines.add(inputLine);
 				}
 			}
 			else {
-				if (fileLine.isEmpty()) {
+				if (inputLine.length == 0) {
 					rulesFinished = true;
 				}
 				else {
-					parseRuleIntoManager(numberedRuleComponentManager, fileLine, false);
+					parseRuleIntoManager(numberedRuleComponentManager, new String(inputLine), false);
 				}
 			}
 		}
-		outputSummary(1, numberedRuleComponentManager, 0, inputLines);
+		char[][] inputLinesArray = inputLines.toArray(new char[0][]);
+		int partAResult = matchLinesAgainstRule(numberedRuleComponentManager, 0, inputLinesArray);
 		for (String extraRuleLine : EXTRA_RULE_LINES) {
 			parseRuleIntoManager(numberedRuleComponentManager, extraRuleLine, true);
 		}
-		outputSummary(2, numberedRuleComponentManager, 0, inputLines);
-	}
-
-	private static void outputSummary(int partNumber, NumberedRuleComponentManager numberedRuleComponentManager, @SuppressWarnings("SameParameterValue") int ruleNumber, List<String> inputLines) {
-		System.out.format("Match count for part %d: %d%n", partNumber, matchLinesAgainstRule(numberedRuleComponentManager, ruleNumber, inputLines));
+		int partBResult = matchLinesAgainstRule(numberedRuleComponentManager, 0, inputLinesArray);
+		return new BasicPuzzleResults<>(
+			partAResult,
+			partBResult
+		);
 	}
 }

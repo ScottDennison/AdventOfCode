@@ -1,21 +1,32 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 @SuppressWarnings("DuplicatedCode")
-public class Day04 {
-	private static final int MAX_REQUIRED_ZEROS = 6;
+public class Day04 implements IPuzzle {
+	private static final int REQUIRED_ZEROS_A = 5;
+	private static final int REQUIRED_ZEROS_B = 6;
 
-	public static void main(String[] args) throws IOException, NoSuchAlgorithmException {
-		String secretKeyString = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8).trim();
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		String secretKeyString = new String(inputCharacters).trim();
 		byte[] secretKey = secretKeyString.getBytes(StandardCharsets.UTF_8);
-		MessageDigest messageDigest = MessageDigest.getInstance("MD5");
+		MessageDigest messageDigest;
+		try {
+			messageDigest = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException ex) {
+			throw new IllegalStateException("Unable to get MD5 instance", ex);
+		}
+		int maxZerosRequired = Math.max(REQUIRED_ZEROS_A, REQUIRED_ZEROS_B);
+		long[] zerosFoundAt = new long[maxZerosRequired + 1];
 		byte[] value = new byte[0];
 		int startIndex = -1;
 		int bestZerosFound = 0;
@@ -58,14 +69,24 @@ public class Day04 {
 			}
 			if (zerosFound > bestZerosFound) {
 				String valueString = new String(value, StandardCharsets.UTF_8);
+				long valueLong = Long.parseLong(valueString);
 				while (bestZerosFound < zerosFound) {
 					bestZerosFound++;
-					System.out.format("%d zero(s) found with value: %s%n", bestZerosFound, valueString);
+					if (bestZerosFound > maxZerosRequired) {
+						break;
+					}
+					printWriter.format("%d zero(s) found with value: %s%n", bestZerosFound, valueString);
+					printWriter.flush();
+					zerosFoundAt[bestZerosFound] = valueLong;
 				}
-				if (zerosFound >= MAX_REQUIRED_ZEROS) {
+				if (zerosFound >= maxZerosRequired) {
 					break;
 				}
 			}
 		}
+		return new BasicPuzzleResults<>(
+			zerosFoundAt[REQUIRED_ZEROS_A],
+			zerosFoundAt[REQUIRED_ZEROS_B]
+		);
 	}
 }

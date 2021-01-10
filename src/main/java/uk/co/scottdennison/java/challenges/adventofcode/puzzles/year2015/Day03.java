@@ -1,9 +1,13 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzlePartResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzlePartResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.MultiPartPuzzleResults;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -16,7 +20,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Day03 {
+public class Day03 implements IPuzzle {
 	private static final boolean LOG_PRESENTS = false;
 
 	private static class House {
@@ -86,7 +90,8 @@ public class Day03 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		SantaPositionTracker year1SantaPositionTracker = new SantaPositionTracker();
 		SantaPositionTracker year2ActualSantaPositionTracker = new SantaPositionTracker();
 		SantaPositionTracker year2RoboSantaPositionTracker = new SantaPositionTracker();
@@ -95,12 +100,11 @@ public class Day03 {
 		handleVisit(year1GridManager, year1SantaPositionTracker);
 		handleVisit(year2GridManager, year2ActualSantaPositionTracker);
 		handleVisit(year2GridManager, year2RoboSantaPositionTracker);
-		byte[] fileBytes = Files.readAllBytes(InputFileUtils.getInputPath());
-		int fileByteCount = fileBytes.length;
-		for (int fileByteIndex = 0; fileByteIndex < fileByteCount; fileByteIndex++) {
+		int inputCharacterCount = inputCharacters.length;
+		for (int inputCharacterIndex = 0; inputCharacterIndex < inputCharacterCount; inputCharacterIndex++) {
 			int relativeXAddition;
 			int relativeYAddition;
-			switch (fileBytes[fileByteIndex]) {
+			switch (inputCharacters[inputCharacterIndex]) {
 				case '^':
 					relativeXAddition = 0;
 					relativeYAddition = -1;
@@ -121,10 +125,12 @@ public class Day03 {
 					throw new IllegalStateException("Unexpected character");
 			}
 			handleVisit(relativeXAddition, relativeYAddition, year1GridManager, year1SantaPositionTracker);
-			handleVisit(relativeXAddition, relativeYAddition, year2GridManager, (fileByteIndex & 1) == 0 ? year2ActualSantaPositionTracker : year2RoboSantaPositionTracker);
+			handleVisit(relativeXAddition, relativeYAddition, year2GridManager, (inputCharacterIndex & 1) == 0 ? year2ActualSantaPositionTracker : year2RoboSantaPositionTracker);
 		}
-		outputSummary(1, year1GridManager);
-		outputSummary(2, year2GridManager);
+		return new MultiPartPuzzleResults<>(
+			summarizePuzzlePart(1, year1GridManager, printWriter),
+			summarizePuzzlePart(2, year2GridManager, printWriter)
+		);
 	}
 
 	private static void handleVisit(GridManager gridManager, SantaPositionTracker santaPositionTracker) {
@@ -136,12 +142,11 @@ public class Day03 {
 		handleVisit(gridManager, santaPositionTracker);
 	}
 
-	public static void outputSummary(int year, GridManager gridManager) {
+	public static IPuzzlePartResults summarizePuzzlePart(int year, GridManager gridManager, PrintWriter printWriter) {
 		Set<House> visitedHousesWithPresents = gridManager.getKnownHousesStream().filter(house -> house.getPresentCount() > 0).collect(Collectors.toSet());
-		System.out.format("-----%n");
-		System.out.format("Year: %d%n", year);
-		System.out.format("Houses with at least one present: %d%n", visitedHousesWithPresents.size());
 		if (LOG_PRESENTS) {
+			printWriter.format("Year: %d%n", year);
+			printWriter.format("\tHouses with at least one present: %d%n", visitedHousesWithPresents.size());
 			SortedMap<Integer, List<House>> visitedHousesByPresentCount = visitedHousesWithPresents.stream()
 				.sorted(
 					Comparator
@@ -156,14 +161,14 @@ public class Day03 {
 					)
 				);
 			String coordinatePartFormat = String.format("%% %dd", (int) Math.ceil(Math.log10(IntStream.concat(visitedHousesWithPresents.stream().mapToInt(House::getRelativeX), visitedHousesWithPresents.stream().mapToInt(House::getRelativeY)).map(Math::abs).max().orElse(0) + 1)) + 1);
-			String coordinateFormat = String.format("[ %s , %s ]%%n", coordinatePartFormat, coordinatePartFormat);
+			String coordinateFormat = String.format("\t[ %s , %s ]%%n", coordinatePartFormat, coordinatePartFormat);
 			for (Map.Entry<Integer, List<House>> visitedHousesByPresentCountEntry : visitedHousesByPresentCount.entrySet()) {
-				System.out.format("Houses with %d present(s):%n", visitedHousesByPresentCountEntry.getKey());
+				printWriter.format("\tHouses with %d present(s):%n", visitedHousesByPresentCountEntry.getKey());
 				for (House house : visitedHousesByPresentCountEntry.getValue()) {
-					System.out.format(coordinateFormat, house.getRelativeX(), house.getRelativeY());
+					printWriter.format(coordinateFormat, house.getRelativeX(), house.getRelativeY());
 				}
 			}
 		}
-		System.out.format("-----%n%n");
+		return new BasicPuzzlePartResults<>(visitedHousesWithPresents.size());
 	}
 }

@@ -1,13 +1,14 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.PriorityQueue;
 
-public class Day09 {
+public class Day09 implements IPuzzle {
 	private static class MultiplierRemoval implements Comparable<MultiplierRemoval> {
 		private final long compressedLengthToRemoveAt;
 		private final long multiplierDivision;
@@ -205,20 +206,19 @@ public class Day09 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		char[] fileCharacters = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8).trim().toCharArray();
-		outputSummary(fileCharacters, "disallowed", false);
-		outputSummary(fileCharacters, "allowed", true);
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		char[] inputCharactersTrimmed = new String(inputCharacters).trim().toCharArray();
+		return new BasicPuzzleResults<>(
+			runModel(inputCharactersTrimmed, false),
+			runModel(inputCharactersTrimmed, true)
+		);
 	}
 
-	private static void outputSummary(char[] fileCharacters, String allowNestedInstructionsDescription, boolean allowNestedInstructions) {
-		System.out.format("Decompressed length when nested instructions are %s: %d%n", allowNestedInstructionsDescription, runModel(fileCharacters, allowNestedInstructions));
-	}
-
-	private static long runModel(char[] fileCharacters, boolean allowNestedInstructions) {
+	private static long runModel(char[] inputCharacters, boolean allowNestedInstructions) {
 		Model model = new Model(allowNestedInstructions);
-		for (char fileCharacter : fileCharacters) {
-			model.getNextState().process(model, fileCharacter);
+		for (char inputCharacter : inputCharacters) {
+			model.getNextState().process(model, inputCharacter);
 			model.postProcessCompressedCharacter();
 		}
 		if (!model.isInputAllowedToEnd()) {

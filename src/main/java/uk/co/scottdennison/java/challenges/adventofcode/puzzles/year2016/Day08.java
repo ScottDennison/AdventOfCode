@@ -1,15 +1,18 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day08 {
+public class Day08 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^(?:(?:rect (?<rectWidth>[0-9]+)x(?<rectHeight>[0-9]+))|(?:(?:(?:rotate row y=(?<rotateY>[0-9]+))|(?:rotate column x=(?<rotateX>[0-9]+))) by (?<rotateAmount>[0-9]+)))$");
 
 	private static final int SCREEN_WIDTH = 50;
@@ -82,7 +85,8 @@ public class Day08 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		//noinspection ConstantConditions
 		if (SCREEN_WIDTH % CHARACTER_WIDTH != 0 || SCREEN_HEIGHT % CHARACTER_HEIGHT != 0) {
 			throw new IllegalStateException("Invalid screen size.");
@@ -90,8 +94,8 @@ public class Day08 {
 
 		int currentScreenIndex = 0;
 		boolean[][][] screens = new boolean[2][SCREEN_HEIGHT][SCREEN_WIDTH];
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Could not parse line.");
 			}
@@ -183,7 +187,9 @@ public class Day08 {
 			}
 		}
 
-		System.out.format("Lights on: %d%n", lightsOn);
-		System.out.format("Message:%n%s%n", new String(messageCharacters));
+		return new BasicPuzzleResults<>(
+			lightsOn,
+			new String(messageCharacters)
+		);
 	}
 }

@@ -1,26 +1,30 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class Day06 {
-	public static void main(String[] args) throws IOException {
+public class Day06 implements IPuzzle {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		int yesAnswersForOne = 0;
 		int yesAnswersForAll = 0;
 		Set<Character> yesAnswerQuestionsForOneInGroup = new TreeSet<>();
 		Set<Character> yesAnswerQuestionsForAllInGroup = new TreeSet<>();
 		Set<Character> yesAnswerQuestionsForPerson = new TreeSet<>();
-		List<String> fileLines = Files.readAllLines(InputFileUtils.getInputPath());
-		fileLines.add("");
+		List<String> inputLines = LineReader.stringsList(inputCharacters, true);
+		inputLines.add("");
 		boolean isFirstEntryForGroup = true;
-		for (String fileLine : fileLines) {
-			fileLine = fileLine.trim();
-			if (fileLine.isEmpty()) {
+		for (String inputLine : inputLines) {
+			inputLine = inputLine.trim();
+			if (inputLine.isEmpty()) {
 				yesAnswersForOne += yesAnswerQuestionsForOneInGroup.size();
 				yesAnswersForAll += yesAnswerQuestionsForAllInGroup.size();
 				yesAnswerQuestionsForOneInGroup.clear();
@@ -28,7 +32,7 @@ public class Day06 {
 				isFirstEntryForGroup = true;
 			}
 			else {
-				char[] characters = fileLine.toCharArray();
+				char[] characters = inputLine.toCharArray();
 				yesAnswerQuestionsForPerson.clear();
 				for (char character : characters) {
 					yesAnswerQuestionsForPerson.add(character);
@@ -43,11 +47,9 @@ public class Day06 {
 				}
 			}
 		}
-		outputSummary("one person", yesAnswersForOne);
-		outputSummary("all people", yesAnswersForAll);
-	}
-
-	private static void outputSummary(String type, int count) {
-		System.out.format("Yes answers for %s in each group: %d%n", type, count);
+		return new BasicPuzzleResults<>(
+			yesAnswersForOne,
+			yesAnswersForAll
+		);
 	}
 }

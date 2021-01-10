@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,7 +19,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day11 {
+public class Day11 implements IPuzzle {
 	private static final String[] ORDINALS = {
 		"zeroth",
 		"first",
@@ -290,9 +293,11 @@ public class Day11 {
 	private static final Pattern PATTERN_DEVICES_SPLIT = Pattern.compile("(?: *, *and +)|(?: +and +)|(?: *, *)");
 	private static final Pattern PATTERN_DEVICE = Pattern.compile("^a (?<element>[a-z]+)(?:-compatible)? (?<deviceType>[a-z]+)$");
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		if (Runtime.getRuntime().maxMemory() < (3L * 1024L * 1024L * 1024L)) {
-			System.out.println("WARNING: The implementation of this problem is NOT memory efficient, and it is recommended to use >=3GB of java heap to prevent excessive GC overhead");
+			printWriter.write("WARNING: The implementation of this problem is NOT memory efficient, and it is recommended to use >=3GB of java heap to prevent excessive GC overhead");
+			printWriter.flush();
 		}
 		Map<String, Integer> ordinalValues = new HashMap<>();
 		for (int index = 0; index < ORDINALS.length; index++) {
@@ -303,8 +308,8 @@ public class Day11 {
 		Map<Device, Integer> deviceToFloorNumberMap = new HashMap<>();
 		int minimumFloorNumber = Integer.MAX_VALUE;
 		int maximumFloorNumber = Integer.MIN_VALUE;
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher lineMatcher = PATTERN_LINE.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher lineMatcher = PATTERN_LINE.matcher(inputLine);
 			if (!lineMatcher.matches()) {
 				throw new IllegalStateException("Unparseable line");
 			}
@@ -332,22 +337,30 @@ public class Day11 {
 		if ((maximumFloorNumber - minimumFloorNumber + 1) < 2) {
 			throw new IllegalStateException("Invalid number of floors");
 		}
-		outputSummary(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber);
-		System.out.format("Adding new devices%n");
+		int stepsRequiredForPartA = runSummaryWithWrappingPrint(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber, printWriter);
+		printWriter.format("Adding new devices%n");
+		printWriter.flush();
 		deviceToFloorNumberMap.put(new Device("elerium", DeviceType.GENERATOR), minimumFloorNumber);
 		deviceToFloorNumberMap.put(new Device("elerium", DeviceType.MICROCHIP), minimumFloorNumber);
 		deviceToFloorNumberMap.put(new Device("dilithium", DeviceType.GENERATOR), minimumFloorNumber);
 		deviceToFloorNumberMap.put(new Device("dilithium", DeviceType.MICROCHIP), minimumFloorNumber);
-		outputSummary(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber);
+		int stepsRequiredForPartB = runSummaryWithWrappingPrint(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber, printWriter);
+		return new BasicPuzzleResults<>(
+			stepsRequiredForPartA,
+			stepsRequiredForPartB
+		);
 	}
 
-	private static void outputSummary(Map<Device, Integer> deviceToFloorNumberMap, int minimumFloorNumber, int maximumFloorNumber) {
-		System.out.format("Running simulation for %d devices%n", deviceToFloorNumberMap.size());
-		int stepsRequired = runSimulation(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber);
-		System.out.format("Total moves required: %d%n", stepsRequired);
+	private static int runSummaryWithWrappingPrint(Map<Device, Integer> deviceToFloorNumberMap, int minimumFloorNumber, int maximumFloorNumber, PrintWriter printWriter) {
+		printWriter.format("Running simulation for %d devices%n", deviceToFloorNumberMap.size());
+		printWriter.flush();
+		int stepsRequired = runSimulation(deviceToFloorNumberMap, minimumFloorNumber, maximumFloorNumber, printWriter);
+		printWriter.format("Total moves required: %d%n", stepsRequired);
+		printWriter.flush();
+		return stepsRequired;
 	}
 
-	private static int runSimulation(Map<Device, Integer> deviceToFloorNumberMap, int minimumFloorNumber, int maximumFloorNumber) {
+	private static int runSimulation(Map<Device, Integer> deviceToFloorNumberMap, int minimumFloorNumber, int maximumFloorNumber, PrintWriter printWriter) {
 		RadioisotopeTestingFacility startingFacility = RadioisotopeTestingFacility.createNew(deviceToFloorNumberMap, 1);
 		Set<RadioisotopeTestingFacility> seenFacilities = new HashSet<>();
 		Set<RadioisotopeTestingFacility> pendingFacilities = Collections.singleton(startingFacility);
@@ -355,7 +368,8 @@ public class Day11 {
 		int stepsCompleted = 0;
 		boolean solutionPending = true;
 		while (solutionPending && !pendingFacilities.isEmpty()) {
-			System.out.format("Simulation in progress. Steps completed: %3d, Valid solutions seen: %9d, Solutions to investigate: %9d%n", stepsCompleted, seenFacilities.size(), pendingFacilities.size());
+			printWriter.format("Simulation in progress. Steps completed: %3d, Valid solutions seen: %9d, Solutions to investigate: %9d%n", stepsCompleted, seenFacilities.size(), pendingFacilities.size());
+			printWriter.flush();
 			Set<RadioisotopeTestingFacility> newPendingFacilities = new HashSet<>();
 			for (RadioisotopeTestingFacility pendingFacility : pendingFacilities) {
 				if (pendingFacility.isValid() && seenFacilities.add(pendingFacility)) {

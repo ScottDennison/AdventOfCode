@@ -1,39 +1,39 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2017;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 
-public class Day01 {
-	public static void main(String[] args) throws IOException {
-		char[] fileCharacters = new String(Files.readAllBytes(InputFileUtils.getInputPath()), StandardCharsets.UTF_8).trim().toCharArray();
-		int fileCharactersLength = fileCharacters.length;
-		int captcha2Offset = fileCharactersLength / 2;
+public class Day01 implements IPuzzle {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		char[] inputCharactersTrimmed = new String(inputCharacters).trim().toCharArray();
+		int inputCharactersLength = inputCharactersTrimmed.length;
+		int captcha2Offset = inputCharactersLength / 2;
 		int captcha1 = 0;
 		int captcha2 = 0;
-		for (int fileCharacterIndex = 0; fileCharacterIndex < fileCharactersLength; fileCharacterIndex++) {
-			captcha1 += checkCharacter(fileCharacters, fileCharacterIndex, 1);
-			captcha2 += checkCharacter(fileCharacters, fileCharacterIndex, captcha2Offset);
+		for (int inputCharacterIndex = 0; inputCharacterIndex < inputCharactersLength; inputCharacterIndex++) {
+			captcha1 += checkCharacter(inputCharactersTrimmed, inputCharacterIndex, 1);
+			captcha2 += checkCharacter(inputCharactersTrimmed, inputCharacterIndex, captcha2Offset);
 		}
-		outputSummary(1, captcha1);
-		outputSummary(2, captcha2);
+		return new BasicPuzzleResults<>(
+			captcha1,
+			captcha2
+		);
 	}
 
-	private static void outputSummary(int captchaNumber, int result) {
-		System.out.format("Captcha %d answer: %d%n", captchaNumber, result);
-	}
-
-	private static int checkCharacter(char[] fileCharacters, int currentIndex, int offset) {
-		char currentFileCharacter = fileCharacters[currentIndex];
-		char checkFileCharacter = fileCharacters[(currentIndex + offset) % fileCharacters.length];
-		if (currentFileCharacter == checkFileCharacter) {
-			if (currentFileCharacter >= '0' && currentFileCharacter <= '9') {
-				return (currentFileCharacter - '0');
+	private static int checkCharacter(char[] inputCharacters, int currentIndex, int offset) {
+		char currentInputCharacter = inputCharacters[currentIndex];
+		char checkInputCharacter = inputCharacters[(currentIndex + offset) % inputCharacters.length];
+		if (currentInputCharacter == checkInputCharacter) {
+			if (currentInputCharacter >= '0' && currentInputCharacter <= '9') {
+				return (currentInputCharacter - '0');
 			}
 			else {
-				throw new IllegalStateException("Invalid file character.");
+				throw new IllegalStateException("Invalid input character.");
 			}
 		}
 		else {

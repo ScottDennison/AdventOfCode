@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,15 +16,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class Day04 {
+public class Day04 implements IPuzzle {
 	private static final Pattern INPUT_PATTERN = Pattern.compile("^(?<encryptedName>(?:(?:[a-z]+)-)+)(?<sectorID>[0-9]+)\\[(?<checksum>[a-z]{5})]$");
 	private static final Pattern NAME_PATTERN = Pattern.compile("^.*(?:(?:north.*pole.*object)|(?:santa.*workshop)).*$");
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		int sumOfRealRoomSectorIds = 0;
 		Integer targetSectorId = null;
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = INPUT_PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = INPUT_PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Pattern not matched.");
 			}
@@ -78,7 +82,9 @@ public class Day04 {
 		if (targetSectorId == null) {
 			throw new IllegalStateException("No target sector.");
 		}
-		System.out.format("Sum of sector IDs of real rooms is %d%n", sumOfRealRoomSectorIds);
-		System.out.format("Target sector ID: %d%n", targetSectorId);
+		return new BasicPuzzleResults<>(
+			sumOfRealRoomSectorIds,
+			targetSectorId
+		);
 	}
 }

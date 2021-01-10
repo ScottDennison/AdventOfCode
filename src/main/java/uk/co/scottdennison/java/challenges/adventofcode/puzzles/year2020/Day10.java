@@ -1,15 +1,19 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Day10 {
-	public static void main(String[] args) throws IOException {
-		List<Integer> adapterRatings = Files.lines(InputFileUtils.getInputPath()).map(String::trim).map(Integer::parseInt).sorted().collect(Collectors.toList());
+public class Day10 implements IPuzzle {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		List<Integer> adapterRatings = LineReader.stringsStream(inputCharacters).map(String::trim).map(Integer::parseInt).sorted().collect(Collectors.toList());
 		int jump1Count = 0;
 		int jump3Count = 1;
 		int previousAdapterRating = 0;
@@ -44,7 +48,9 @@ public class Day10 {
 				}
 			}
 		}
-		System.out.format("Jolt differences product is %d%n", (jump1Count * jump3Count));
-		System.out.format("Ways of combining adapters is %d%n", waysOfMakingRatings[targetAdapterRating]);
+		return new BasicPuzzleResults<>(
+			jump1Count * jump3Count,
+			waysOfMakingRatings[targetAdapterRating]
+		);
 	}
 }

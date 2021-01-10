@@ -1,20 +1,24 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2020;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Day09 {
+public class Day09 implements IPuzzle {
 	private static final int N_NUMBERS = 25;
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		List<Long> numbers = new ArrayList<>();
 		Long weaknessNumber = null;
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			long number = Long.parseLong(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			long number = Long.parseLong(inputLine);
 			//noinspection ConstantConditions (IntellIJ is wrong, given the program would fail with a later IllegalStateException if so, and it doesn't)
 			if (weaknessNumber == null) {
 				int numberCount = numbers.size();
@@ -63,7 +67,9 @@ public class Day09 {
 		if (encryptionWeakness == null) {
 			throw new IllegalStateException("No encryption weakness.");
 		}
-		System.out.format("Weakness number is %d%n", weaknessNumber);
-		System.out.format("Encryption weakness is %d%n", encryptionWeakness);
+		return new BasicPuzzleResults<>(
+			weaknessNumber,
+			encryptionWeakness
+		);
 	}
 }

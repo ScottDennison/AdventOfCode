@@ -1,9 +1,12 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -12,14 +15,15 @@ import java.util.function.IntBinaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Day09 {
+public class Day09 implements IPuzzle {
 	private static final Pattern PATTERN = Pattern.compile("^(?<city1>.+) to (?<city2>.+) = (?<distance>[0-9]+)$");
 
-	public static void main(String[] args) throws IOException {
+	@Override
+	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		Set<String> citiesSet = new HashSet<>();
 		Map<String, Map<String, Integer>> distances = new HashMap<>();
-		for (String fileLine : Files.readAllLines(InputFileUtils.getInputPath())) {
-			Matcher matcher = PATTERN.matcher(fileLine);
+		for (String inputLine : LineReader.strings(inputCharacters)) {
+			Matcher matcher = PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
 				throw new IllegalStateException("Could not parse line.");
 			}
@@ -43,13 +47,15 @@ public class Day09 {
 			}
 		}
 		String[] citiesArray = citiesSet.toArray(new String[0]);
-		outputSummary("Shortest", citiesArray, distances, Integer.MAX_VALUE, Math::min);
-		outputSummary("Longest", citiesArray, distances, Integer.MIN_VALUE, Math::max);
+		return new BasicPuzzleResults<>(
+			recurseDistance(citiesArray, distances, Integer.MAX_VALUE, Math::min),
+			recurseDistance(citiesArray, distances, Integer.MIN_VALUE, Math::max)
+		);
 	}
 
-	private static void outputSummary(String distanceType, String[] citiesArray, Map<String, Map<String, Integer>> distances, int bestDistance, IntBinaryOperator comparisonOperator) {
+	private static long recurseDistance(String[] citiesArray, Map<String, Map<String, Integer>> distances, int bestDistance, IntBinaryOperator comparisonOperator) {
 		boolean[] citiesVisited = new boolean[citiesArray.length];
-		System.out.format("%s distance: %d%n", distanceType, recurseDistances(citiesArray, distances, citiesVisited, null, 0, 0, bestDistance, comparisonOperator));
+		return recurseDistances(citiesArray, distances, citiesVisited, null, 0, 0, bestDistance, comparisonOperator);
 	}
 
 	//There are better algorithms for the travelling salesman problem, but we'll just bruteforce it here.
