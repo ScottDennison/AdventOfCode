@@ -18,12 +18,12 @@ import java.util.stream.Collectors;
 
 public class Day04 implements IPuzzle {
 	private static final Pattern INPUT_PATTERN = Pattern.compile("^(?<encryptedName>(?:(?:[a-z]+)-)+)(?<sectorID>[0-9]+)\\[(?<checksum>[a-z]{5})]$");
-	private static final Pattern NAME_PATTERN = Pattern.compile("^.*(?:(?:north.*pole.*object)|(?:santa.*workshop)).*$");
 
 	@Override
 	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		int sumOfRealRoomSectorIds = 0;
 		Integer targetSectorId = null;
+		Pattern namePattern = Pattern.compile(new String(configProvider.getPuzzleConfigChars("target_room_regex")),Pattern.CASE_INSENSITIVE);
 		for (String inputLine : LineReader.strings(inputCharacters)) {
 			Matcher matcher = INPUT_PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {
@@ -70,7 +70,7 @@ public class Day04 implements IPuzzle {
 					decryptedNameChars[nameCharIndex] = decryptedNameChar;
 				}
 				String decryptedName = new String(decryptedNameChars);
-				if (NAME_PATTERN.matcher(decryptedName).matches()) {
+				if (namePattern.matcher(decryptedName).matches()) {
 					if (targetSectorId != null) {
 						throw new IllegalStateException("Multiple target sectors.");
 					}

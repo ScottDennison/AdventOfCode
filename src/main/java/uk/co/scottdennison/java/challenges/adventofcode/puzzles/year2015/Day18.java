@@ -53,19 +53,20 @@ public class Day18 implements IPuzzle {
 				initialLightStateRow[x] = lightState;
 			}
 		}
-		int partALightOnCount = runSimulation(initialLightStateArray, rowCount, columnCount);
+		int targetIterationCount = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("iterations")));
+		int partALightOnCount = runSimulation(initialLightStateArray, rowCount, columnCount, targetIterationCount);
 		initialLightStateArray[0][0] = LightState.FIXED_ON;
 		initialLightStateArray[0][columnCount - 1] = LightState.FIXED_ON;
 		initialLightStateArray[rowCount - 1][0] = LightState.FIXED_ON;
 		initialLightStateArray[rowCount - 1][columnCount - 1] = LightState.FIXED_ON;
-		int partBLightOnCount = runSimulation(initialLightStateArray, rowCount, columnCount);
+		int partBLightOnCount = runSimulation(initialLightStateArray, rowCount, columnCount, targetIterationCount);
 		return new BasicPuzzleResults<>(
 			partALightOnCount,
 			partBLightOnCount
 		);
 	}
 
-	private static int runSimulation(LightState[][] initialLightStateArray, int rowCount, int columnCount) {
+	private static int runSimulation(LightState[][] initialLightStateArray, int rowCount, int columnCount, int targetIterationCount) {
 		LightState[][][] lightStateArrays = new LightState[2][rowCount][columnCount];
 		int currentLightStateArrayIndex = 0;
 		LightState[][] currentLightStateArray = lightStateArrays[currentLightStateArrayIndex];
@@ -133,7 +134,7 @@ public class Day18 implements IPuzzle {
 				}
 			}
 			currentLightStateArrayIndex = newLightStateArrayIndex;
-			if (noChange || iterationCount >= 100) {
+			if (noChange || iterationCount >= targetIterationCount) {
 				break;
 			}
 		}

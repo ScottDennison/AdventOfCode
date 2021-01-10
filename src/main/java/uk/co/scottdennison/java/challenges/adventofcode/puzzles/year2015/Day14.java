@@ -74,8 +74,6 @@ public class Day14 implements IPuzzle {
 		}
 	}
 
-	private static final int TARGET_SECONDS = 2503;
-
 	@Override
 	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		List<Reindeer> reindeerList = new ArrayList<>();
@@ -87,7 +85,8 @@ public class Day14 implements IPuzzle {
 			reindeerList.add(new Reindeer(matcher.group("name"), Integer.parseInt(matcher.group("distance")), Integer.parseInt(matcher.group("activeSeconds")), Integer.parseInt(matcher.group("restSeconds"))));
 		}
 		Reindeer[] reindeerArray = reindeerList.toArray(new Reindeer[0]);
-		for (int second = 1; second <= TARGET_SECONDS; second++) {
+		int targetSeconds = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("seconds")));
+		for (int second = 1; second <= targetSeconds; second++) {
 			for (Reindeer reindeer : reindeerArray) {
 				reindeer.tick();
 			}

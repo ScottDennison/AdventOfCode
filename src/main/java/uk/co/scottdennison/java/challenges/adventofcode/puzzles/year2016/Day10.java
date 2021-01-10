@@ -16,6 +16,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Day10 implements IPuzzle {
+	private static final Pattern PATTERN_PART_A_INTERESTED_MICROCHIPS = Pattern.compile("^(?<microchip1>[0-9]+)/(?<microchip2>[0-9]+)$");
+
 	private interface Receiver {
 		void receive(int value);
 	}
@@ -195,8 +197,6 @@ public class Day10 implements IPuzzle {
 	private static final Pattern PATTERN_VALUE_INPUT = Pattern.compile("^value (?<value>[0-9]+) goes to bot (?<botNumber>[0-9]+)$");
 	private static final Pattern PATTERN_BOT_INSTRUCTION = Pattern.compile("^bot (?<inputBotNumber>[0-9]+) gives (?<leftLevel>" + REGEX_LEVEL + ") to (?<leftOutputType>bot|output) (?<leftOutputNumber>[0-9]+) and (?!\\2)(?<rightLevel>" + REGEX_LEVEL + ") to (?<rightOutputType>bot|output) (?<rightOutputNumber>[0-9]+)$");
 
-	private static final int DESIRED_LOW_VALUE = 17;
-	private static final int DESIRED_HIGH_VALUE = 61;
 	private static final int MINIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT = 0;
 	private static final int MAXIMUM_OUTPUT_BIN_NUMBER_FOR_PRODUCT = 2;
 
@@ -233,9 +233,17 @@ public class Day10 implements IPuzzle {
 		}
 		Iterator<Bot> botIterator = factoryManager.iterateBots();
 		Integer desiredBotNumber = null;
+		Matcher desiredValuesMatcher = PATTERN_PART_A_INTERESTED_MICROCHIPS.matcher(new String(configProvider.getPuzzleConfigChars("part_a_interested_microchips")));
+		if (!desiredValuesMatcher.matches()) {
+			throw new IllegalStateException("Unable ot parse part a interested microchips config.");
+		}
+		int desiredValue1 = Integer.parseInt(desiredValuesMatcher.group("microchip1"));
+		int desiredValue2 = Integer.parseInt(desiredValuesMatcher.group("microchip2"));
+		int desiredValueLow = Math.min(desiredValue1,desiredValue2);
+		int desiredValueHigh = Math.max(desiredValue1,desiredValue2);
 		while (botIterator.hasNext()) {
 			Bot bot = botIterator.next();
-			if (bot.hasBotDoneWork() && bot.getHighInputValue() == DESIRED_HIGH_VALUE && bot.getLowInputValue() == DESIRED_LOW_VALUE) {
+			if (bot.hasBotDoneWork() && bot.getHighInputValue() == desiredValueHigh && bot.getLowInputValue() == desiredValueLow) {
 				if (desiredBotNumber == null) {
 					desiredBotNumber = bot.getNumber();
 				}

@@ -21,8 +21,6 @@ public class Day16 implements IPuzzle {
 	private static final Pattern PATTERN_RULE = Pattern.compile("^(?<name>[a-z ]+?) *: *(?<subRules>.*)$");
 	private static final Pattern PATTERN_COMMA = Pattern.compile(",");
 
-	private static final Pattern PATTERN_INTERESTED_RULE_NAME = Pattern.compile("^departure .*$", Pattern.CASE_INSENSITIVE);
-
 	private static final class Rule {
 		private final String name;
 		private final SubRule[] subRules;
@@ -151,8 +149,9 @@ public class Day16 implements IPuzzle {
 			throw new IllegalStateException("No valid field rule ids");
 		}
 		long myTicketInterestedFieldProduct = 1;
+		Pattern interestedRuleNamePattern = Pattern.compile(new String(configProvider.getPuzzleConfigChars("field_regex")));
 		for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
-			if (PATTERN_INTERESTED_RULE_NAME.matcher(rulesArray[assignedFieldRuleIds[fieldIndex]].getName()).matches()) {
+			if (interestedRuleNamePattern.matcher(rulesArray[assignedFieldRuleIds[fieldIndex]].getName()).matches()) {
 				myTicketInterestedFieldProduct *= myTicket[fieldIndex];
 			}
 		}
