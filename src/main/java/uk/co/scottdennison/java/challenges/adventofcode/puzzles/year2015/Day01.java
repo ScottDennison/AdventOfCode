@@ -1,18 +1,68 @@
 package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.ResultGetter;
 
-import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 
-public class Day01 {
-	public static void main(String[] args) throws IOException {
+public final class Day01 implements IPuzzle {
+	public static class Results implements IPuzzleResults {
+		private final int targetFloor;
+		private final Integer basementEnteredPosition;
+
+		public Results(int targetFloor, Integer basementEnteredPosition) {
+			this.targetFloor = targetFloor;
+			this.basementEnteredPosition = basementEnteredPosition;
+		}
+
+		@ResultGetter
+		public int getTargetFloor() {
+			return this.targetFloor;
+		}
+
+		@ResultGetter
+		public int getBasementEnteredPosition() {
+			return this.basementEnteredPosition;
+		}
+
+		@Override
+		public String getPartAAnswerString() {
+			return Integer.toString(this.targetFloor);
+		}
+
+		@Override
+		public String getPartBAnswerString() {
+			if (this.basementEnteredPosition == null) {
+				return "-1";
+			} else {
+				return Integer.toString(this.basementEnteredPosition);
+			}
+		}
+
+		@Override
+		public String getPartASummary() {
+			return String.format("Target floor is: %d", this.targetFloor);
+		}
+
+		@Override
+		public String getPartBSummary() {
+			if (this.basementEnteredPosition == null) {
+				return "The basement is never entered.";
+			} else {
+				return String.format("Basement entered at position: %d", this.basementEnteredPosition);
+			}
+		}
+	}
+
+	@Override
+	public Day01.Results runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter progressWriter) {
 		int floor = 0;
 		Integer basementEnteredPosition = null;
-		byte[] fileBytes = Files.readAllBytes(InputFileUtils.getInputPath());
-		int fileByteCount = fileBytes.length;
-		for (int fileByteIndex = 0; fileByteIndex < fileByteCount; fileByteIndex++) {
-			switch (fileBytes[fileByteIndex]) {
+		int inputCharacterCount = inputCharacters.length;
+		for (int inputCharacterIndex = 0; inputCharacterIndex < inputCharacterCount; inputCharacterIndex++) {
+			switch (inputCharacters[inputCharacterIndex]) {
 				case '(':
 					floor++;
 					break;
@@ -23,13 +73,12 @@ public class Day01 {
 					throw new IllegalStateException("Unexpected character");
 			}
 			if (floor < 0 && basementEnteredPosition == null) {
-				basementEnteredPosition = fileByteIndex + 1;
+				basementEnteredPosition = inputCharacterIndex + 1;
 			}
 		}
-		if (basementEnteredPosition == null) {
+		if (basementEnteredPosition == null && !partBPotentiallyUnsolvable) {
 			throw new IllegalStateException("The basement was never entered");
 		}
-		System.out.format("Target floor is: %d%n", floor);
-		System.out.format("Basement entered at position: %d%n", basementEnteredPosition);
+		return new Day01.Results(floor, basementEnteredPosition);
 	}
 }

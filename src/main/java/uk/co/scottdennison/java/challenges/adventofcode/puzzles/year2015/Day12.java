@@ -2,12 +2,41 @@ package uk.co.scottdennison.java.challenges.adventofcode.puzzles.year2015;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.InputFileUtils;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzlePartResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.MultiPartPuzzleResults;
+import uk.co.scottdennison.java.challenges.adventofcode.framework.ResultGetter;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.io.PrintWriter;
 
-public class Day12 {
+public class Day12 implements IPuzzle {
+	private static class PartResults implements IPuzzlePartResults {
+		private final boolean redSkipped;
+		private final long sum;
+
+		public PartResults(boolean redSkipped, long sum) {
+			this.redSkipped = redSkipped;
+			this.sum = sum;
+		}
+
+		@ResultGetter
+		public long getSum() {
+			return this.sum;
+		}
+
+		@Override
+		public String getAnswerString() {
+			return Long.toString(this.sum);
+		}
+
+		@Override
+		public String getSummary() {
+			return String.format("Result when skipRed=%b: %d", this.redSkipped, this.sum);
+		}
+	}
+
 	private static long recurse(JsonNode jsonNode, boolean skipRed) {
 		boolean isObject;
 		if (jsonNode.isArray() || ((isObject = jsonNode.isObject()) && !skipRed)) {
@@ -36,13 +65,24 @@ public class Day12 {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		JsonNode jsonNode = new ObjectMapper().readTree(Files.newBufferedReader(InputFileUtils.getInputPath()));
-		outputSummary(jsonNode, false);
-		outputSummary(jsonNode, true);
+	@Override
+	public MultiPartPuzzleResults<Day12.PartResults> runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter progressWriter) {
+		JsonNode jsonNode;
+		try {
+			jsonNode = new ObjectMapper().readTree(new String(inputCharacters));
+		} catch (IOException ex) {
+			throw new IllegalStateException("Unable to parse JSON");
+		}
+		return new MultiPartPuzzleResults<>(
+			runPuzzlePart(jsonNode, false),
+			runPuzzlePart(jsonNode, true)
+		);
 	}
 
-	private static void outputSummary(JsonNode jsonNode, boolean skipRed) {
-		System.out.format("Result when skipRed=%b: %d%n", skipRed, recurse(jsonNode, skipRed));
+	private static Day12.PartResults runPuzzlePart(JsonNode jsonNode, boolean skipRed) {
+		return new Day12.PartResults(
+			skipRed,
+			recurse(jsonNode, skipRed)
+		);
 	}
 }
