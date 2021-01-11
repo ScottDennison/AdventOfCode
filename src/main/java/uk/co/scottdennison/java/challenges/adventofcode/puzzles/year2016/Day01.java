@@ -135,7 +135,7 @@ public class Day01 implements IPuzzle {
 				throw new IllegalStateException("Unable to parse instruction.");
 			}
 		}
-		if (firstDuplicatePosition == null) {
+		if (firstDuplicatePosition == null && !partBPotentiallyUnsolvable) {
 			throw new IllegalStateException("No duplicate position.");
 		}
 		return new BasicPuzzleResults<>(
@@ -144,7 +144,12 @@ public class Day01 implements IPuzzle {
 		);
 	}
 
-	private static int calculateBlocksAway(Position initialPosition, Position position) {
-		return Math.abs(initialPosition.getX() - position.getX()) + Math.abs(initialPosition.getY() - position.getY());
+	private static Integer calculateBlocksAway(Position initialPosition, Position position) {
+		if (position == null) {
+			return null;
+		}
+		else {
+			return Math.abs(initialPosition.getX() - position.getX()) + Math.abs(initialPosition.getY() - position.getY());
+		}
 	}
 }

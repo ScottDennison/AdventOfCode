@@ -239,8 +239,8 @@ public class Day10 implements IPuzzle {
 		}
 		int desiredValue1 = Integer.parseInt(desiredValuesMatcher.group("microchip1"));
 		int desiredValue2 = Integer.parseInt(desiredValuesMatcher.group("microchip2"));
-		int desiredValueLow = Math.min(desiredValue1,desiredValue2);
-		int desiredValueHigh = Math.max(desiredValue1,desiredValue2);
+		int desiredValueLow = Math.min(desiredValue1, desiredValue2);
+		int desiredValueHigh = Math.max(desiredValue1, desiredValue2);
 		while (botIterator.hasNext()) {
 			Bot bot = botIterator.next();
 			if (bot.hasBotDoneWork() && bot.getHighInputValue() == desiredValueHigh && bot.getLowInputValue() == desiredValueLow) {

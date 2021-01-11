@@ -28,7 +28,7 @@ public class Day11 implements IPuzzle {
 		char continueChar = 'z' + 1;
 		String[] newPasswords = new String[2];
 		int newPasswordCount = newPasswords.length;
-		for (int newPasswordIndex = 0; newPasswordIndex <= newPasswordCount; newPasswordIndex++) {
+		for (int newPasswordIndex = 0; newPasswordIndex < newPasswordCount; newPasswordIndex++) {
 			while (true) {
 				for (int passwordCharacterIndex = passwordEndIndex; passwordCharacterIndex >= -1; passwordCharacterIndex--) {
 					// We'll get an ArrayIndexOutOfBoundsException if this is unsolvable.

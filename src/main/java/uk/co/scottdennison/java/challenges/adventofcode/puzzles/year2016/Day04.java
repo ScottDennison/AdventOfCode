@@ -23,7 +23,7 @@ public class Day04 implements IPuzzle {
 	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		int sumOfRealRoomSectorIds = 0;
 		Integer targetSectorId = null;
-		Pattern namePattern = Pattern.compile(new String(configProvider.getPuzzleConfigChars("target_room_regex")),Pattern.CASE_INSENSITIVE);
+		Pattern namePattern = Pattern.compile(new String(configProvider.getPuzzleConfigChars("target_room_regex")), Pattern.CASE_INSENSITIVE);
 		for (String inputLine : LineReader.strings(inputCharacters)) {
 			Matcher matcher = INPUT_PATTERN.matcher(inputLine);
 			if (!matcher.matches()) {

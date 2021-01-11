@@ -261,7 +261,7 @@ public class Main {
 					}
 				}
 			}
-			throw new IllegalStateException("Could not read file " + path + (allowMissing ? "" : " or an equivalent .missing file"));
+			throw new IllegalStateException("Could not read file " + path + (allowMissing ? " or an equivalent .missing file" : ""));
 		}
 
 		private static char[] readFile(Path path) {

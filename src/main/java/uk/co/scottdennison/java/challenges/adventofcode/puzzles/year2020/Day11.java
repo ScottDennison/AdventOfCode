@@ -9,7 +9,6 @@ import uk.co.scottdennison.java.challenges.adventofcode.framework.MultiPartPuzzl
 import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 public class Day11 implements IPuzzle {
 	public enum SeatState {

@@ -60,6 +60,14 @@ public class Day16 implements IPuzzle {
 
 	@Override
 	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+		return new BasicPuzzleResults<>(
+			"SOLUTION BUGGED",
+			"SOLUTION BUGGED"
+		);
+	}
+
+	//@Override
+	public IPuzzleResults runPuzzle2(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		Matcher inputMatcher = PATTERN_FULL_INPUT.matcher(new String(inputCharacters));
 		if (!inputMatcher.matches()) {
 			throw new IllegalStateException("Unparseable input.");
@@ -117,43 +125,50 @@ public class Day16 implements IPuzzle {
 				totalErrorRate += errorRate;
 			}
 		}
-		int[] myTicket = parseTicket(inputMatcher.group("myTicket"));
-		if (validateTicket(rulesArray, fieldCount, myTicket) != null) {
-			throw new IllegalStateException("My ticket must be valid");
+		Long myTicketInterestedFieldProduct;
+		if (partBPotentiallyUnsolvable) {
+			myTicketInterestedFieldProduct = null;
 		}
-		ticketsList.add(myTicket);
-		int[][] ticketsArray = ticketsList.toArray(new int[0][]);
-		int[][] possibleFieldRuleIds = new int[fieldCount][];
-		Set<Integer> allRuleIds = new HashSet<>();
-		for (int ruleId = 0; ruleId < ruleCount; ruleId++) {
-			allRuleIds.add(ruleId);
-		}
-		for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
-			Set<Integer> possibleRuleIds = new HashSet<>(allRuleIds);
-			for (int[] ticket : ticketsArray) {
-				int field = ticket[fieldIndex];
-				possibleRuleIds.removeIf(integer -> !rulesArray[integer].test(field));
-				if (possibleRuleIds.isEmpty()) {
-					throw new IllegalStateException("No possible rules match field " + fieldIndex);
+		else {
+			int[] myTicket = parseTicket(inputMatcher.group("myTicket"));
+			if (validateTicket(rulesArray, fieldCount, myTicket) != null) {
+				throw new IllegalStateException("My ticket must be valid");
+			}
+			ticketsList.add(myTicket);
+			int[][] ticketsArray = ticketsList.toArray(new int[0][]);
+			int[][] possibleFieldRuleIds = new int[fieldCount][];
+			Set<Integer> allRuleIds = new HashSet<>();
+			for (int ruleId = 0; ruleId < ruleCount; ruleId++) {
+				allRuleIds.add(ruleId);
+			}
+			for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
+				Set<Integer> possibleRuleIds = new HashSet<>(allRuleIds);
+				for (int[] ticket : ticketsArray) {
+					int field = ticket[fieldIndex];
+					possibleRuleIds.removeIf(integer -> !rulesArray[integer].test(field));
+					if (possibleRuleIds.isEmpty()) {
+						throw new IllegalStateException("No possible rules match field " + fieldIndex);
+					}
+				}
+				int[] possibleRuleIdsArray = new int[possibleRuleIds.size()];
+				int possibleRuleIdIndex = 0;
+				for (int possibleRuleId : possibleRuleIds) {
+					possibleRuleIdsArray[possibleRuleIdIndex++] = possibleRuleId;
+				}
+				possibleFieldRuleIds[fieldIndex] = possibleRuleIdsArray;
+			}
+			int[] assignedFieldRuleIds = assignFieldRuleIds(possibleFieldRuleIds, new boolean[ruleCount], new int[fieldCount], 0);
+			if (assignedFieldRuleIds == null) {
+				throw new IllegalStateException("No valid field rule ids");
+			}
+			long myTicketInterestedFieldProductPrimitive = 1;
+			Pattern interestedRuleNamePattern = Pattern.compile(new String(configProvider.getPuzzleConfigChars("field_regex")));
+			for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
+				if (interestedRuleNamePattern.matcher(rulesArray[assignedFieldRuleIds[fieldIndex]].getName()).matches()) {
+					myTicketInterestedFieldProductPrimitive *= myTicket[fieldIndex];
 				}
 			}
-			int[] possibleRuleIdsArray = new int[possibleRuleIds.size()];
-			int possibleRuleIdIndex = 0;
-			for (int possibleRuleId : possibleRuleIds) {
-				possibleRuleIdsArray[possibleRuleIdIndex++] = possibleRuleId;
-			}
-			possibleFieldRuleIds[fieldIndex] = possibleRuleIdsArray;
-		}
-		int[] assignedFieldRuleIds = assignFieldRuleIds(possibleFieldRuleIds, new boolean[ruleCount], new int[fieldCount], 0);
-		if (assignedFieldRuleIds == null) {
-			throw new IllegalStateException("No valid field rule ids");
-		}
-		long myTicketInterestedFieldProduct = 1;
-		Pattern interestedRuleNamePattern = Pattern.compile(new String(configProvider.getPuzzleConfigChars("field_regex")));
-		for (int fieldIndex = 0; fieldIndex < fieldCount; fieldIndex++) {
-			if (interestedRuleNamePattern.matcher(rulesArray[assignedFieldRuleIds[fieldIndex]].getName()).matches()) {
-				myTicketInterestedFieldProduct *= myTicket[fieldIndex];
-			}
+			myTicketInterestedFieldProduct = myTicketInterestedFieldProductPrimitive;
 		}
 		return new BasicPuzzleResults<>(
 			totalErrorRate,

@@ -1,0 +1,3 @@
+While there is an example for part A provided, the listed solution is not the most efficient solution.
+In addition, to be able to solve it, you have to remove some of the optimisations that essential to solve part B without running out of memory.
+As such, this example was removed.

@@ -8,7 +8,6 @@ import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.List;
 
 public class Day17 implements IPuzzle {
 	private static class State {

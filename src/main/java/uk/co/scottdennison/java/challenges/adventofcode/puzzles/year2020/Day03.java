@@ -95,10 +95,10 @@ public class Day03 implements IPuzzle {
 		);
 	}
 
-	private static int countTreesUsingSlopeSet(boolean[][] trees, Slope[] slopeSet) {
+	private static long countTreesUsingSlopeSet(boolean[][] trees, Slope[] slopeSet) {
 		int rowCount = trees.length;
 		int columnCount = trees[0].length;
-		int treesEncounteredProduct = 1;
+		long treesEncounteredProduct = 1;
 		for (Slope slope : slopeSet) {
 			int xStartPosition = slope.getXStartPosition();
 			int yStartPosition = slope.getYStartPosition();

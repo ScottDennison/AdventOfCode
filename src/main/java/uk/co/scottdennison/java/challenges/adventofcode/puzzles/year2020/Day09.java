@@ -11,20 +11,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Day09 implements IPuzzle {
-	private static final int N_NUMBERS = 25;
-
 	@Override
 	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		List<Long> numbers = new ArrayList<>();
 		Long weaknessNumber = null;
+		int previousNumbers = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("previous_numbers")));
 		for (String inputLine : LineReader.strings(inputCharacters)) {
 			long number = Long.parseLong(inputLine);
 			//noinspection ConstantConditions (IntellIJ is wrong, given the program would fail with a later IllegalStateException if so, and it doesn't)
 			if (weaknessNumber == null) {
 				int numberCount = numbers.size();
-				if (numberCount > N_NUMBERS) {
+				if (numberCount > previousNumbers) {
 					boolean matchFound = false;
-					for (int index1 = numberCount - N_NUMBERS; index1 < numberCount && !matchFound; index1++) {
+					for (int index1 = numberCount - previousNumbers; index1 < numberCount && !matchFound; index1++) {
 						for (int index2 = index1; index2 < numberCount; index2++) {
 							if ((numbers.get(index1) + numbers.get(index2)) == number) {
 								matchFound = true;

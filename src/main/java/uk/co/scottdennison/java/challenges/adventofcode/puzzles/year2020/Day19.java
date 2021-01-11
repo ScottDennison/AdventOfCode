@@ -144,7 +144,7 @@ public class Day19 implements IPuzzle {
 		private final Map<Integer, RuleComponent> ruleComponents = new HashMap<>();
 
 		public void addRuleComponent(int ruleNumber, RuleComponent ruleComponent, boolean allowOverride) {
-			if ((this.ruleComponents.put(ruleNumber, ruleComponent) != null) ^ allowOverride) {
+			if ((this.ruleComponents.put(ruleNumber, ruleComponent) != null) && !allowOverride) {
 				throw new IllegalStateException("Duplicate rule");
 			}
 		}

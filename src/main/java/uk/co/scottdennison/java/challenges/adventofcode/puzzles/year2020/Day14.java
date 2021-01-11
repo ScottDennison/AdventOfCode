@@ -51,7 +51,9 @@ public class Day14 implements IPuzzle {
 				long address = Long.parseLong(matcher.group("address"));
 				long newValue = Long.parseLong(matcher.group("value"));
 				memoryV1.put(address, (newValue & maskAnd) | maskOr);
-				recursePutMemoryV2(memoryV2, 0, maskFloating, address | maskOr, newValue);
+				if (!partBPotentiallyUnsolvable) {
+					recursePutMemoryV2(memoryV2, 0, maskFloating, address | maskOr, newValue);
+				}
 			}
 			else {
 				int maskStringLength = maskString.length();
@@ -77,7 +79,7 @@ public class Day14 implements IPuzzle {
 		}
 		return new BasicPuzzleResults<>(
 			sumMemory(memoryV1),
-			sumMemory(memoryV2)
+			partBPotentiallyUnsolvable ? null : sumMemory(memoryV2)
 		);
 	}
 

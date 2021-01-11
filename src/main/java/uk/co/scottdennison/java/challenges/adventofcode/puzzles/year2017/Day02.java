@@ -26,32 +26,36 @@ public class Day02 implements IPuzzle {
 			for (int newIndex = 0; newIndex < valueCount; newIndex++) {
 				int newIntValue = Integer.parseInt(values[newIndex]);
 				intValues[newIndex] = newIntValue;
-				for (int oldIndex = 0; oldIndex < newIndex; oldIndex++) {
-					int oldIntValue = intValues[oldIndex];
-					int smallerValue = Math.min(oldIntValue, newIntValue);
-					int largerValue = Math.max(oldIntValue, newIntValue);
-					int divisionResult = largerValue / smallerValue;
-					if ((divisionResult * smallerValue) == largerValue) {
-						if (cleanDivisionResult < 0) {
-							cleanDivisionResult = divisionResult;
-						}
-						else {
-							throw new IllegalStateException("Multiple values on this row divide cleanly.");
+				if (!partBPotentiallyUnsolvable) {
+					for (int oldIndex = 0; oldIndex < newIndex; oldIndex++) {
+						int oldIntValue = intValues[oldIndex];
+						int smallerValue = Math.min(oldIntValue, newIntValue);
+						int largerValue = Math.max(oldIntValue, newIntValue);
+						int divisionResult = largerValue / smallerValue;
+						if ((divisionResult * smallerValue) == largerValue) {
+							if (cleanDivisionResult < 0) {
+								cleanDivisionResult = divisionResult;
+							}
+							else {
+								throw new IllegalStateException("Multiple values on this row divide cleanly.");
+							}
 						}
 					}
 				}
 				minimumValue = Math.min(minimumValue, newIntValue);
 				maximumValue = Math.max(maximumValue, newIntValue);
 			}
-			if (cleanDivisionResult < 0) {
-				throw new IllegalStateException("No values on this row divide cleanly.");
-			}
 			checksum1 += (maximumValue - minimumValue);
-			checksum2 += cleanDivisionResult;
+			if (!partBPotentiallyUnsolvable) {
+				if (cleanDivisionResult < 0) {
+					throw new IllegalStateException("No values on this row divide cleanly.");
+				}
+				checksum2 += cleanDivisionResult;
+			}
 		}
 		return new BasicPuzzleResults<>(
 			checksum1,
-			checksum2
+			partBPotentiallyUnsolvable ? null : checksum2
 		);
 	}
 }

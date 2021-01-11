@@ -7,7 +7,6 @@ import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults
 import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 public class Day18 implements IPuzzle {
 	public enum LightState {
