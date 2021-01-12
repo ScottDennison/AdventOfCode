@@ -8,11 +8,13 @@ import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
 
 public class Day16 implements IPuzzle {
 	private static final Pattern PATTERN_FULL_INPUT = Pattern.compile("^\\s*(?<rules>(?:.+\\n)*.+)\\n{2,}your ticket *: *\\n(?<myTicket>.+)\\n{2,}nearby tickets *: *\\n(?<nearbyTickets>(?:.+\\n)*.+)\\s*$", Pattern.CASE_INSENSITIVE);
@@ -60,14 +62,6 @@ public class Day16 implements IPuzzle {
 
 	@Override
 	public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
-		return new BasicPuzzleResults<>(
-			"SOLUTION BUGGED",
-			"SOLUTION BUGGED"
-		);
-	}
-
-	//@Override
-	public IPuzzleResults runPuzzle2(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
 		Matcher inputMatcher = PATTERN_FULL_INPUT.matcher(new String(inputCharacters));
 		if (!inputMatcher.matches()) {
 			throw new IllegalStateException("Unparseable input.");
@@ -157,7 +151,8 @@ public class Day16 implements IPuzzle {
 				}
 				possibleFieldRuleIds[fieldIndex] = possibleRuleIdsArray;
 			}
-			int[] assignedFieldRuleIds = assignFieldRuleIds(possibleFieldRuleIds, new boolean[ruleCount], new int[fieldCount], 0);
+			int[] orderToAttemptFields = IntStream.range(0, ruleCount).boxed().sorted(Comparator.comparingInt(fieldIndex -> possibleFieldRuleIds[fieldIndex].length)).mapToInt(fieldIndex -> fieldIndex).toArray();
+			int[] assignedFieldRuleIds = assignFieldRuleIds(orderToAttemptFields, possibleFieldRuleIds, new boolean[ruleCount], new int[fieldCount], 0);
 			if (assignedFieldRuleIds == null) {
 				throw new IllegalStateException("No valid field rule ids");
 			}
@@ -176,18 +171,19 @@ public class Day16 implements IPuzzle {
 		);
 	}
 
-	private static int[] assignFieldRuleIds(int[][] possibleFieldRuleIds, boolean[] rulesAssigned, int[] currentFieldRuleIds, int fieldIndex) {
-		if (fieldIndex >= possibleFieldRuleIds.length) {
+	private static int[] assignFieldRuleIds(int[] orderToAttemptFields, int[][] possibleFieldRuleIds, boolean[] rulesAssigned, int[] currentFieldRuleIds, int fieldIndexIndex) {
+		if (fieldIndexIndex >= orderToAttemptFields.length) {
 			return Arrays.copyOf(currentFieldRuleIds, currentFieldRuleIds.length);
 		}
+		int fieldIndex = orderToAttemptFields[fieldIndexIndex];
 		int[] possibleRuleIds = possibleFieldRuleIds[fieldIndex];
-		int nextFieldIndex = fieldIndex + 1;
+		int nextFieldIndexIndex = fieldIndexIndex + 1;
 		int[] assignedFieldRuleIds = null;
 		for (int ruleId : possibleRuleIds) {
 			if (!rulesAssigned[ruleId]) {
 				currentFieldRuleIds[fieldIndex] = ruleId;
 				rulesAssigned[ruleId] = true;
-				int[] possibleAssignedFieldRuleIds = assignFieldRuleIds(possibleFieldRuleIds, rulesAssigned, currentFieldRuleIds, nextFieldIndex);
+				int[] possibleAssignedFieldRuleIds = assignFieldRuleIds(orderToAttemptFields, possibleFieldRuleIds, rulesAssigned, currentFieldRuleIds, nextFieldIndexIndex);
 				if (possibleAssignedFieldRuleIds != null) {
 					if (assignedFieldRuleIds == null) {
 						assignedFieldRuleIds = possibleAssignedFieldRuleIds;

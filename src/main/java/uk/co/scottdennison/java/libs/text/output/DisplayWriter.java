@@ -1,4 +1,4 @@
-package uk.co.scottdennison.java.challenges.adventofcode.utils;
+package uk.co.scottdennison.java.libs.text.output;
 
 import java.io.IOException;
 import java.io.Writer;

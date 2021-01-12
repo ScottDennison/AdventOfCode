@@ -59,15 +59,31 @@ public class Day05 implements IPuzzle {
 			if (zerosFound >= ZEROS_REQUIRED) {
 				int passwordCharacterValue1 = getPasswordValue(resultDigest, targetByte1Index, targetByte1BitShift);
 				int passwordCharacterValue2 = getPasswordValue(resultDigest, targetByte2Index, targetByte2BitShift);
+				printWriter.format("Found %d zeros using code %s.%n", zerosFound, new String(value, StandardCharsets.US_ASCII));
+				printWriter.flush();
 				if (password1CharactersFound < PASSWORD_LENGTH) {
-					password1[password1CharactersFound++] = convertValueToSingleDigitHex(passwordCharacterValue1);
+					char newCharacter = convertValueToSingleDigitHex(passwordCharacterValue1);
+					printWriter.format("\tSet password #1 character %d to %c.%n", password1CharactersFound, newCharacter);
+					printWriter.flush();
+					password1[password1CharactersFound++] = newCharacter;
 				}
 				if (passwordCharacterValue1 >= 0 && passwordCharacterValue1 < PASSWORD_LENGTH) {
 					int bitMask = 1 << passwordCharacterValue1;
 					if ((password2CharactersBitfield & bitMask) != 0) {
-						password2[passwordCharacterValue1] = convertValueToSingleDigitHex(passwordCharacterValue2);
+						char newCharacter = convertValueToSingleDigitHex(passwordCharacterValue2);
+						printWriter.format("\tSet password #2 character %d to %c.%n", passwordCharacterValue1, newCharacter);
+						printWriter.flush();
+						password2[passwordCharacterValue1] = newCharacter;
 						password2CharactersBitfield &= ~bitMask;
 					}
+					else {
+						printWriter.format("\tUnable to set password #2 character %d as it has already been set.%n", passwordCharacterValue1);
+						printWriter.flush();
+					}
+				}
+				else {
+					printWriter.format("\tUnable to set password #2 character as %d is not a valid index.%n", passwordCharacterValue1);
+					printWriter.flush();
 				}
 				if (password2CharactersBitfield == 0) {
 					break;

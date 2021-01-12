@@ -23,21 +23,23 @@ public class Day15 implements IPuzzle {
 		if (inputNumbers.length > targetMoveCountsOrdered[0]) {
 			throw new IllegalStateException("Target move count is more than the amount of input numbers!");
 		}
-		Map<Integer, Integer> movesCalledWhen = new HashMap<>();
+		int[] numbersCalledWhen = new int[targetMoveCountsOrdered[targetMoveCountsOrdered.length - 1]];
 		int seedNumberCount = inputNumbers.length - 1;
 		for (int inputNumberIndex = 0; inputNumberIndex < seedNumberCount; inputNumberIndex++) {
-			if (movesCalledWhen.put(inputNumbers[inputNumberIndex], inputNumberIndex + 1) != null) {
+			int inputNumber = inputNumbers[inputNumberIndex];
+			if (numbersCalledWhen[inputNumber] != 0) {
 				throw new IllegalStateException("Duplicate input number");
 			}
+			numbersCalledWhen[inputNumber] = (inputNumberIndex + 1) + 1;
 		}
 		int lastNumber = inputNumbers[seedNumberCount];
 		int numberSpokenCount = inputNumbers.length;
 		Map<Integer, Integer> results = new HashMap<>();
 		for (int targetMoveCount : targetMoveCountsOrdered) {
 			while (numberSpokenCount < targetMoveCount) {
-				Integer lastNumberCalledWhen = movesCalledWhen.get(lastNumber);
-				movesCalledWhen.put(lastNumber, numberSpokenCount);
-				if (lastNumberCalledWhen == null) {
+				int lastNumberCalledWhen = numbersCalledWhen[lastNumber] - 1;
+				numbersCalledWhen[lastNumber] = numberSpokenCount + 1;
+				if (lastNumberCalledWhen == -1) {
 					lastNumber = 0;
 				}
 				else {

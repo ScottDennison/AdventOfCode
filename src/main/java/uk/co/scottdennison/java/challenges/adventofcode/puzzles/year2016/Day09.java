@@ -115,7 +115,7 @@ public class Day09 implements IPuzzle {
 			this.compressedLength++;
 			while (true) {
 				MultiplierRemoval multiplierRemoval = this.pendingMultiplierRemovals.peek();
-				if (multiplierRemoval == null || multiplierRemoval.getCompressedLengthToRemoveAt() >= this.compressedLength) {
+				if (multiplierRemoval == null || multiplierRemoval.getCompressedLengthToRemoveAt() > this.compressedLength) {
 					break;
 				}
 				if (!this.previousState.isMultiplierAllowedToDecreaseInThisState()) {

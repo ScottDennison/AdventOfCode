@@ -1,4 +1,4 @@
-package uk.co.scottdennison.java.challenges.adventofcode.utils;
+package uk.co.scottdennison.java.libs.text.input;
 
 import java.util.ArrayList;
 import java.util.List;

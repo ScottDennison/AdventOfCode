@@ -6,10 +6,10 @@ import org.kohsuke.args4j.Option;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.DisplayTextualTableBuilder;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.DisplayTextualTableBuilder.Alignment;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.DisplayTextualTableBuilder.CharacterSet;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.DisplayWriter;
+import uk.co.scottdennison.java.libs.text.output.DisplayWriter;
+import uk.co.scottdennison.java.libs.text.output.table.DisplayTextualTableBuilder;
+import uk.co.scottdennison.java.libs.text.output.table.DisplayTextualTableBuilder.Alignment;
+import uk.co.scottdennison.java.libs.text.output.table.DisplayTextualTableBuilder.CharacterSet;
 
 import java.io.Console;
 import java.io.IOException;

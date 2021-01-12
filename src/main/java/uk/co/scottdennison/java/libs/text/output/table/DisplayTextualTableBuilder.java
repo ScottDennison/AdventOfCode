@@ -1,4 +1,4 @@
-package uk.co.scottdennison.java.challenges.adventofcode.utils;
+package uk.co.scottdennison.java.libs.text.output.table;
 
 import java.util.HashMap;
 import java.util.List;

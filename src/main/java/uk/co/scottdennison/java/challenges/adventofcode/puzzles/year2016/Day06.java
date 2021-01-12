@@ -4,7 +4,7 @@ import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleRes
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
+import uk.co.scottdennison.java.libs.text.input.LineReader;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

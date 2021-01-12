@@ -4,7 +4,7 @@ import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleRes
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
+import uk.co.scottdennison.java.libs.text.input.LineReader;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -51,7 +51,6 @@ public class Day12 implements IPuzzle {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private enum Rotation {
 		LEFT(-1),
 		RIGHT(1);

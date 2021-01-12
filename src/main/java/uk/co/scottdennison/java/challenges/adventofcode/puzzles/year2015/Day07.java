@@ -4,7 +4,7 @@ import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleRes
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
+import uk.co.scottdennison.java.libs.text.input.LineReader;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -20,7 +20,6 @@ public class Day07 implements IPuzzle {
 	private static final int MASK = ((1 << BITS) - 1);
 	private static final Pattern PATTERN = Pattern.compile("^(?:(?<singularExpression>(?:(?<singularNot>NOT) )?(?:(?<singularNumber>[0-9]+)|(?<singularVariable>[a-z]+)))|(?<dualExpression>(?:(?<leftNumber>[0-9]+)|(?<leftVariable>[a-z]+)) (?<operator>[A-Z]+) (?:(?<rightNumber>[0-9]+)|(?<rightVariable>[a-z]+)))) -> (?<outputVariable>[a-z]+)$");
 
-	@SuppressWarnings("unused")
 	private enum DualOperator {
 		AND {
 			@Override

@@ -4,7 +4,6 @@ import uk.co.scottdennison.java.challenges.adventofcode.framework.BasicPuzzleRes
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.challenges.adventofcode.framework.IPuzzleResults;
-import uk.co.scottdennison.java.challenges.adventofcode.utils.LineReader;
 import uk.co.scottdennison.java.libs.grammar.chomsky.algorithms.ChomskyReducedFormRuleCYKAlgorithm;
 import uk.co.scottdennison.java.libs.grammar.chomsky.model.ChomskyReducedFormRules;
 import uk.co.scottdennison.java.libs.grammar.chomsky.transformation.ChomskyReducedFormRuleTransformationHelper;
@@ -15,6 +14,7 @@ import uk.co.scottdennison.java.libs.grammar.parseresults.exceptions.Unflattenab
 import uk.co.scottdennison.java.libs.grammar.parseresults.model.ParseForest;
 import uk.co.scottdennison.java.libs.grammar.parseresults.model.ParseForestStats;
 import uk.co.scottdennison.java.libs.grammar.parseresults.util.ParseForestUtils;
+import uk.co.scottdennison.java.libs.text.input.LineReader;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -235,7 +235,7 @@ public class Day19 implements IPuzzle {
 		}
 		return new BasicPuzzleResults<>(
 			countSingleReplacementPossibilities(inputMolecule, possibleReplacementMoleculesForAtoms),
-			calculateStepsRequired(initialAtom, inputMolecule, possibleReplacementMoleculesForAtoms)
+			calculateStepsRequired(initialAtom, inputMolecule, possibleReplacementMoleculesForAtoms, partBPotentiallyUnsolvable)
 		);
 	}
 
@@ -299,9 +299,44 @@ public class Day19 implements IPuzzle {
 				.collect(Collectors.toList());
 	}
 
-	private static int calculateStepsRequired(Atom initialAtom, Molecule inputMolecule, Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms) {
-		Collection<ContextFreeGrammarRule<Atom>> contextFreeGrammarRules = transformReplacementsIntoContextFreeGrammarRules(possibleReplacementMoleculesForAtoms);
-		ChomskyReducedFormRules<Object, Atom> chomskyReducedFormRules = ChomskyReducedFormRuleTransformationHelper.transformContextFreeGrammarIntoChomskyReducedForm(contextFreeGrammarRules, Collections.singleton(initialAtom), Atom.class);
+	private static Integer calculateStepsRequired(Atom initialAtom, Molecule inputMolecule, Map<Atom, Set<Molecule>> possibleReplacementMoleculesForAtoms, boolean potentiallyUnsolvable) {
+		Map<Atom, Set<Molecule>> modifiedPossibleReplacementMoleculesForAtoms = new HashMap<>(possibleReplacementMoleculesForAtoms);
+		Set<Molecule> rootMolecules = modifiedPossibleReplacementMoleculesForAtoms.get(initialAtom);
+		boolean allRootMoleculesSingleAtom = rootMolecules.stream().allMatch(molecule -> molecule.getAtomCount() == 1);
+		Set<Atom> startingRules;
+		if (allRootMoleculesSingleAtom) {
+			startingRules = rootMolecules.stream().map(Molecule::getAtomsView).map(atoms -> atoms.get(0)).collect(Collectors.toSet());
+			modifiedPossibleReplacementMoleculesForAtoms.remove(initialAtom);
+		}
+		else {
+			startingRules = Collections.singleton(initialAtom);
+		}
+		for (Map.Entry<Atom, Set<Molecule>> modifiedPossibleReplacementMoleculesForAtomsEntry : modifiedPossibleReplacementMoleculesForAtoms.entrySet()) {
+			for (Molecule molecule : modifiedPossibleReplacementMoleculesForAtomsEntry.getValue()) {
+				if (molecule.getAtomCount() == 1) {
+					if (potentiallyUnsolvable) {
+						return null;
+					}
+					else {
+						/*
+							We can't process this as this currently stand.
+							With some re-engineering of the Chomsky code we probably could, but it currently strips outs WHICH rule was matched, only that a rule with the specified key was matched.
+							As such, we don't know how many items in the tree were subject to the UNIT rule listed in https://en.wikipedia.org/wiki/Chomsky_normal_form (or the DEL rule for that matter, but we don't use it thanks to using Chomsky reduced form instead)
+							We would need to know this because we need to count such removed nodes when computing the results.
+
+							For now, doing the above removal of the initial rule if all root molecules have a single atom solves the problem.
+							If this becomes insufficient, a rewrite of the CYK algorithm code and surrounding data structures is probably needed.
+							However it is expected that this is sufficient to solve both the examples and all supplied inputs.
+
+							(AKA, I'm lazy and really don't want to go back and change the chomsky code now I've found this complication)
+						 */
+						throw new IllegalStateException("Cannot solve a rule set that contains a rule in the form of A => B where both A and B are individual atoms (Note: The starting rule CAN have such rules as long as it is comprised COMPLETELY of such rules)");
+					}
+				}
+			}
+		}
+		Collection<ContextFreeGrammarRule<Atom>> contextFreeGrammarRules = transformReplacementsIntoContextFreeGrammarRules(modifiedPossibleReplacementMoleculesForAtoms);
+		ChomskyReducedFormRules<Object, Atom> chomskyReducedFormRules = ChomskyReducedFormRuleTransformationHelper.transformContextFreeGrammarIntoChomskyReducedForm(contextFreeGrammarRules, startingRules, Atom.class);
 		Collection<ParseForest<Object>> unflattenedParseForests = ChomskyReducedFormRuleCYKAlgorithm.runCYKAndProduceParseTrees(chomskyReducedFormRules, inputMolecule.getAtomsView());
 		if (unflattenedParseForests.isEmpty()) {
 			throw new IllegalStateException("Could not parse input.");
@@ -313,6 +348,6 @@ public class Day19 implements IPuzzle {
 			throw new IllegalStateException("The parse forests are not flattenable.", ex);
 		}
 		ParseForestStats parseForestStats = ParseForestUtils.computeParseForestStats(flattenedParseForests);
-		return parseForestStats.getMinNodes();
+		return parseForestStats.getMinNodes() + (allRootMoleculesSingleAtom ? 1 : 0);
 	}
 }

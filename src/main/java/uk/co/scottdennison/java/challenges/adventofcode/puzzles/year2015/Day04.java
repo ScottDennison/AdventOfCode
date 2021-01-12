@@ -68,7 +68,7 @@ public class Day04 implements IPuzzle {
 				}
 			}
 			if (zerosFound > bestZerosFound) {
-				String valueString = new String(value, StandardCharsets.UTF_8);
+				String valueString = new String(value, StandardCharsets.US_ASCII);
 				long valueLong = Long.parseLong(valueString);
 				while (bestZerosFound < zerosFound) {
 					bestZerosFound++;

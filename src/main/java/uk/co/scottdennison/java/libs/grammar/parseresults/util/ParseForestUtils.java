@@ -27,7 +27,7 @@ public class ParseForestUtils {
 	private ParseForestUtils() {
 	}
 
-	private static <K, T extends ChomskyReducedFormRule<K>, R> Map<K, R> computeChomskyReducedFormRuleKeyMapping(Collection<? extends Collection<? extends T>> ruleCollections, Set<K> allowableBadKeys, Function<T, R> ruleMapper, String reasoning) throws UnflattenableParseForestsException {
+	private static <K, T extends ChomskyReducedFormRule<K>, R> Map<K, R> computeChomskyReducedFormRuleKeyMapping(Collection<? extends Collection<? extends T>> ruleCollections, Function<T, R> ruleMapper, String reasoning) throws UnflattenableParseForestsException {
 		Map<K, R> keyStates = new HashMap<>();
 		Set<K> badKeys = new HashSet<>();
 		for (Collection<? extends T> rulesCollection : ruleCollections) {
@@ -39,10 +39,6 @@ public class ParseForestUtils {
 					badKeys.add(key);
 				}
 			}
-		}
-		for (K allowableBadKey : allowableBadKeys) {
-			keyStates.remove(allowableBadKey);
-			badKeys.remove(allowableBadKey);
 		}
 		if (!badKeys.isEmpty()) {
 			throw new UnflattenableParseForestsException("Flattening cannot occur as the following rule keys " + reasoning + ": " + badKeys);
@@ -152,9 +148,9 @@ public class ParseForestUtils {
 	public static <K, V extends K> Collection<ParseForest<V>> flattenTemporariesOfParseForests(Collection<ParseForest<K>> parseForests, ChomskyReducedFormRules<K, V> chomskyReducedFormRules) throws UnflattenableParseForestsException {
 		Collection<ChomskyReducedFormNonTerminalRule<K>> nonTerminalRules = chomskyReducedFormRules.getNonTerminalRulesView();
 		Collection<ChomskyReducedFormTerminalRule<K, V>> terminalRules = chomskyReducedFormRules.getTerminalRulesView();
-		Map<K, Boolean> ruleKeysAreTemporaryMap = computeChomskyReducedFormRuleKeyMapping(Arrays.asList(nonTerminalRules, terminalRules), Collections.emptySet(), ChomskyReducedFormRule::isTemporary, "have both associated temporary rules and associated non-temporary rules");
+		Map<K, Boolean> ruleKeysAreTemporaryMap = computeChomskyReducedFormRuleKeyMapping(Arrays.asList(nonTerminalRules, terminalRules), ChomskyReducedFormRule::isTemporary, "have both associated temporary rules and associated non-temporary rules");
 		List<ParseTree<V>> emptyParseForestTreeList = Collections.emptyList();
-		Map<K, ParseForest<V>> terminalRuleKeyParseForestsMap = computeChomskyReducedFormRuleKeyMapping(Collections.singleton(terminalRules), chomskyReducedFormRules.getValidStartRuleKeys(), terminalRule -> new ParseForest<>(terminalRule.getOutput(), emptyParseForestTreeList), "have multiple associated terminal rules which produce differing outputs");
+		Map<K, ParseForest<V>> terminalRuleKeyParseForestsMap = computeChomskyReducedFormRuleKeyMapping(Collections.singleton(terminalRules), terminalRule -> new ParseForest<>(terminalRule.getOutput(), emptyParseForestTreeList), "have multiple associated terminal rules which produce differing outputs");
 		Map<K, V> nonTerminalRuleKeyValuesMap = new HashMap<>();
 		Map<K, ClassCastException> failedCastExceptions = new HashMap<>();
 		Class<V> valueClazz = chomskyReducedFormRules.getValueClass();
