@@ -14,5 +14,5 @@ repositories {
 }
 
 dependencies {
-    compile group: 'args4j', name: 'args4j', version: '2.33'
+    implementation group: 'args4j', name: 'args4j', version: '2.33'
 }

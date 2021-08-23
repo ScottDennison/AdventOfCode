@@ -13,6 +13,9 @@
 .idea/**/dictionaries
 .idea/**/shelf
 
+# AWS User-specific
+.idea/**/aws.xml
+
 # Generated files
 .idea/**/contentModel.xml
 
@@ -149,6 +152,13 @@ gradle-app.setting
 ### Gradle Patch ###
 **/build/
 
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
 # End of https://www.toptal.com/developers/gitignore/api/java,intellij,gradle
 
 /temp
+/timings
