@@ -30,7 +30,7 @@ import java.util.Objects;
 
 public class Main {
 	private static final int MIN_YEAR = 2015;
-	private static final int MAX_YEAR = 2020;
+	private static final int MAX_YEAR = 2021;
 	private static final int MIN_DAY = 1;
 	private static final int MAX_DAY = 25;
 
