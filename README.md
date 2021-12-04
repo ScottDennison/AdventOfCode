@@ -1,19 +1,21 @@
 Welcome to my solutions for Advent Of Code
 
-| Year | Day | Complete | Runs in <100ms? |
+All solutions are run against 4 different sets of puzzle inputs, plus any provided examples, to make sure the solution isn't overfitted to a specific set of data. This is done using a runner mechanism in [Main.java](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/runner/Main.java)
+
+| Year | Day | Complete | All Datasets Run in <100ms? |
 | --- | --- | --- | --- |
 | 2015 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day01.java)  | Yes |
 | 2015 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day01.java)  | Yes |
 | 2015 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day02.java)  | Yes |
 | 2015 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day03.java)  | Yes |
-| 2015 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day04.java)  | No - ~1.5 seconds |
+| 2015 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day04.java)  | No - Worst dataset is approximately 1.5 seconds |
 | 2015 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day05.java)  | Yes |
-| 2015 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day06.java)  | No - ~200ms |
+| 2015 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day06.java)  | No - Worst dataset is approximately 200ms |
 | 2015 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day07.java)  | Yes |
 | 2015 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day08.java)  | Yes |
 | 2015 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day09.java)  | Yes |
 | 2015 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day10.java)  | Yes |
-| 2015 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day11.java)  | No - ~1 second |
+| 2015 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day11.java)  | No - Worst dataset is approximately 1 second |
 | 2015 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day12.java)  | Yes |
 | 2015 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day13.java)  | Yes |
 | 2015 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day14.java)  | Yes |
@@ -21,7 +23,7 @@ Welcome to my solutions for Advent Of Code
 | 2015 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day16.java)  | Yes |
 | 2015 | 17 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day17.java)  | Yes |
 | 2015 | 18 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day18.java)  | Yes |
-| 2015 | 19 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day19.java)  | No - ~500ms |
+| 2015 | 19 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day19.java)  | No - Worst dataset is approximately 500ms |
 | 2015 | 20 | No  |  |
 | 2015 | 21 | No  |  |
 | 2015 | 22 | No  |  |
@@ -32,13 +34,13 @@ Welcome to my solutions for Advent Of Code
 | 2016 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day02.java)  | Yes |
 | 2016 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day03.java)  | Yes |
 | 2016 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day04.java)  | Yes |
-| 2016 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day05.java)  | No - ~4 seconds |
+| 2016 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day05.java)  | No - Worst dataset is approximately 4 seconds |
 | 2016 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day06.java)  | Yes |
 | 2016 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day07.java)  | Yes |
 | 2016 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day08.java)  | Yes |
 | 2016 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day09.java)  | Yes |
 | 2016 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day10.java)  | Yes |
-| 2016 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day11.java)  | No - ~14 seconds |
+| 2016 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day11.java)  | No - Worst dataset is approximately 14 seconds |
 | 2016 | 12 | No  |  |
 | 2016 | 13 | No  |  |
 | 2016 | 14 | No  |  |
@@ -142,7 +144,7 @@ Welcome to my solutions for Advent Of Code
 | 2020 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day12.java)  | Yes |
 | 2020 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day13.java)  | Yes |
 | 2020 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day14.java)  | Yes |
-| 2020 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day15.java)  | No - ~500ms |
+| 2020 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day15.java)  | No - Worst dataset is approximately 500ms |
 | 2020 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day16.java)  | Yes |
 | 2020 | 17 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day17.java)  | Yes |
 | 2020 | 18 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day18.java)  | Yes |
@@ -157,3 +159,35 @@ Welcome to my solutions for Advent Of Code
 | 2021 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day02.java)  | Yes |
 | 2021 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day03.java)  | Yes |
 | 2021 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day04.java)  | Yes |
+| 2021 | 05 | Not Yet Released (at time of writing) |  |
+| 2021 | 06 | Not Yet Released |  |
+| 2021 | 07 | Not Yet Released |  |
+| 2021 | 08 | Not Yet Released |  |
+| 2021 | 09 | Not Yet Released |  |
+| 2021 | 10 | Not Yet Released |  |
+| 2021 | 11 | Not Yet Released |  |
+| 2021 | 12 | Not Yet Released |  |
+| 2021 | 13 | Not Yet Released |  |
+| 2021 | 14 | Not Yet Released |  |
+| 2021 | 15 | Not Yet Released |  |
+| 2021 | 16 | Not Yet Released |  |
+| 2021 | 17 | Not Yet Released |  |
+| 2021 | 18 | Not Yet Released |  |
+| 2021 | 19 | Not Yet Released |  |
+| 2021 | 20 | Not Yet Released |  |
+| 2021 | 21 | Not Yet Released |  |
+| 2021 | 22 | Not Yet Released |  |
+| 2021 | 23 | Not Yet Released |  |
+| 2021 | 24 | Not Yet Released |  |
+| 2021 | 25 | Not Yet Released |  |
+
+Note that timing is done on a machine of the following spec:
+* Intel i9-10900K CPU @ 3.70GHz
+* 64.0GB RAM
+* 64-bit Windows 10 OS
+* Java 8
+
+The AoC author has said that all solutions should run in at most 15 seconds on 10 year old hardware, or 1 second in a compiled language on semi-modern hardware.
+Given this machine is quite a bit higher spec than that, I chose to use 100ms as a target benchmark instead.
+
+I also run Java with JIT disabled, to prevent JIT optimizing code when running under one dataset, which otherwise throws the remaining dataset timings off.
