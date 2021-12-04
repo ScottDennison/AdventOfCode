@@ -174,7 +174,7 @@ public class Main {
 					dataSetPaths.add(path);
 				}
 			} catch (IOException ex) {
-				throw new IllegalStateException("Unable to iterate directory " + dataSetsPath);
+				throw new IllegalStateException("Unable to iterate directory " + dataSetsPath, ex);
 			}
 			List<PuzzleRunResults> puzzleRunResults = new ArrayList<>();
 			for (Path dataSetPath : dataSetPaths) {
