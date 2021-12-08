@@ -44,6 +44,9 @@ public class Main {
 		@Option(name = "-u", aliases = "--user", usage = "only run puzzle data sets for user u")
 		private Integer user;
 
+		@Option(name = "-j", aliases = "--pre-run-for-jit", usage = "run each data set twice, discarding the first time, in a bid to pre-JIT the code")
+		private boolean preRunForJIT;
+
 		public Integer getYear() {
 			return this.year;
 		}
@@ -54,6 +57,10 @@ public class Main {
 
 		public Integer getUser() {
 			return this.user;
+		}
+
+		public boolean isPreRunForJIT() {
+			return this.preRunForJIT;
 		}
 	}
 
@@ -122,14 +129,14 @@ public class Main {
 			this.createPuzzleInstance();
 		}
 
-		public void run(PrintWriter consoleWriter, boolean restrictedCharacterSet, Integer userFilter) {
+		public void run(PrintWriter consoleWriter, boolean restrictedCharacterSet, Integer userFilter, boolean preRunForJIT) {
 			Path dataPath = Paths.get(String.format("data/year%04d/day%02d/io", this.year, this.day));
 			consoleWriter.format("Running year %d day %d%n", this.year, this.day);
 			List<PuzzleRunResults> puzzleRunResults = new ArrayList<>();
 			if (userFilter == null) {
-				puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "Example", "examples", null));
+				puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "Example", "examples", preRunForJIT, null));
 			}
-			puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "User", "users", userFilter == null ? null : Integer.toString(userFilter)));
+			puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "User", "users", preRunForJIT, userFilter == null ? null : Integer.toString(userFilter)));
 			DisplayTextualTableBuilder displayTextualTableBuilder = new DisplayTextualTableBuilder();
 			NumberFormat numberFormat = NumberFormat.getNumberInstance();
 			for (PuzzleRunResults puzzleRunResultsEntry : puzzleRunResults) {
@@ -166,28 +173,36 @@ public class Main {
 			displayTextualTableBuilder.addEntry("Part " + partCode + " - State", resultState, Alignment.CENTER);
 		}
 
-		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsName, String dataSetsFolderName, String filter) {
+		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsName, String dataSetsFolderName, boolean preRunForJIT, String filter) {
 			Path dataSetsPath = dataPath.resolve(dataSetsFolderName);
 			List<Path> dataSetPaths = new ArrayList<>();
 			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dataSetsPath, Files::isDirectory)) {
 				for (Path path : directoryStream) {
-					dataSetPaths.add(path);
+					if (filter == null || filter.equalsIgnoreCase(path.getFileName().toString())) {
+						dataSetPaths.add(path);
+					}
 				}
 			} catch (IOException ex) {
 				throw new IllegalStateException("Unable to iterate directory " + dataSetsPath, ex);
 			}
+			if (preRunForJIT) {
+				consoleWriter.format("\tPre-running for JIT to make any optimizations%n");
+				consoleWriter.flush();
+				for (Path dataSetPath : dataSetPaths) {
+					runWithDataSet(consoleWriter, dataPath, dataSetPath, dataSetsName + " " + dataSetPath.getFileName().toString());
+				}
+			}
+			consoleWriter.format("\tRunning to gather results%n");
+			consoleWriter.flush();
 			List<PuzzleRunResults> puzzleRunResults = new ArrayList<>();
 			for (Path dataSetPath : dataSetPaths) {
-				String dataSetPartialName = dataSetPath.getFileName().toString();
-				if (filter == null || filter.equalsIgnoreCase(dataSetPartialName)) {
-					puzzleRunResults.add(runWithDataSet(consoleWriter, dataPath, dataSetPath, dataSetsName + " " + dataSetPartialName));
-				}
+				puzzleRunResults.add(runWithDataSet(consoleWriter, dataPath, dataSetPath, dataSetsName + " " + dataSetPath.getFileName().toString()));
 			}
 			return puzzleRunResults;
 		}
 
 		private PuzzleRunResults runWithDataSet(PrintWriter consoleWriter, Path dataPath, Path dataSetPath, String dataSetName) {
-			consoleWriter.format("\tRunning with data set %s%n", dataSetName);
+			consoleWriter.format("\t\tRunning with data set %s%n", dataSetName);
 			consoleWriter.flush();
 			char[] inputCharacters = readDataSetFile(dataSetPath, "input.txt", false);
 			char[] outputACharacters = readDataSetFile(dataSetPath, "output_a.txt", true);
@@ -293,10 +308,10 @@ public class Main {
 			cmdLineParser.printUsage(System.err);
 			return;
 		}
-		runPuzzles(commandLineBean.getYear(), commandLineBean.getDay(), commandLineBean.getUser());
+		runPuzzles(commandLineBean.getYear(), commandLineBean.getDay(), commandLineBean.getUser(), commandLineBean.isPreRunForJIT());
 	}
 
-	private static void runPuzzles(Integer yearFilter, Integer dayFilter, Integer userFilter) {
+	private static void runPuzzles(Integer yearFilter, Integer dayFilter, Integer userFilter, boolean preRunForJIT) {
 		List<PuzzleRunner> puzzleRunners = new ArrayList<>();
 		String mainClassName = Main.class.getName();
 		String mainPackageName = mainClassName.substring(0, mainClassName.lastIndexOf('.'));
@@ -338,7 +353,7 @@ public class Main {
 				restrictedCharacterSet = false;
 			}
 			for (PuzzleRunner puzzleRunner : puzzleRunners) {
-				puzzleRunner.run(consoleOutWriter, restrictedCharacterSet, userFilter);
+				puzzleRunner.run(consoleOutWriter, restrictedCharacterSet, userFilter, preRunForJIT);
 			}
 		}
 	}
