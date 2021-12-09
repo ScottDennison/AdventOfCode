@@ -134,9 +134,9 @@ public class Main {
 			consoleWriter.format("Running year %d day %d%n", this.year, this.day);
 			List<PuzzleRunResults> puzzleRunResults = new ArrayList<>();
 			if (userFilter == null) {
-				puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "Example", "examples", preRunForJIT, null));
+				puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "Example", "Examples", "examples", preRunForJIT, null));
 			}
-			puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "User", "users", preRunForJIT, userFilter == null ? null : Integer.toString(userFilter)));
+			puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "User", "Users", "users", preRunForJIT, userFilter == null ? null : Integer.toString(userFilter)));
 			DisplayTextualTableBuilder displayTextualTableBuilder = new DisplayTextualTableBuilder();
 			NumberFormat numberFormat = NumberFormat.getNumberInstance();
 			for (PuzzleRunResults puzzleRunResultsEntry : puzzleRunResults) {
@@ -173,7 +173,7 @@ public class Main {
 			displayTextualTableBuilder.addEntry("Part " + partCode + " - State", resultState, Alignment.CENTER);
 		}
 
-		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsName, String dataSetsFolderName, boolean preRunForJIT, String filter) {
+		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsNameSingular, String dataSetsNamePlural, String dataSetsFolderName, boolean preRunForJIT, String filter) {
 			Path dataSetsPath = dataPath.resolve(dataSetsFolderName);
 			List<Path> dataSetPaths = new ArrayList<>();
 			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dataSetsPath, Files::isDirectory)) {
@@ -186,17 +186,17 @@ public class Main {
 				throw new IllegalStateException("Unable to iterate directory " + dataSetsPath, ex);
 			}
 			if (preRunForJIT) {
-				consoleWriter.format("\tPre-running for JIT to make any optimizations%n");
+				consoleWriter.format("\tPre-running " + dataSetsNamePlural + " data sets for JIT to make any optimizations, discarding results%n");
 				consoleWriter.flush();
 				for (Path dataSetPath : dataSetPaths) {
-					runWithDataSet(consoleWriter, dataPath, dataSetPath, dataSetsName + " " + dataSetPath.getFileName().toString());
+					runWithDataSet(consoleWriter, dataPath, dataSetPath, dataSetsNameSingular + " " + dataSetPath.getFileName().toString());
 				}
 			}
-			consoleWriter.format("\tRunning to gather results%n");
+			consoleWriter.format("\tRunning " + dataSetsNamePlural + " data sets to gather results%n");
 			consoleWriter.flush();
 			List<PuzzleRunResults> puzzleRunResults = new ArrayList<>();
 			for (Path dataSetPath : dataSetPaths) {
-				puzzleRunResults.add(runWithDataSet(consoleWriter, dataPath, dataSetPath, dataSetsName + " " + dataSetPath.getFileName().toString()));
+				puzzleRunResults.add(runWithDataSet(consoleWriter, dataPath, dataSetPath, dataSetsNameSingular + " " + dataSetPath.getFileName().toString()));
 			}
 			return puzzleRunResults;
 		}
