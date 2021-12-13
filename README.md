@@ -28,8 +28,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2015 | 21 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day21.java)  | Yes |
 | 2015 | 22 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day22.java)  | Yes |
 | 2015 | 23 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day23.java)  | Yes |
-| 2015 | 24 | No  |  |
-| 2015 | 25 | No  |  |
+| 2015 | 24 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day24.java)  | Yes |
+| 2015 | 25 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day25.java)  | Yes |
 | 2016 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day01.java)  | Yes |
 | 2016 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day02.java)  | Yes |
 | 2016 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day03.java)  | Yes |
@@ -163,11 +163,11 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2021 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day06.java)  | Yes |
 | 2021 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day07.java)  | Yes |
 | 2021 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day08.java)  | Yes |
-| 2021 | 09 | Not Yet Released (at time of writing) |  |
-| 2021 | 10 | Not Yet Released |  |
-| 2021 | 11 | Not Yet Released |  |
-| 2021 | 12 | Not Yet Released |  |
-| 2021 | 13 | Not Yet Released |  |
+| 2021 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day09.java)  | Yes |
+| 2021 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day10.java)  | Yes |
+| 2021 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day11.java)  | Yes |
+| 2021 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day12.java)  | Yes |
+| 2021 | 13 | Not Yet Released (at time of writing) |  |
 | 2021 | 14 | Not Yet Released |  |
 | 2021 | 15 | Not Yet Released |  |
 | 2021 | 16 | Not Yet Released |  |
