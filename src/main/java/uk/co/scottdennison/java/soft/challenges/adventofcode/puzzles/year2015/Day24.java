@@ -7,139 +7,155 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Day24 implements IPuzzle {
-    private static final int REQUIRED_GROUPS = 4;
-
-    private static class Group implements Comparable<Group> {
-        public static final Group WORST = new Group(Integer.MAX_VALUE, Long.MAX_VALUE);
-
-        private final int packageCount;
+    private static class Group {
+        private final boolean[] usedWeightsReference;
         private final long quantumEntanglement;
 
-        private Group(int packageCount, long quantumEntanglement) {
-            this.packageCount = packageCount;
+        private Group(boolean[] usedWeightsReference, long quantumEntanglement) {
+            this.usedWeightsReference = usedWeightsReference;
             this.quantumEntanglement = quantumEntanglement;
         }
 
-        public int getPackageCount() {
-            return this.packageCount;
+        public boolean[] getUsedWeightsReference() {
+            return this.usedWeightsReference;
         }
 
         public long getQuantumEntanglement() {
             return this.quantumEntanglement;
         }
-
-        @Override
-        public int compareTo(Group otherGroup) {
-            int difference = Integer.compare(packageCount,otherGroup.packageCount);
-            if (difference == 0) {
-                difference = Long.compare(quantumEntanglement,otherGroup.quantumEntanglement);
-            }
-            return difference;
-        }
     }
 
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
-        /*
-        long[] weights = LineReader.stringsStream(inputCharacters).map(Long::parseLong).sorted(Collections.reverseOrder()).mapToLong(Long::longValue).toArray();
-        long totalWeight = Arrays.stream(weights).sum();
-        long targetWeight = totalWeight/REQUIRED_GROUPS;
-        if ((targetWeight*REQUIRED_GROUPS) != totalWeight) {
+        int[] weights = LineReader.stringsStream(inputCharacters).map(Integer::parseInt).sorted(Collections.reverseOrder()).mapToInt(Integer::intValue).toArray();
+        return new BasicPuzzleResults<>(
+            run(weights, 3, printWriter),
+            run(weights, 4, printWriter)
+        );
+    }
+
+    private long run(int[] weights, int requiredGroups, PrintWriter printWriter) {
+        if (requiredGroups < 2) {
+            throw new IllegalStateException("There must be at least 2 groups.");
+        }
+        printWriter.println("Running to find " + requiredGroups + " required groups");
+        int weightCount = weights.length;
+        int totalWeight = Arrays.stream(weights).sum();
+        int targetWeight = totalWeight/requiredGroups;
+        if ((targetWeight*requiredGroups) != totalWeight) {
             throw new IllegalStateException("Unable to balance groups");
         }
-        Group[] potentialGroups = new Group[REQUIRED_GROUPS];
-        int weightCount = weights.length;
-        return new BasicPuzzleResults<>(
-            buildGroup(weights,targetWeight,potentialGroups,1,new boolean[weightCount],Group.WORST).getQuantumEntanglement(),
-            null
-        );
-        */
-        return new BasicPuzzleResults<>(
-            "This code takes 21h35m55s to run the example and all 4 datasets in jit mode, so will be skipped.",
-            null
-        );
-    }
-
-    private Group buildGroup(long[] weights, long targetWeight, Group[] potentialGroups, int groupNumber, boolean[] usedInAnyGroup, Group bestGroup) {
-        return buildGroup(weights, targetWeight, potentialGroups, groupNumber, 0, 0, usedInAnyGroup, new boolean[weights.length], bestGroup);
-    }
-
-    private Group buildGroup(long[] weights, long targetWeight, Group[] potentialGroups, int groupNumber, int startWeightIndex, long currentWeight, boolean[] usedInAnyGroup, boolean[] usedInThisGroup, Group bestGroup) {
-        int weightCount = weights.length;
-        if (groupNumber == REQUIRED_GROUPS) {
-            long remainingWeight = 0L;
-            for (int weightIndex=0; weightIndex<weightCount; weightIndex++) {
-                if (!usedInAnyGroup[weightIndex]) {
-                    usedInThisGroup[weightIndex] = true;
-                    remainingWeight += weights[weightIndex];
-                }
-            }
-            if (remainingWeight == targetWeight) {
-                potentialGroups[groupNumber-1] = createGroup(weights, usedInThisGroup);
-                Group bestGroupFromPotentials = Group.WORST;
-                for (int potentialGroupIndex=0; potentialGroupIndex<REQUIRED_GROUPS; potentialGroupIndex++) {
-                    Group potentialGroup = potentialGroups[potentialGroupIndex];
-                    if (potentialGroup.compareTo(bestGroupFromPotentials) < 0) {
-                        bestGroupFromPotentials = potentialGroup;
+        printWriter.println("Calculating all possible ways to create first group");
+        SortedMap<Integer, List<boolean[]>> ways = findAllPrimeSumsForTarget(weights, targetWeight);
+        for (Map.Entry<Integer,List<boolean[]>> waysEntry : ways.entrySet()) {
+            boolean[][] waysWithLength = waysEntry.getValue().toArray(new boolean[0][]);
+            int waysWithLengthCount = waysWithLength.length;
+            printWriter.println("Checking the " + waysWithLengthCount + (waysWithLengthCount==1?" entry that has":" entries that have") + " a length of " + waysEntry.getKey());
+            Group[] groups = new Group[waysWithLengthCount];
+            for (int wayIndex=0; wayIndex<waysWithLengthCount; wayIndex++) {
+                boolean[] way = waysWithLength[wayIndex];
+                long quantumEntanglement = 1;
+                for (int weightIndex=0; weightIndex<weightCount; weightIndex++) {
+                    if (way[weightIndex]) {
+                        quantumEntanglement = Math.multiplyExact(quantumEntanglement,weights[weightIndex]);
                     }
                 }
-                if (bestGroupFromPotentials.compareTo(bestGroup) < 0) {
-                    return bestGroupFromPotentials;
+                groups[wayIndex] = new Group(way, quantumEntanglement);
+            }
+            Arrays.sort(groups, Comparator.comparing(Group::getQuantumEntanglement));
+            for (Group group : groups) {
+                if (canMakePrimeSumGroups(weights, targetWeight, group.getUsedWeightsReference(), requiredGroups-1)) {
+                    return group.getQuantumEntanglement();
                 }
             }
-            return bestGroup;
+        }
+        throw new IllegalStateException("Unable to solve problem");
+    }
+
+    private static SortedMap<Integer,List<boolean[]>> findAllPrimeSumsForTarget(int[] weights, int targetWeight) {
+        int weightCount = weights.length;
+        int[] maxSums = new int[weightCount+1];
+        int sum = 0;
+        for (int index=weightCount-1; index>=0; index--) {
+            maxSums[index] = (sum += weights[index]);
+        }
+        SortedMap<Integer,List<boolean[]>> ways = new TreeMap<>();
+        findAllPrimeSumsForTarget(weights, maxSums, ways, new boolean[weightCount], 0, targetWeight, 0);
+        return ways;
+    }
+
+    private static void findAllPrimeSumsForTarget(int[] weights, int[] maxSums, SortedMap<Integer,List<boolean[]>> ways, boolean[] currentUsedWeights, int currentUsedWeightCount, int remainingWeight, int weightIndex) {
+        if (remainingWeight < 0) {
+            // Not possible.
+        }
+        else if (remainingWeight == 0) {
+            ways.computeIfAbsent(currentUsedWeightCount,__->new ArrayList<>()).add(Arrays.copyOf(currentUsedWeights,currentUsedWeights.length));
+        }
+        else if (remainingWeight > maxSums[weightIndex]) {
+            // Not possible.
+        }
+        else {
+            int nextWeightIndex = weightIndex+1;
+            findAllPrimeSumsForTarget(weights, maxSums, ways, currentUsedWeights, currentUsedWeightCount, remainingWeight, nextWeightIndex);
+            currentUsedWeights[weightIndex] = true;
+            findAllPrimeSumsForTarget(weights, maxSums, ways, currentUsedWeights, currentUsedWeightCount + 1, remainingWeight - weights[weightIndex], nextWeightIndex);
+            currentUsedWeights[weightIndex] = false;
+        }
+    }
+
+    private static boolean canMakePrimeSumGroups(int[] weights, int targetWeight, boolean[] usedWeights, int groupsRequired) {
+        if (groupsRequired < 1) {
+            throw new IllegalStateException("Required to make at least one group");
+        }
+        return canMakePrimeSumGroups(weights, targetWeight, usedWeights, groupsRequired, 0, targetWeight);
+    }
+
+    private static boolean canMakePrimeSumGroups(int[] weights, int targetWeight, boolean[] usedWeights, int groupsRequired, int startWeightIndex, int remainingWeight) {
+        int weightCount = weights.length;
+        if (groupsRequired == 1) {
+            for (int weightIndex=0; weightIndex<weightCount; weightIndex++) {
+                if (!usedWeights[weightIndex]) {
+                    remainingWeight -= weights[weightIndex];
+                    if (remainingWeight < 0) {
+                        break;
+                    }
+                }
+            }
+            return remainingWeight == 0;
         } else {
             for (int weightIndex=startWeightIndex; weightIndex<weightCount; weightIndex++) {
-                if (!usedInAnyGroup[weightIndex]) {
-                    long newWeight = currentWeight+weights[weightIndex];
-                    long remainingRequiredWeight = targetWeight-newWeight;
-                    if (remainingRequiredWeight < 0L) {
+                if (!usedWeights[weightIndex]) {
+                    int newRemainingWeight = remainingWeight-weights[weightIndex];
+                    if (newRemainingWeight < 0) {
                         // We have gone over the target weight, this is not a valid path.
                     } else {
-                        usedInAnyGroup[weightIndex] = true;
-                        usedInThisGroup[weightIndex] = true;
-                        if (remainingRequiredWeight > 0L) {
+                        usedWeights[weightIndex] = true;
+                        if (newRemainingWeight > 0) {
                             // We still need more weight
-                            bestGroup = buildGroup(weights, targetWeight, potentialGroups, groupNumber, weightIndex+1, newWeight, usedInAnyGroup, usedInThisGroup, bestGroup);
+                            if (canMakePrimeSumGroups(weights, targetWeight, usedWeights, groupsRequired, weightIndex+1, newRemainingWeight)) {
+                                return true;
+                            }
                         } else {
-                            // We are at our target weight.
-                            potentialGroups[groupNumber-1] = createGroup(weights, usedInThisGroup);
-                            bestGroup = buildGroup(weights, targetWeight, potentialGroups, groupNumber+1, usedInAnyGroup, bestGroup);
+                            // We've completed this group.
+                            if (canMakePrimeSumGroups(weights, targetWeight, usedWeights, groupsRequired-1, 0, targetWeight)) {
+                                return true;
+                            }
                         }
-                        usedInThisGroup[weightIndex] = false;
-                        usedInAnyGroup[weightIndex] = false;
+                        usedWeights[weightIndex] = false;
                     }
                 }
             }
-            return bestGroup;
+            return false;
         }
-    }
-
-    private Group createGroup(long[] weights, boolean[] usedInThisGroup) {
-        int weightCount = weights.length;
-        int packageCount = 0;
-        long quantumEntanglement = 1;
-        for (int weightIndex=0; weightIndex<weightCount; weightIndex++) {
-            if (usedInThisGroup[weightIndex]) {
-                packageCount++;
-                try {
-                    quantumEntanglement = Math.multiplyExact(quantumEntanglement, weights[weightIndex]);
-                } catch (ArithmeticException ex) {
-                    // Lets cheat a little
-                    quantumEntanglement = Long.MAX_VALUE;
-                    for (int weightIndex2=weightIndex+1; weightIndex<weightCount; weightIndex++) {
-                        if (usedInThisGroup[weightIndex2]) {
-                            packageCount++;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        return new Group(packageCount,quantumEntanglement);
     }
 }
