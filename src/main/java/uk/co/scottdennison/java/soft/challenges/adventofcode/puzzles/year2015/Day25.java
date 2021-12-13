@@ -20,7 +20,8 @@ public class Day25 implements IPuzzle {
         }
         int row = Integer.parseInt(matcher.group("row"));
         int column = Integer.parseInt(matcher.group("column"));
-        int iterationsRequired = (((row+column-1)*(row+column))/2)-(row+column-1-column);
+        int iterationsRequired = (((row+column-1)*(row+column))/2)-row;
+        printWriter.println("Iterations required: " + iterationsRequired);
         long value = 20151125L;
         for (int iteration=0; iteration<iterationsRequired; iteration++) {
             value = (value * 252533L) % 33554393L;
