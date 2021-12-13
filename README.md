@@ -167,8 +167,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2021 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day10.java)  | Yes |
 | 2021 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day11.java)  | Yes |
 | 2021 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day12.java)  | Yes |
-| 2021 | 13 | Not Yet Released (at time of writing) |  |
-| 2021 | 14 | Not Yet Released |  |
+| 2021 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day13.java)  | Yes |
+| 2021 | 14 | Not Yet Released (at time of writing) |  |
 | 2021 | 15 | Not Yet Released |  |
 | 2021 | 16 | Not Yet Released |  |
 | 2021 | 17 | Not Yet Released |  |
