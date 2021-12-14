@@ -73,16 +73,12 @@ public class Day22 implements IPuzzle {
     }
 
     private static int runGame(Deque<Integer> player1Cards, Deque<Integer> player2Cards, boolean allowRecursiveCombat) {
-        //int roundNumber = 0;
         Set<List<List<Integer>>> previousRounds = new HashSet<>();
         while (true) {
             List<List<Integer>> thisRound = Arrays.asList(new ArrayList<>(player1Cards), new ArrayList<>(player2Cards));
             if (!previousRounds.add(thisRound)) {
                 return 1;
             }
-            //printWriter.println("-- Round " + (++roundNumber) + " --");
-            //printWriter.println("Player 1's deck: " + player1Cards);
-            //printWriter.println("Player 2's deck: " + player2Cards);
             Integer player1PlayedCard;
             if ((player1PlayedCard = player1Cards.pollFirst()) == null) {
                 return 2;
@@ -92,8 +88,6 @@ public class Day22 implements IPuzzle {
                 player1Cards.addFirst(player1PlayedCard);
                 return 1;
             }
-            //printWriter.println("Player 1 plays: " + player1PlayedCard);
-            //printWriter.println("Player 2 plays: " + player2PlayedCard);
             int winnerOfRound;
             if (allowRecursiveCombat && player1PlayedCard <= player1Cards.size() && player2PlayedCard <= player2Cards.size()) {
                 winnerOfRound = runGame(createSubDeque(player1Cards,player1PlayedCard),createSubDeque(player2Cards,player2PlayedCard),allowRecursiveCombat);
@@ -120,10 +114,6 @@ public class Day22 implements IPuzzle {
                     throw new IllegalStateException("Unexpected winner of round");
             }
         }
-        //printWriter.println();
-        //printWriter.println("== Post-game results ==");
-        //printWriter.println("Player 1's deck: " + player1Cards);
-        //printWriter.println("Player 2's deck: " + player2Cards);
     }
 
     private static Deque<Integer> createSubDeque(Deque<Integer> input, int count) {
