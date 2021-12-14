@@ -150,8 +150,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2020 | 18 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day18.java)  | Yes |
 | 2020 | 19 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day19.java)  | Yes |
 | 2020 | 20 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day20.java)  | Yes |
-| 2020 | 21 | No  |  |
-| 2020 | 22 | No  |  |
+| 2020 | 21 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day21.java)  | Yes |
+| 2020 | 22 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day22.java)  | No - Worst dataset is approximately 350ms |
 | 2020 | 23 | No  |  |
 | 2020 | 24 | No  |  |
 | 2020 | 25 | No  |  |
