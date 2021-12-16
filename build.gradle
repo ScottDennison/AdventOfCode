@@ -1,9 +1,14 @@
 plugins {
     id 'java'
+    id 'application'
 }
 
 group 'uk.co.scottdennison.java'
 version '1.0-SNAPSHOT'
+
+application {
+    mainClass = 'uk.co.scottdennison.java.soft.challenges.adventofcode.runner.Main'
+}
 
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
