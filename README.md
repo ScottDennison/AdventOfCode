@@ -41,9 +41,9 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2016 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day09.java)  | Yes |
 | 2016 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day10.java)  | Yes |
 | 2016 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day11.java)  | No - Worst dataset is approximately 14 seconds |
-| 2016 | 12 | No  |  |
-| 2016 | 13 | No  |  |
-| 2016 | 14 | No  |  |
+| 2016 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day12.java)  | No - Worst dataset is approximately 125ms |
+| 2016 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day13.java)  | Yes |
+| 2016 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day14.java)  | No - Worst dataset is approximately 18.75 seconds |
 | 2016 | 15 | No  |  |
 | 2016 | 16 | No  |  |
 | 2016 | 17 | No  |  |
@@ -169,8 +169,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2021 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day12.java)  | Yes |
 | 2021 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day13.java)  | Yes |
 | 2021 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day14.java)  | Yes |
-| 2021 | 15 | Not Yet Released (at time of writing) |  |
-| 2021 | 16 | Not Yet Released |  |
+| 2021 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day15.java)  | No - Worst dataset is approximately 3.25 seconds |
+| 2021 | 16 | Not Yet Released (at time of writing) |  |
 | 2021 | 17 | Not Yet Released |  |
 | 2021 | 18 | Not Yet Released |  |
 | 2021 | 19 | Not Yet Released |  |

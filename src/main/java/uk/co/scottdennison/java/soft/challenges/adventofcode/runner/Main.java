@@ -116,6 +116,42 @@ public class Main {
 		}
 	}
 
+	private static class PuzzleConfigProvider implements IPuzzleConfigProvider {
+		private final Path dataSetPath;
+		private final Path dataPath;
+		private long timeSpentLoadingConfig;
+
+		public PuzzleConfigProvider(Path dataSetPath, Path dataPath) {
+			this.dataSetPath = dataSetPath;
+			this.dataPath = dataPath;
+			this.timeSpentLoadingConfig = 0L;
+		}
+
+		@Override
+		public char[] getPuzzleConfigChars(String configName) {
+			long startTime = System.nanoTime();
+			String configFileName = "config_" + configName + ".txt";
+			Path directoryPath = dataSetPath;
+			while (true) {
+				Path filePath = directoryPath.resolve(configFileName);
+				if (Files.isRegularFile(filePath)) {
+					char[] result = readFile(filePath);
+					long endTime = System.nanoTime();
+					timeSpentLoadingConfig += (endTime-startTime);
+					return result;
+				}
+				if (directoryPath.equals(dataPath)) {
+					throw new IllegalStateException("No such config found.");
+				}
+				directoryPath = directoryPath.getParent();
+			}
+		}
+
+		public long getTimeSpentLoadingConfig() {
+			return timeSpentLoadingConfig;
+		}
+	}
+
 	private static class PuzzleRunner {
 		private final int year;
 		private final int day;
@@ -207,22 +243,9 @@ public class Main {
 			char[] inputCharacters = readDataSetFile(dataSetPath, "input.txt", false);
 			char[] outputACharacters = readDataSetFile(dataSetPath, "output_a.txt", true);
 			char[] outputBCharacters = readDataSetFile(dataSetPath, "output_b.txt", true);
-			IPuzzleConfigProvider puzzleConfigProvider = configName -> {
-				String configFileName = "config_" + configName + ".txt";
-				Path directoryPath = dataSetPath;
-				while (true) {
-					Path filePath = directoryPath.resolve(configFileName);
-					if (Files.isRegularFile(filePath)) {
-						return readFile(filePath);
-					}
-					if (directoryPath.equals(dataPath)) {
-						throw new IllegalStateException("No such config found.");
-					}
-					directoryPath = directoryPath.getParent();
-				}
-			};
 			PrintWriter displayPrinterWriter = new PrintWriter(new DisplayWriter(consoleWriter, "----------------------------------------", "\t\t", false));
 			boolean partBPotentiallyUnsolvable = outputBCharacters == null;
+			PuzzleConfigProvider puzzleConfigProvider = new PuzzleConfigProvider(dataSetPath,dataPath);
 			long startTime = System.nanoTime();
 			IPuzzle puzzleInstance = this.createPuzzleInstance();
 			IPuzzleResults puzzleResults = puzzleInstance.runPuzzle(inputCharacters, puzzleConfigProvider, partBPotentiallyUnsolvable, displayPrinterWriter);
@@ -230,7 +253,7 @@ public class Main {
 			displayPrinterWriter.close();
 			return new PuzzleRunResults(
 				dataSetName,
-				finishTime - startTime,
+				finishTime - startTime - puzzleConfigProvider.getTimeSpentLoadingConfig(),
 				createPartResults(outputACharacters, puzzleResults.getPartAAnswerString()),
 				createPartResults(outputBCharacters, puzzleResults.getPartBAnswerString())
 			);
@@ -261,40 +284,40 @@ public class Main {
 				throw new IllegalStateException("Unable to instantiate puzzle class", ex);
 			}
 		}
+	}
 
-		private static char[] readDataSetFile(Path dataSetPath, String fileName, boolean allowMissing) {
-			Path path = dataSetPath.resolve(fileName);
-			if (Files.isRegularFile(path)) {
-				return readFile(path);
-			}
-			else if (allowMissing) {
-				Path missingPath = dataSetPath.resolve(fileName + ".missing");
-				if (Files.isRegularFile(missingPath)) {
-					char[] fileContents = readFile(missingPath);
-					if (fileContents.length == 0) {
-						return null;
-					}
+	private static char[] readDataSetFile(Path dataSetPath, String fileName, boolean allowMissing) {
+		Path path = dataSetPath.resolve(fileName);
+		if (Files.isRegularFile(path)) {
+			return readFile(path);
+		}
+		else if (allowMissing) {
+			Path missingPath = dataSetPath.resolve(fileName + ".missing");
+			if (Files.isRegularFile(missingPath)) {
+				char[] fileContents = readFile(missingPath);
+				if (fileContents.length == 0) {
+					return null;
 				}
 			}
-			throw new IllegalStateException("Could not read file " + path + (allowMissing ? " or an equivalent .missing file" : ""));
 		}
+		throw new IllegalStateException("Could not read file " + path + (allowMissing ? " or an equivalent .missing file" : ""));
+	}
 
-		private static char[] readFile(Path path) {
-			byte[] fileBytes;
-			try {
-				fileBytes = Files.readAllBytes(path);
-			} catch (IOException ex) {
-				throw new IllegalStateException("Unable to read file bytes");
-			}
-			CharBuffer charBuffer = StandardCharsets.UTF_8.decode(ByteBuffer.wrap(fileBytes));
-			if (charBuffer.hasArray() && !charBuffer.isReadOnly()) {
-				return charBuffer.array();
-			}
-			else {
-				char[] chars = new char[charBuffer.remaining()];
-				charBuffer.get(chars);
-				return chars;
-			}
+	private static char[] readFile(Path path) {
+		byte[] fileBytes;
+		try {
+			fileBytes = Files.readAllBytes(path);
+		} catch (IOException ex) {
+			throw new IllegalStateException("Unable to read file bytes");
+		}
+		CharBuffer charBuffer = StandardCharsets.UTF_8.decode(ByteBuffer.wrap(fileBytes));
+		if (charBuffer.hasArray() && !charBuffer.isReadOnly()) {
+			return charBuffer.array();
+		}
+		else {
+			char[] chars = new char[charBuffer.remaining()];
+			charBuffer.get(chars);
+			return chars;
 		}
 	}
 
