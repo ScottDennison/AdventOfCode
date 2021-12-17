@@ -1,5 +1,6 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2020;
 
+import uk.co.scottdennison.java.libs.math.ChineseNumberTheorem;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -29,122 +30,6 @@ public class Day13 implements IPuzzle {
 		}
 	}
 
-	private static class ChineseNumberTheoremInput {
-		private final long n;
-		private final long a;
-
-		public ChineseNumberTheoremInput(long n, long a) {
-			this.n = n;
-			this.a = a;
-		}
-
-		public long getN() {
-			return this.n;
-		}
-
-		public long getA() {
-			return this.a;
-		}
-	}
-
-	private static class ExtendedEuclideanAlgorithmResult {
-		private final long gcd;
-		private final long bezoutCoefficientS;
-		private final long bezoutCoefficientT;
-
-		public ExtendedEuclideanAlgorithmResult(long gcd, long bezoutCoefficientS, long bezoutCoefficientT) {
-			this.gcd = gcd;
-			this.bezoutCoefficientS = bezoutCoefficientS;
-			this.bezoutCoefficientT = bezoutCoefficientT;
-		}
-
-		public long getGcd() {
-			return this.gcd;
-		}
-
-		public long getBezoutCoefficientS() {
-			return this.bezoutCoefficientS;
-		}
-
-		public long getBezoutCoefficientT() {
-			return this.bezoutCoefficientT;
-		}
-	}
-
-	// Based on https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Pseudocode
-	private static ExtendedEuclideanAlgorithmResult solveExtendedEuclideanAlgorithm(long a, long b) {
-		long s = 0;
-		long oldS = 1;
-		long r = b;
-		long oldR = a;
-		while (r != 0) {
-			long quotient = oldR / r;
-			long temp;
-			temp = oldR;
-			oldR = r;
-			r = temp - quotient * r;
-			temp = oldS;
-			oldS = s;
-			s = temp - quotient * s;
-		}
-		long bezoutT;
-		if (b != 0) {
-			bezoutT = (oldR - oldS * a) / b;
-		}
-		else {
-			bezoutT = 0;
-		}
-		return new ExtendedEuclideanAlgorithmResult(oldR, oldS, bezoutT);
-	}
-
-	// Based on https://en.wikipedia.org/wiki/Chinese_remainder_theorem#Existence_(direct_construction) with sanity checks mentioned in https://en.wikipedia.org/wiki/Chinese_remainder_theorem#Statement
-	private static long solveChineseNumberTheorem(ChineseNumberTheoremInput[] inputs) {
-		int inputCount = inputs.length;
-		long upperN = 1;
-		for (int leftIndex = 0; leftIndex < inputCount; leftIndex++) {
-			long nLeft = inputs[leftIndex].getN();
-			upperN = Math.multiplyExact(upperN, nLeft);
-			for (int rightIndex = leftIndex + 1; rightIndex < inputCount; rightIndex++) {
-				long nRight = inputs[rightIndex].getN();
-				long gcd = solveExtendedEuclideanAlgorithm(nLeft, nRight).getGcd();
-				if (gcd != 1) {
-					throw new IllegalStateException("All n values must be pairwise coprime. " + nLeft + " and " + nRight + " have a gcd of " + gcd + ", and are therefore not pairwise coprime.");
-				}
-			}
-		}
-		long sum = 0;
-		for (int i = 1; i <= inputCount; i++) {
-			ChineseNumberTheoremInput input = inputs[i - 1];
-			long lowerNi = input.getN();
-			if (lowerNi <= 1) {
-				throw new IllegalArgumentException("All n values must be greater than 1. n value " + i + " is " + lowerNi);
-			}
-			long lowerAi = input.getA();
-			while (lowerAi < 0) {
-				lowerAi += lowerNi;
-			}
-			if (lowerAi >= lowerNi) {
-				throw new IllegalArgumentException("All a values must be less than their equivalent n value. a value " + i + " is " + lowerAi);
-			}
-			long upperNi = upperN / lowerNi;
-			ExtendedEuclideanAlgorithmResult extendedEuclideanAlgorithmResult = solveExtendedEuclideanAlgorithm(upperNi, lowerNi);
-			long s = extendedEuclideanAlgorithmResult.getBezoutCoefficientS();
-			long t = extendedEuclideanAlgorithmResult.getBezoutCoefficientT();
-			long mi;
-			if (Math.abs(s) > Math.abs(t)) {
-				mi = t;
-			}
-			else {
-				mi = s;
-			}
-			sum = Math.addExact(sum, Math.multiplyExact(Math.multiplyExact(lowerAi, mi), upperNi));
-		}
-		while (sum < 0) {
-			sum = Math.addExact(sum, upperN);
-		}
-		return sum % upperN;
-	}
-
 	private static NextBusResult calculateNextBus(long currentTime, Long[] busIds) {
 		long bestBusId = Long.MAX_VALUE;
 		long smallestWaitTime = Long.MAX_VALUE;
@@ -171,16 +56,16 @@ public class Day13 implements IPuzzle {
 	}
 
 	private static long calculateCompetitionTime(Long[] busIds) {
-		List<ChineseNumberTheoremInput> chineseNumberTheoremInputList = new ArrayList<>();
+		List<ChineseNumberTheorem.Input> chineseNumberTheoremInputList = new ArrayList<>();
 		int busIdCount = busIds.length;
 		for (int busIdIndex = 0; busIdIndex < busIdCount; busIdIndex++) {
 			Long busId = busIds[busIdIndex];
 			if (busId != null) {
-				chineseNumberTheoremInputList.add(new ChineseNumberTheoremInput(busId, -busIdIndex));
+				chineseNumberTheoremInputList.add(new ChineseNumberTheorem.Input(busId, -busIdIndex));
 			}
 		}
-		ChineseNumberTheoremInput[] chineseNumberTheoremInputArray = chineseNumberTheoremInputList.toArray(new ChineseNumberTheoremInput[0]);
-		return solveChineseNumberTheorem(chineseNumberTheoremInputArray);
+		ChineseNumberTheorem.Input[] chineseNumberTheoremInputArray = chineseNumberTheoremInputList.toArray(new ChineseNumberTheorem.Input[0]);
+		return ChineseNumberTheorem.solve(chineseNumberTheoremInputArray);
 	}
 
 	@Override

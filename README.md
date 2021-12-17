@@ -1,21 +1,20 @@
-Welcome to my solutions for Advent Of Code
+Welcome to my solutions for [Advent of Code](https://adventofcode.com/)
 
 All solutions are run against 4 different sets of puzzle inputs, plus any provided examples, to make sure the solution isn't overfitted to a specific set of data. This is done using a runner mechanism in [Main.java](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/runner/Main.java)
 
-| Year | Day | Complete | All Datasets Run in <100ms? |
+| Year | Day | Complete | All Datasets Run in ≤100ms Each? |
 | --- | --- | --- | --- |
-| 2015 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day01.java)  | Yes |
 | 2015 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day01.java)  | Yes |
 | 2015 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day02.java)  | Yes |
 | 2015 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day03.java)  | Yes |
-| 2015 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day04.java)  | No - Worst dataset is approximately 1.5 seconds |
+| 2015 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day04.java)  | No - Worst dataset is approximately 1,500ms |
 | 2015 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day05.java)  | Yes |
 | 2015 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day06.java)  | No - Worst dataset is approximately 125ms |
 | 2015 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day07.java)  | Yes |
 | 2015 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day08.java)  | Yes |
 | 2015 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day09.java)  | Yes |
 | 2015 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day10.java)  | Yes |
-| 2015 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day11.java)  | No - Worst dataset is approximately 1 second |
+| 2015 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day11.java)  | No - Worst dataset is approximately 1,000ms |
 | 2015 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day12.java)  | Yes |
 | 2015 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day13.java)  | Yes |
 | 2015 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2015/Day14.java)  | Yes |
@@ -34,18 +33,18 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2016 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day02.java)  | Yes |
 | 2016 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day03.java)  | Yes |
 | 2016 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day04.java)  | Yes |
-| 2016 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day05.java)  | No - Worst dataset is approximately 4 seconds |
+| 2016 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day05.java)  | No - Worst dataset is approximately 4,000ms |
 | 2016 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day06.java)  | Yes |
 | 2016 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day07.java)  | Yes |
 | 2016 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day08.java)  | Yes |
 | 2016 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day09.java)  | Yes |
 | 2016 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day10.java)  | Yes |
-| 2016 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day11.java)  | No - Worst dataset is approximately 14 seconds |
+| 2016 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day11.java)  | No - Worst dataset is approximately 14,000ms |
 | 2016 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day12.java)  | No - Worst dataset is approximately 125ms |
 | 2016 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day13.java)  | Yes |
-| 2016 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day14.java)  | No - Worst dataset is approximately 18.75 seconds |
-| 2016 | 15 | No  |  |
-| 2016 | 16 | No  |  |
+| 2016 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day14.java)  | No - Worst dataset is approximately 18,750ms |
+| 2016 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day15.java)  | Yes |
+| 2016 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day16.java)  | No - Worst dataset is approximately 125ms |
 | 2016 | 17 | No  |  |
 | 2016 | 18 | No  |  |
 | 2016 | 19 | No  |  |
@@ -153,8 +152,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2020 | 21 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day21.java)  | Yes |
 | 2020 | 22 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day22.java)  | No - Worst dataset is approximately 350ms |
 | 2020 | 23 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day23.java)  | No - Worst dataset is approximately 750ms |
-| 2020 | 24 | No  |  |
-| 2020 | 25 | No  |  |
+| 2020 | 24 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day24.java)  | Yes |
+| 2020 | 25 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2020/Day25.java)  | No - Worst dataset is approximately 125ms |
 | 2021 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day01.java)  | Yes |
 | 2021 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day02.java)  | Yes |
 | 2021 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day03.java)  | Yes |
@@ -169,9 +168,9 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2021 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day12.java)  | Yes |
 | 2021 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day13.java)  | Yes |
 | 2021 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day14.java)  | Yes |
-| 2021 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day15.java)  | No - Worst dataset is approximately 3.25 seconds |
-| 2021 | 16 | Not Yet Released (at time of writing) |  |
-| 2021 | 17 | Not Yet Released |  |
+| 2021 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day15.java)  | No - Worst dataset is approximately 3,250ms |
+| 2021 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day16.java)  | Yes |
+| 2021 | 17 | Not Yet Released (at time of writing) |  |
 | 2021 | 18 | Not Yet Released |  |
 | 2021 | 19 | Not Yet Released |  |
 | 2021 | 20 | Not Yet Released |  |
