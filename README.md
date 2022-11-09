@@ -79,8 +79,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2017 | 23 | No  |  |
 | 2017 | 24 | No  |  |
 | 2017 | 25 | No  |  |
-| 2018 | 01 | No  |  |
-| 2018 | 02 | No  |  |
+| 2018 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day01.java)  | Yes |
+| 2018 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day02.java)  | Yes |
 | 2018 | 03 | No  |  |
 | 2018 | 04 | No  |  |
 | 2018 | 05 | No  |  |
@@ -104,8 +104,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2018 | 23 | No  |  |
 | 2018 | 24 | No  |  |
 | 2018 | 25 | No  |  |
-| 2019 | 01 | No  |  |
-| 2019 | 02 | No  |  |
+| 2019 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2019/Day01.java)  | Yes |
+| 2019 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2019/Day02.java)  | Yes |
 | 2019 | 03 | No  |  |
 | 2019 | 04 | No  |  |
 | 2019 | 05 | No  |  |
@@ -171,14 +171,39 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2021 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day15.java)  | No - Worst dataset is approximately 3,250ms |
 | 2021 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day16.java)  | Yes |
 | 2021 | 17 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day17.java)  | Yes |
-| 2021 | 18 | Not Yet Released (at time of writing) |  |
-| 2021 | 19 | Not Yet Released |  |
-| 2021 | 20 | Not Yet Released |  |
-| 2021 | 21 | Not Yet Released |  |
-| 2021 | 22 | Not Yet Released |  |
-| 2021 | 23 | Not Yet Released |  |
-| 2021 | 24 | Not Yet Released |  |
-| 2021 | 25 | Not Yet Released |  |
+| 2021 | 18 | No  |  |
+| 2021 | 19 | No  |  |
+| 2021 | 20 | No  |  |
+| 2021 | 21 | No  |  |
+| 2021 | 22 | No  |  |
+| 2021 | 23 | No  |  |
+| 2021 | 24 | No  |  |
+| 2021 | 25 | No  |  |
+| 2022 | 01 | Not Yet Released (at time of writing) |  |
+| 2022 | 02 | Not Yet Released |  |
+| 2022 | 03 | Not Yet Released |  |
+| 2022 | 04 | Not Yet Released |  |
+| 2022 | 05 | Not Yet Released |  |
+| 2022 | 06 | Not Yet Released |  |
+| 2022 | 07 | Not Yet Released |  |
+| 2022 | 08 | Not Yet Released |  |
+| 2022 | 09 | Not Yet Released |  |
+| 2022 | 10 | Not Yet Released |  |
+| 2022 | 11 | Not Yet Released |  |
+| 2022 | 12 | Not Yet Released |  |
+| 2022 | 13 | Not Yet Released |  |
+| 2022 | 14 | Not Yet Released |  |
+| 2022 | 15 | Not Yet Released |  |
+| 2022 | 16 | Not Yet Released |  |
+| 2022 | 17 | Not Yet Released |  |
+| 2022 | 18 | Not Yet Released |  |
+| 2022 | 19 | Not Yet Released |  |
+| 2022 | 20 | Not Yet Released |  |
+| 2022 | 21 | Not Yet Released |  |
+| 2022 | 22 | Not Yet Released |  |
+| 2022 | 23 | Not Yet Released |  |
+| 2022 | 24 | Not Yet Released |  |
+| 2022 | 25 | Not Yet Released |  |
 
 Note that timing is done on a machine of the following spec:
 * Intel i9-10900K CPU @ 3.70GHz

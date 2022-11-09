@@ -25,8 +25,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class Main {
 	private static final int MIN_YEAR = 2015;
@@ -36,27 +42,34 @@ public class Main {
 
 	public static class CommandLineBean {
 		@Option(name = "-y", aliases = "--year", usage = "only run puzzles from a specified year")
-		private Integer year;
+		private List<Integer> years;
 
 		@Option(name = "-d", aliases = "--day", usage = "only run puzzles from a specified year")
-		private Integer day;
+		private List<Integer> days;
 
 		@Option(name = "-u", aliases = "--user", usage = "only run puzzle data sets for user u")
-		private Integer user;
+		private List<Integer> users;
 
 		@Option(name = "-j", aliases = "--pre-run-for-jit", usage = "run each data set twice, discarding the first time, in a bid to pre-JIT the code")
 		private boolean preRunForJIT;
 
-		public Integer getYear() {
-			return this.year;
+		private Set<Integer> processSetList(List<Integer> values) {
+			if (values == null) {
+				return Collections.emptySet();
+			}
+			return new HashSet<>(values);
 		}
 
-		public Integer getDay() {
-			return this.day;
+		public Set<Integer> getYears() {
+			return this.processSetList(this.years);
 		}
 
-		public Integer getUser() {
-			return this.user;
+		public Set<Integer> getDays() {
+			return this.processSetList(this.days);
+		}
+
+		public Set<Integer> getUsers() {
+			return this.processSetList(this.users);
 		}
 
 		public boolean isPreRunForJIT() {
@@ -165,14 +178,14 @@ public class Main {
 			this.createPuzzleInstance();
 		}
 
-		public void run(PrintWriter consoleWriter, boolean restrictedCharacterSet, Integer userFilter, boolean preRunForJIT) {
+		public void run(PrintWriter consoleWriter, boolean restrictedCharacterSet, Set<Integer> userFilter, boolean preRunForJIT) {
 			Path dataPath = Paths.get(String.format("data/year%04d/day%02d/io", this.year, this.day));
 			consoleWriter.format("Running year %d day %d%n", this.year, this.day);
 			List<PuzzleRunResults> puzzleRunResults = new ArrayList<>();
-			if (userFilter == null) {
+			if (userFilter.isEmpty()) {
 				puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "Example", "Examples", "examples", preRunForJIT, null));
 			}
-			puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "User", "Users", "users", preRunForJIT, userFilter == null ? null : Integer.toString(userFilter)));
+			puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "User", "Users", "users", preRunForJIT, userFilter.stream().map(x -> x.toString()).collect(Collectors.toSet())));
 			DisplayTextualTableBuilder displayTextualTableBuilder = new DisplayTextualTableBuilder();
 			NumberFormat numberFormat = NumberFormat.getNumberInstance();
 			for (PuzzleRunResults puzzleRunResultsEntry : puzzleRunResults) {
@@ -209,12 +222,21 @@ public class Main {
 			displayTextualTableBuilder.addEntry("Part " + partCode + " - State", resultState, Alignment.CENTER);
 		}
 
-		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsNameSingular, String dataSetsNamePlural, String dataSetsFolderName, boolean preRunForJIT, String filter) {
+		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsNameSingular, String dataSetsNamePlural, String dataSetsFolderName, boolean preRunForJIT, Set<String> filters) {
 			Path dataSetsPath = dataPath.resolve(dataSetsFolderName);
 			List<Path> dataSetPaths = new ArrayList<>();
+			Set<String> caseInsensitiveFilters;
+			boolean noFilter = filters == null || filters.isEmpty();
+			if (noFilter) {
+				caseInsensitiveFilters = null;
+			}
+			else {
+				caseInsensitiveFilters = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+				caseInsensitiveFilters.addAll(filters);
+			}
 			try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(dataSetsPath, Files::isDirectory)) {
 				for (Path path : directoryStream) {
-					if (filter == null || filter.equalsIgnoreCase(path.getFileName().toString())) {
+					if (noFilter || caseInsensitiveFilters.contains(path.getFileName().toString())) {
 						dataSetPaths.add(path);
 					}
 				}
@@ -331,20 +353,22 @@ public class Main {
 			cmdLineParser.printUsage(System.err);
 			return;
 		}
-		runPuzzles(commandLineBean.getYear(), commandLineBean.getDay(), commandLineBean.getUser(), commandLineBean.isPreRunForJIT());
+		runPuzzles(commandLineBean.getYears(), commandLineBean.getDays(), commandLineBean.getUsers(), commandLineBean.isPreRunForJIT());
 	}
 
-	private static void runPuzzles(Integer yearFilter, Integer dayFilter, Integer userFilter, boolean preRunForJIT) {
+	private static void runPuzzles(Set<Integer> yearFilter, Set<Integer> dayFilter, Set<Integer> userFilter, boolean preRunForJIT) {
 		List<PuzzleRunner> puzzleRunners = new ArrayList<>();
 		String mainClassName = Main.class.getName();
 		String mainPackageName = mainClassName.substring(0, mainClassName.lastIndexOf('.'));
 		String mainParentPackageName = mainPackageName.substring(0, mainPackageName.lastIndexOf('.'));
 		String puzzlesPackageName = mainParentPackageName + ".puzzles";
+		boolean noYearFilter = yearFilter.isEmpty();
+		boolean noDayFilter = dayFilter.isEmpty();
 		for (int year = MIN_YEAR; year <= MAX_YEAR; year++) {
-			if (yearFilter == null || year == yearFilter) {
+			if (noYearFilter || yearFilter.contains(year)) {
 				String yearPackageName = String.format("%s.year%04d", puzzlesPackageName, year);
 				for (int day = MIN_DAY; day <= MAX_DAY; day++) {
-					if (dayFilter == null || day == dayFilter) {
+					if (noDayFilter || dayFilter.contains(day)) {
 						String dayClassName = String.format("%s.Day%02d", yearPackageName, day);
 						Class<?> clazz;
 						try {
