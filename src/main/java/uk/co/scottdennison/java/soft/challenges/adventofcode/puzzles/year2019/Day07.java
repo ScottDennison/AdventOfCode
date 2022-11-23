@@ -8,6 +8,7 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 
 import java.io.PrintWriter;
 import java.util.function.IntSupplier;
+import java.util.function.LongSupplier;
 
 public class Day07 implements IPuzzle {
     private static final int PART_A_MIN_PHASE_SETTING = 0;
@@ -18,18 +19,18 @@ public class Day07 implements IPuzzle {
     private static final int PART_B_MAX_PHASE_SETTING = 9;
     private static final int PART_B_THRUSTER_COUNT = 5;
 
-    private static int recursePhasesPartA(int[] program, int depth, boolean[] usedPhaseSettings, int input) {
+    private static long recursePhasesPartA(long[] program, int depth, boolean[] usedPhaseSettings, long input) {
         if (depth >= PART_A_THRUSTER_COUNT) {
             return input;
         }
         else {
             int nextDepth = depth+1;
-            int maxThrusterSignal = Integer.MIN_VALUE;
+            long maxThrusterSignal = Long.MIN_VALUE;
             for (int phaseSetting=PART_A_MIN_PHASE_SETTING; phaseSetting<=PART_A_MAX_PHASE_SETTING; phaseSetting++) {
                 if (!usedPhaseSettings[phaseSetting]) {
                     usedPhaseSettings[phaseSetting] = true;
                     IntcodeComputer intcodeComputer = new IntcodeComputer(program);
-                    intcodeComputer.addInputs(phaseSetting, input);
+                    intcodeComputer.addInputs((long)phaseSetting, input);
                     intcodeComputer.runFully();
                     if (intcodeComputer.getOutputCount() != 1) {
                         throw new IllegalStateException("Unexpected amount of outputs");
@@ -42,15 +43,15 @@ public class Day07 implements IPuzzle {
         }
     }
 
-    private static int recursePhasesPartB(int[] program, int depth, boolean[] usedPhaseSettings, int[] chosenPhaseSettings) {
+    private static long recursePhasesPartB(long[] program, int depth, boolean[] usedPhaseSettings, int[] chosenPhaseSettings) {
         if (depth >= PART_B_THRUSTER_COUNT) {
             IntcodeComputer[] intcodeComputers = new IntcodeComputer[PART_B_THRUSTER_COUNT];
             for (int index=0; index<PART_B_THRUSTER_COUNT; index++) {
                 IntcodeComputer intcodeComputer = new IntcodeComputer(program);
-                intcodeComputer.addInput(chosenPhaseSettings[index]);
+                intcodeComputer.addInput((long)chosenPhaseSettings[index]);
                 intcodeComputers[index] = intcodeComputer;
             }
-            int input = 0;
+            long input = 0;
             int index = 0;
             boolean resultPending = true;
             while (true) {
@@ -74,7 +75,7 @@ public class Day07 implements IPuzzle {
         }
         else {
             int nextDepth = depth+1;
-            int maxThrusterSignal = Integer.MIN_VALUE;
+            long maxThrusterSignal = Long.MIN_VALUE;
             for (int phaseSetting=PART_B_MIN_PHASE_SETTING; phaseSetting<=PART_B_MAX_PHASE_SETTING; phaseSetting++) {
                 if (!usedPhaseSettings[phaseSetting]) {
                     usedPhaseSettings[phaseSetting] = true;
@@ -87,9 +88,9 @@ public class Day07 implements IPuzzle {
         }
     }
 
-    private static Integer runPart(IntSupplier part) {
+    private static Long runPart(LongSupplier part) {
         try {
-            return part.getAsInt();
+            return part.getAsLong();
         } catch (IntcodeComputer.InsufficentInputsException ex) {
             return null;
         }
@@ -97,7 +98,7 @@ public class Day07 implements IPuzzle {
 
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
-        int[] program = IntcodeComputer.readProgram(inputCharacters);
+        long[] program = IntcodeComputer.readProgram(inputCharacters);
         return new BasicPuzzleResults<>(
             runPart(() -> recursePhasesPartA(program,0, new boolean[PART_A_MAX_PHASE_SETTING+1], 0)),
             runPart(() -> recursePhasesPartB(program, 0, new boolean[PART_B_MAX_PHASE_SETTING+1], new int[PART_B_THRUSTER_COUNT]))

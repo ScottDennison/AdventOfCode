@@ -31,25 +31,47 @@ public class IntcodeComputer {
         }
     }
 
-    private static final int[] POWERS_OF_10 = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000};
+    private static final long[] POWERS_OF_10 = {
+        1L,
+        10L,
+        100L,
+        1000L,
+        10000L,
+        100000L,
+        1000000L,
+        10000000L,
+        100000000L,
+        1000000000L,
+        10000000000L,
+        100000000000L,
+        1000000000000L,
+        10000000000000L,
+        100000000000000L,
+        1000000000000000L,
+        10000000000000000L,
+        100000000000000000L,
+        1000000000000000000L
+    };
 
-    private final int[] memory;
-    private final List<Integer> inputs;
-    private final List<Integer> outputs;
+    private long[] memory;
+    private final List<Long> inputs;
+    private final List<Long> outputs;
 
     private State state;
     private boolean inputsLocked;
-    private int instructionPointer;
+    private long instructionPointer;
     private int inputPointer;
+    private long relativeBase;
 
-    private int currentIntcode;
+    private long currentIntcode;
 
-    public IntcodeComputer(int[] memory) {
+    public IntcodeComputer(long[] memory) {
         this.memory = Arrays.copyOf(memory, memory.length);
         this.inputs = new ArrayList<>();
         this.outputs = new ArrayList<>();
         this.instructionPointer = 0;
         this.inputPointer = 0;
+        this.relativeBase = 0;
         this.state = State.NOT_STARTED;
     }
 
@@ -59,18 +81,18 @@ public class IntcodeComputer {
         }
     }
 
-    public void addInput(int input) {
-        ensureInputsUnlocked();
+    public void addInput(long input) {
+        this.ensureInputsUnlocked();
         this.inputs.add(input);
     }
 
-    public void addInputs(int... inputs) {
-        ensureInputsUnlocked();
+    public void addInputs(long... inputs) {
+        this.ensureInputsUnlocked();
         Arrays.stream(inputs).boxed().forEach(this.inputs::add);
     }
 
-    public void addInputs(Collection<Integer> inputs) {
-        ensureInputsUnlocked();
+    public void addInputs(Collection<Long> inputs) {
+        this.ensureInputsUnlocked();
         this.inputs.addAll(inputs);
     }
 
@@ -78,15 +100,15 @@ public class IntcodeComputer {
         this.inputsLocked = true;
     }
 
-    public int getMemory(int index) {
-        return this.memory[index];
+    public long getMemory(int index) {
+        return this.readMemory(index, false);
     }
 
     public int getOutputCount() {
         return this.outputs.size();
     }
 
-    public int getOutput(int index) {
+    public long getOutput(int index) {
         return this.outputs.get(index);
     }
 
@@ -122,14 +144,14 @@ public class IntcodeComputer {
                 break;
         }
         this.state = State.RUNNING;
-        int opCode = (this.currentIntcode = this.memory[this.instructionPointer]) % 100;
+        int opCode = (int)((this.currentIntcode = this.readMemory(this.instructionPointer)) % 100);
         switch (opCode) {
             case 1:
-                writeParameter(3, readParameter(1) + readParameter(2));
+                this.writeParameter(3, this.readParameter(1) + this.readParameter(2));
                 this.instructionPointer += 4;
                 break;
             case 2:
-                writeParameter(3, readParameter(1) * readParameter(2));
+                this.writeParameter(3, this.readParameter(1) * this.readParameter(2));
                 this.instructionPointer += 4;
                 break;
             case 3:
@@ -142,11 +164,11 @@ public class IntcodeComputer {
                         break;
                     }
                 }
-                writeParameter(1, this.inputs.get(this.inputPointer++));
+                this.writeParameter(1, this.inputs.get(this.inputPointer++));
                 this.instructionPointer += 2;
                 break;
             case 4:
-                outputs.add(this.readParameter(1));
+                this.outputs.add(this.readParameter(1));
                 this.instructionPointer += 2;
                 break;
             case 5:
@@ -171,6 +193,10 @@ public class IntcodeComputer {
                 this.writeParameter(3, this.readParameter(1) == this.readParameter(2) ? 1 : 0);
                 this.instructionPointer += 4;
                 break;
+            case 9:
+                this.relativeBase += this.readParameter(1);
+                this.instructionPointer += 2;
+                break;
             case 99:
                 this.state = State.HALTED;
                 break;
@@ -179,30 +205,90 @@ public class IntcodeComputer {
         }
     }
 
-    private int readParameter(int parameterNumber) {
-        int value = memory[instructionPointer + parameterNumber];
-        switch (getParameterMode(parameterNumber)) {
+    private long readMemory(int address) {
+        return this.readMemory(address, true);
+    }
+
+    private long readMemory(int address, boolean allowOutside) {
+        if (address < 0) {
+            throw new IllegalProgramException("Tried to access negative memory address.");
+        }
+        if (address >= this.memory.length) {
+            if (allowOutside) {
+                return 0;
+            }
+            else {
+                throw new IllegalProgramException("Tried to access memory address that is too high.");
+            }
+        }
+        return this.memory[address];
+    }
+
+    private long readMemory(long address) {
+        return this.readMemory(address, true);
+    }
+
+    private long readMemory(long address, boolean allowOutside) {
+        if (address < Integer.MIN_VALUE || address > Integer.MAX_VALUE) {
+            throw new IllegalProgramException("Tried to read memory that is outside of 32-bit range.");
+        }
+        return this.readMemory((int)address, allowOutside);
+    }
+
+    private void writeMemory(int address, long value) {
+        if (address < 0) {
+            throw new IllegalProgramException("Tried to access negative memory address.");
+        }
+        if (address >= this.memory.length) {
+            long[] newMemory = new long[(address*2)+1];
+            System.arraycopy(this.memory,0,newMemory,0,this.memory.length);
+            this.memory = newMemory;
+        }
+        this.memory[address] = value;
+    }
+
+    private void writeMemory(long address, long value) {
+        if (address < Integer.MIN_VALUE || address > Integer.MAX_VALUE) {
+            throw new IllegalProgramException("Tried to write memory that is outside of 32-bit range.");
+        }
+        this.writeMemory((int)address, value);
+    }
+
+    private long readParameter(int parameterNumber) {
+        long parameterValue = this.readMemory(this.instructionPointer + parameterNumber);
+        switch (this.getParameterMode(parameterNumber)) {
             case 0:
-                return memory[value];
+                return this.readMemory(parameterValue);
             case 1:
-                return value;
+                return parameterValue;
+            case 2:
+                return this.readMemory(parameterValue + this.relativeBase);
             default:
                 throw new IllegalProgramException("Unexpected parameter mode");
         }
     }
 
-    private void writeParameter(int parameterNumber, int value) {
-        if (getParameterMode(parameterNumber) != 0) {
-            throw new IllegalProgramException("Invalid parameter mode");
+    private void writeParameter(int parameterNumber, long value) {
+        long parameterValue =  this.readMemory(this.instructionPointer + parameterNumber);
+        switch (this.getParameterMode(parameterNumber)) {
+            case 0:
+                this.writeMemory(parameterValue, value);
+                break;
+            case 1:
+                throw new IllegalProgramException("Parameter mode 1 is invalid for writing");
+            case 2:
+                this.writeMemory(parameterValue + this.relativeBase, value);
+                break;
+            default:
+                throw new IllegalProgramException("Unexpected parameter mode");
         }
-        memory[memory[instructionPointer + parameterNumber]] = value;
     }
 
     private int getParameterMode(int parameterNumber) {
-        return (currentIntcode / POWERS_OF_10[parameterNumber + 1]) % 10;
+        return (int)((this.currentIntcode / IntcodeComputer.POWERS_OF_10[parameterNumber + 1]) % 10);
     }
 
-    public static final int[] readProgram(char[] inputCharacters) {
-        return Arrays.stream(new String(inputCharacters).trim().split(",")).mapToInt(Integer::parseInt).toArray();
+    public static final long[] readProgram(char[] inputCharacters) {
+        return Arrays.stream(new String(inputCharacters).trim().split(",")).mapToLong(Long::parseLong).toArray();
     }
 }
