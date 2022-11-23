@@ -13,8 +13,9 @@ public class Day05 implements IPuzzle {
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
         int[] memory = IntcodeComputer.readProgram(inputCharacters);
 
-        IntcodeComputer partAIntcodeComputer = new IntcodeComputer(memory, new int[] {1});
-        partAIntcodeComputer.run();
+        IntcodeComputer partAIntcodeComputer = new IntcodeComputer(memory);
+        partAIntcodeComputer.addInput(1);
+        partAIntcodeComputer.runFully();
         int partAOutputCount = partAIntcodeComputer.getOutputCount();
         if (partAOutputCount < 2) {
             throw new IllegalStateException("Expected at least 2 outputs from part A");
@@ -26,8 +27,9 @@ public class Day05 implements IPuzzle {
         }
         int partAResult = partAIntcodeComputer.getOutput(partAOutputCount-1);
 
-        IntcodeComputer partBIntcodeComputer = new IntcodeComputer(memory, new int[] {5});
-        partBIntcodeComputer.run();
+        IntcodeComputer partBIntcodeComputer = new IntcodeComputer(memory);
+        partBIntcodeComputer.addInput(5);
+        partBIntcodeComputer.runFully();
         if (partBIntcodeComputer.getOutputCount() != 1) {
             throw new IllegalStateException("Expected only 1 output from part B");
         }

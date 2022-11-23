@@ -36,8 +36,8 @@ public class Day02 implements IPuzzle {
         int[] memory = Arrays.copyOf(initialMemory, initialMemory.length);
         memory[1] = noun;
         memory[2] = verb;
-        IntcodeComputer intcodeComputer = new IntcodeComputer(memory, new int[0]);
-        intcodeComputer.run();
+        IntcodeComputer intcodeComputer = new IntcodeComputer(memory);
+        intcodeComputer.runFully();
         return intcodeComputer.getMemory(0);
     }
 }
