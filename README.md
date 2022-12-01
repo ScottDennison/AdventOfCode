@@ -179,8 +179,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2021 | 23 | No                                                                                                      |  |
 | 2021 | 24 | No                                                                                                      |  |
 | 2021 | 25 | No                                                                                                      |  |
-| 2022 | 01 | Not Yet Released (at time of writing)                                                                   |  |
-| 2022 | 02 | Not Yet Released                                                                                        |  |
+| 2022 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day01.java) | Yes |
+| 2022 | 02 | Not Yet Released (at time of writing)                                                                   |  |
 | 2022 | 03 | Not Yet Released                                                                                        |  |
 | 2022 | 04 | Not Yet Released                                                                                        |  |
 | 2022 | 05 | Not Yet Released                                                                                        |  |
