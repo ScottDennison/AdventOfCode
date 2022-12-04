@@ -10,7 +10,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 public class Day03 implements IPuzzle {
-    private static final int PART_A_RUCK_SEGMENT_COUNT = 2;
+    private static final int PART_A_RUCKSACK_COMPARTMENT_COUNT = 2;
     private static final int PART_B_ELF_RUCKSACK_COUNT = 3;
 
     @Override
@@ -20,28 +20,28 @@ public class Day03 implements IPuzzle {
         if (lineCount % PART_B_ELF_RUCKSACK_COUNT != 0) {
             throw new IllegalStateException("Invalid amount of lines");
         }
-        char[][] partARucksackSegments = new char[PART_A_RUCK_SEGMENT_COUNT][];
+        char[][] partARucksackCompartments = new char[PART_A_RUCKSACK_COMPARTMENT_COUNT][];
         char[][] partBElfRucksacks = new char[PART_B_ELF_RUCKSACK_COUNT][];
         int partASum = 0;
         int partBSum = 0;
-        int partBElfRuckscakIndexToCheckOn = PART_B_ELF_RUCKSACK_COUNT - 1;
+        int partBElfRucksackIndexToCheckOn = PART_B_ELF_RUCKSACK_COUNT - 1;
         for (int lineIndex=0; lineIndex<lineCount; lineIndex++) {
             char[] line = lines[lineIndex];
             int lineLength = line.length;
-            if (lineLength % PART_A_RUCK_SEGMENT_COUNT != 0) {
+            if (lineLength % PART_A_RUCKSACK_COMPARTMENT_COUNT != 0) {
                 throw new IllegalStateException("Invalid line length");
             }
-            int segmentLength = lineLength / 2;
+            int compartmentLength = lineLength / 2;
             int startIndex = 0;
-            for (int segmentIndex=0; segmentIndex<PART_A_RUCK_SEGMENT_COUNT; segmentIndex++) {
-                int nextStartIndex = startIndex+segmentLength;
-                partARucksackSegments[segmentIndex] = Arrays.copyOfRange(line,startIndex,nextStartIndex);
+            for (int compartmentIndex = 0; compartmentIndex< PART_A_RUCKSACK_COMPARTMENT_COUNT; compartmentIndex++) {
+                int nextStartIndex = startIndex+compartmentLength;
+                partARucksackCompartments[compartmentIndex] = Arrays.copyOfRange(line,startIndex,nextStartIndex);
                 startIndex = nextStartIndex;
             }
-            partASum += solve(partARucksackSegments);
+            partASum += solve(partARucksackCompartments);
             int partBElfRucksackIndex = lineIndex %  PART_B_ELF_RUCKSACK_COUNT;
             partBElfRucksacks[partBElfRucksackIndex] = line;
-            if (partBElfRucksackIndex == partBElfRuckscakIndexToCheckOn) {
+            if (partBElfRucksackIndex == partBElfRucksackIndexToCheckOn) {
                 partBSum += solve(partBElfRucksacks);
             }
         }
