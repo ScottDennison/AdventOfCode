@@ -27,18 +27,14 @@ public class Day06 implements IPuzzle {
             if (inputCharacterIndex >= uniqueDesiredCount && --counts[buffer[bufferIndex]] == 0) {
                 unqiueCount--;
             }
-            char inputCharacter = inputCharacters[inputCharacterIndex];
-            if (counts[inputCharacter]++ == 0) {
-                unqiueCount++;
-                if (unqiueCount == uniqueDesiredCount) {
-                    return inputCharacterIndex+1;
+            if (counts[buffer[bufferIndex++] = inputCharacters[inputCharacterIndex++]]++ == 0) {
+                if (++unqiueCount == uniqueDesiredCount) {
+                    return inputCharacterIndex;
                 }
             }
-            buffer[bufferIndex++] = inputCharacter;
             if (bufferIndex == uniqueDesiredCount) {
                 bufferIndex = 0;
             }
-            inputCharacterIndex++;
         }
         throw new IllegalStateException("No solution found");
     }
