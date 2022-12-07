@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 
 public class Day07 implements IPuzzle {
     private static final boolean PRETTY_PRINT = false;
@@ -144,16 +145,23 @@ public class Day07 implements IPuzzle {
         return totalSize;
     }
 
-    private int recursePartB(Directory directory, int spaceToFree) {
+    private OptionalInt recursePartB(Directory directory, int spaceToFree) {
         int bestSize = directory.getSize();
         if (bestSize < spaceToFree) {
             bestSize = Integer.MAX_VALUE;
         }
         Iterator<Directory> childDirectoryIterator = directory.iterateChildDirectories();
         while (childDirectoryIterator.hasNext()) {
-            bestSize = Math.min(bestSize,recursePartB(childDirectoryIterator.next(),spaceToFree));
+            OptionalInt childResult = recursePartB(childDirectoryIterator.next(),spaceToFree);
+            if (childResult.isPresent()) {
+                bestSize = Math.min(bestSize, childResult.getAsInt());
+            }
         }
-        return bestSize;
+        if (bestSize == Integer.MAX_VALUE) {
+            return OptionalInt.empty();
+        } else {
+            return OptionalInt.of(bestSize);
+        }
     }
 
     @Override
@@ -212,7 +220,7 @@ public class Day07 implements IPuzzle {
         }
         return new BasicPuzzleResults<>(
             recursePartA(rootDirectory),
-            recursePartB(rootDirectory,(PART_B_UNUSED_SPACE_REQUIRED-(PART_B_DISK_SIZE-rootDirectory.getSize())))
+            recursePartB(rootDirectory,(PART_B_UNUSED_SPACE_REQUIRED-(PART_B_DISK_SIZE-rootDirectory.getSize()))).orElseThrow(() -> new IllegalStateException("No directory frees enough space"))
         );
     }
 }
