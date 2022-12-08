@@ -186,8 +186,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2022 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day05.java) | Yes |
 | 2022 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day06.java) | Yes |
 | 2022 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day07.java) | Yes |
-| 2022 | 08 | Not Yet Released (at time of writing)                                                                   |  |
-| 2022 | 09 | Not Yet Released                                                                                        |  |
+| 2022 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day08.java) | Yes |
+| 2022 | 09 | Not Yet Released (at time of writing)                                                                   |  |
 | 2022 | 10 | Not Yet Released                                                                                        |  |
 | 2022 | 11 | Not Yet Released                                                                                        |  |
 | 2022 | 12 | Not Yet Released                                                                                        |  |
