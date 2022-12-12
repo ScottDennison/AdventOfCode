@@ -1,6 +1,6 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.libs.text.proessing.CaptialLetterAsciiArtProcessor;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.CaptialLetterAsciiArtProcessor;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -8,8 +8,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 import uk.co.scottdennison.java.libs.text.input.LineReader;
 
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

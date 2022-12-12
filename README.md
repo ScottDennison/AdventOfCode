@@ -188,10 +188,10 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2022 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day07.java) | Yes |
 | 2022 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day08.java) | Yes |
 | 2022 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day09.java) | Yes |
-| 2022 | 10 | Not Yet Released (at time of writing)                                                                   |  |
-| 2022 | 11 | Not Yet Released                                                                                        |  |
-| 2022 | 12 | Not Yet Released                                                                                        |  |
-| 2022 | 13 | Not Yet Released                                                                                        |  |
+| 2022 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day10.java) | Yes |
+| 2022 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day11.java) | Yes |
+| 2022 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day12.java) | Yes |
+| 2022 | 13 | Not Yet Released (at time of writing)                                                                   |  |
 | 2022 | 14 | Not Yet Released                                                                                        |  |
 | 2022 | 15 | Not Yet Released                                                                                        |  |
 | 2022 | 16 | Not Yet Released                                                                                        |  |

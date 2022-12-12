@@ -1,7 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2021;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.libs.text.proessing.CaptialLetterAsciiArtProcessor;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.CaptialLetterAsciiArtProcessor;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;

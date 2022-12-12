@@ -1,14 +1,12 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2019;
 
-import uk.co.scottdennison.java.libs.text.proessing.CaptialLetterAsciiArtProcessor;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.CaptialLetterAsciiArtProcessor;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Day08 implements IPuzzle {
 	private static final int IMAGE_WIDTH = 25;

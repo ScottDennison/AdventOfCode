@@ -17,7 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Day09 implements IPuzzle {
-	private static final boolean DEBUG_MASTER_TURN_OFF = false;
+	private static final boolean DEBUG_MASTER_TURN_OFF = true;
 
 	private static enum Direction {
 		UP (0,-1),

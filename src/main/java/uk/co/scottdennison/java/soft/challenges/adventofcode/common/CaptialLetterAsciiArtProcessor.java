@@ -1,4 +1,4 @@
-package uk.co.scottdennison.java.libs.text.proessing;
+package uk.co.scottdennison.java.soft.challenges.adventofcode.common;
 
 import java.util.HashMap;
 import java.util.Map;

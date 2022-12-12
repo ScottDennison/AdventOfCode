@@ -8,8 +8,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 import uk.co.scottdennison.java.libs.text.output.DisplayWriter;
 import uk.co.scottdennison.java.libs.text.output.table.DisplayTextualTableBuilder;
-import uk.co.scottdennison.java.libs.text.output.table.DisplayTextualTableBuilder.Alignment;
-import uk.co.scottdennison.java.libs.text.output.table.DisplayTextualTableBuilder.CharacterSet;
 
 import java.io.Console;
 import java.io.IOException;
@@ -29,12 +27,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class Main {
+	private static final Pattern PATTERN_NEWLINE = Pattern.compile("\\R");
+
 	private static final int MIN_YEAR = 2015;
 	private static final int MAX_YEAR = 2022;
 	private static final int MIN_DAY = 1;
@@ -187,15 +187,17 @@ public class Main {
 			}
 			puzzleRunResults.addAll(runWithDataSets(consoleWriter, dataPath, "User", "Users", "users", preRunForJIT, userFilter.stream().map(x -> x.toString()).collect(Collectors.toSet())));
 			DisplayTextualTableBuilder displayTextualTableBuilder = new DisplayTextualTableBuilder();
+			displayTextualTableBuilder.setDefaultHorizontalAlignment(DisplayTextualTableBuilder.HorizontalAlignment.CENTER_BLOCK);
+			displayTextualTableBuilder.setDefaultVerticalAlignment(DisplayTextualTableBuilder.VerticalAlignment.MIDDLE);
 			NumberFormat numberFormat = NumberFormat.getNumberInstance();
 			for (PuzzleRunResults puzzleRunResultsEntry : puzzleRunResults) {
 				displayTextualTableBuilder.addRow(true);
-				displayTextualTableBuilder.addEntry("Data Set", puzzleRunResultsEntry.getDataSetName(), Alignment.LEFT);
-				displayTextualTableBuilder.addEntry("Time taken (ns)", numberFormat.format(puzzleRunResultsEntry.getNanoseconds()), Alignment.RIGHT);
+				displayTextualTableBuilder.addEntry("Data Set", puzzleRunResultsEntry.getDataSetName(), DisplayTextualTableBuilder.HorizontalAlignment.LEFT);
+				displayTextualTableBuilder.addEntry("Time taken (ns)", numberFormat.format(puzzleRunResultsEntry.getNanoseconds()), DisplayTextualTableBuilder.HorizontalAlignment.RIGHT);
 				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, "A", puzzleRunResultsEntry.getPartAResults());
 				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, "B", puzzleRunResultsEntry.getPartBResults());
 			}
-			consoleWriter.write(displayTextualTableBuilder.build("\t", restrictedCharacterSet ? CharacterSet.ASCII : CharacterSet.BASIC_BOX_DRAWING_DOUBLE_WIDTH_OUTER, true, null));
+			consoleWriter.write(displayTextualTableBuilder.build("\t", restrictedCharacterSet ? DisplayTextualTableBuilder.CharacterSet.ASCII : DisplayTextualTableBuilder.CharacterSet.BASIC_BOX_DRAWING_DOUBLE_WIDTH_OUTER, true, null));
 			consoleWriter.flush();
 		}
 
@@ -217,9 +219,9 @@ public class Main {
 				expectedResult = "";
 				resultState = "\u001B[33mUNKNOWN\u001B[0m";
 			}
-			displayTextualTableBuilder.addEntry("Part " + partCode + " - Expected Answer", expectedResult, Alignment.RIGHT);
-			displayTextualTableBuilder.addEntry("Part " + partCode + " - Actual Answer", actualResult, Alignment.RIGHT);
-			displayTextualTableBuilder.addEntry("Part " + partCode + " - State", resultState, Alignment.CENTER);
+			displayTextualTableBuilder.addEntry("Part " + partCode + " - Expected Answer", expectedResult, DisplayTextualTableBuilder.HorizontalAlignment.RIGHT_BLOCK);
+			displayTextualTableBuilder.addEntry("Part " + partCode + " - Actual Answer", actualResult, DisplayTextualTableBuilder.HorizontalAlignment.RIGHT_BLOCK);
+			displayTextualTableBuilder.addEntry("Part " + partCode + " - State", resultState);
 		}
 
 		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsNameSingular, String dataSetsNamePlural, String dataSetsFolderName, boolean preRunForJIT, Set<String> filters) {
@@ -288,15 +290,19 @@ public class Main {
 				expectedResultTrimmedString = null;
 			}
 			else {
-				expectedResultTrimmedString = new String(expectedResult).trim();
+				expectedResultTrimmedString = normalizeNewlines(new String(expectedResult)).trim();
 			}
 			if (actualResult == null) {
 				actualResultTrimmedString = null;
 			}
 			else {
-				actualResultTrimmedString = actualResult.trim();
+				actualResultTrimmedString = normalizeNewlines(actualResult).trim();
 			}
 			return new PuzzleRunPartResults(expectedResultTrimmedString, actualResultTrimmedString);
+		}
+
+		private static String normalizeNewlines(String input) {
+			return PATTERN_NEWLINE.matcher(input).replaceAll("\n");
 		}
 
 		private IPuzzle createPuzzleInstance() {
