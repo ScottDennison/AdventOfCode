@@ -20,4 +20,5 @@ repositories {
 
 dependencies {
     implementation group: 'args4j', name: 'args4j', version: '2.33'
+    implementation group: 'org.jsoup', name: 'jsoup', version: '1.15.3'
 }

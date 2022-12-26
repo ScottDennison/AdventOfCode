@@ -191,19 +191,19 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2022 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day10.java) | Yes |
 | 2022 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day11.java) | Yes |
 | 2022 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day12.java) | Yes |
-| 2022 | 13 | Not Yet Released (at time of writing)                                                                   |  |
-| 2022 | 14 | Not Yet Released                                                                                        |  |
-| 2022 | 15 | Not Yet Released                                                                                        |  |
-| 2022 | 16 | Not Yet Released                                                                                        |  |
-| 2022 | 17 | Not Yet Released                                                                                        |  |
-| 2022 | 18 | Not Yet Released                                                                                        |  |
-| 2022 | 19 | Not Yet Released                                                                                        |  |
-| 2022 | 20 | Not Yet Released                                                                                        |  |
-| 2022 | 21 | Not Yet Released                                                                                        |  |
-| 2022 | 22 | Not Yet Released                                                                                        |  |
-| 2022 | 23 | Not Yet Released                                                                                        |  |
-| 2022 | 24 | Not Yet Released                                                                                        |  |
-| 2022 | 25 | Not Yet Released                                                                                        |  |
+| 2022 | 13 | No                                                                                                      |  |
+| 2022 | 14 | No                                                                                                      |  |
+| 2022 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day15.java) | No - Worst dataset is approximately 3750ms |
+| 2022 | 16 | No                                                                                                      |  |
+| 2022 | 17 | No                                                                                                      |  |
+| 2022 | 18 | No                                                                                                      |  |
+| 2022 | 19 | No                                                                                                      |  |
+| 2022 | 20 | No                                                                                                      |  |
+| 2022 | 21 | No                                                                                                      |  |
+| 2022 | 22 | No                                                                                                      |  |
+| 2022 | 23 | No                                                                                                      |  |
+| 2022 | 24 | No                                                                                                      |  |
+| 2022 | 25 | No                                                                                                      |  |
 
 Note that timing is done on a machine of the following spec:
 * Intel i9-10900K CPU @ 3.70GHz
