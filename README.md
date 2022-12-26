@@ -193,7 +193,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2022 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day12.java) | Yes |
 | 2022 | 13 | No                                                                                                      |  |
 | 2022 | 14 | No                                                                                                      |  |
-| 2022 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day15.java) | No - Worst dataset is approximately 500ms |
+| 2022 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2022/Day15.java) | No - Worst dataset is approximately 750ms |
 | 2022 | 16 | No                                                                                                      |  |
 | 2022 | 17 | No                                                                                                      |  |
 | 2022 | 18 | No                                                                                                      |  |
