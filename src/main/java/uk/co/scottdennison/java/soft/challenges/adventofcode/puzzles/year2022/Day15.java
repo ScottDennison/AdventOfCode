@@ -9,23 +9,41 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Day15 implements IPuzzle {
     private static final Pattern PATTERN_LINE = Pattern.compile("^Sensor at x=(?<sensorX>-?[0-9]+), y=(?<sensorY>-?[0-9]+): closest beacon is at x=(?<beaconX>-?[0-9]+), y=(?<beaconY>-?[0-9]+)$");
+
+    private static class Sensor {
+        private final int sensorX;
+        private final int sensorY;
+        private final int manhattanDistanceToNearestBeacon;
+
+        public Sensor(int sensorX, int sensorY, int manhattanDistanceToNearestBeacon) {
+            this.sensorX = sensorX;
+            this.sensorY = sensorY;
+            this.manhattanDistanceToNearestBeacon = manhattanDistanceToNearestBeacon;
+        }
+
+        public int getSensorX() {
+            return this.sensorX;
+        }
+
+        public int getSensorY() {
+            return this.sensorY;
+        }
+
+        public int getManhattanDistanceToNearestBeacon() {
+            return this.manhattanDistanceToNearestBeacon;
+        }
+    }
 
     private static final class Range {
         private final int startInclusive;
@@ -71,35 +89,19 @@ public class Day15 implements IPuzzle {
         ranges.add(newRange);
     }
 
-    private static void iterateRows(Collection<Range>[] impossibleBeaconXRangesPerY, int sensorX, int sensorY, int minBounds, int maxBounds, int manhattenDistanceBetweenSensorAndBeacon, int addition) {
-        for (
-            int index=0, y=sensorY, minXAtY=sensorX-manhattenDistanceBetweenSensorAndBeacon, maxXAtY=sensorX+manhattenDistanceBetweenSensorAndBeacon;
-            index<=manhattenDistanceBetweenSensorAndBeacon && y >= minBounds && y <= maxBounds;
-            index++, y += addition, minXAtY++, maxXAtY--
-        ) {
-            int arrayY = y-minBounds;
-            Collection<Range> impossibleBeaconXRangesAtY = impossibleBeaconXRangesPerY[arrayY];
-            if (impossibleBeaconXRangesAtY == null) {
-                impossibleBeaconXRangesPerY[arrayY] = impossibleBeaconXRangesAtY = new LinkedList<>();
-            }
-            addRangeToCollection(impossibleBeaconXRangesAtY, new Range(minXAtY,maxXAtY+1));
-        }
-    }
-
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+        // Setup and Parsing
         int minBounds = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("min_bounds")));
         int maxBounds = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("max_bounds")));
         int targetRowY = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("target_row_y")));
         int tuningFrequencyXMultiplier = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("tuning_frequency_x_multiplier")));
-        if (minBounds > maxBounds || targetRowY < minBounds || targetRowY > maxBounds) {
-            throw new IllegalStateException("Invalid configuration");
-        }
-        @SuppressWarnings("unsafe")
-        Collection<Range>[] impossibleBeaconXRangesPerY = new Collection[maxBounds-minBounds+1];
+        String[] inputLines = LineReader.stringsArray(inputCharacters, true);
+        int sensorCount = inputLines.length;
+        Sensor[] sensors = new Sensor[sensorCount];
         Map<Integer,Set<Integer>> beaconXLocationsPerY = new HashMap<>();
-        for (String inputLine : LineReader.strings(inputCharacters)) {
-            Matcher matcher = PATTERN_LINE.matcher(inputLine);
+        for (int sensorIndex=0; sensorIndex<sensorCount; sensorIndex++) {
+            Matcher matcher = PATTERN_LINE.matcher(inputLines[sensorIndex]);
             if (!matcher.matches()) {
                 throw new IllegalArgumentException("Could not parse line");
             }
@@ -107,71 +109,76 @@ public class Day15 implements IPuzzle {
             int sensorY = Integer.parseInt(matcher.group("sensorY"));
             int beaconX = Integer.parseInt(matcher.group("beaconX"));
             int beaconY = Integer.parseInt(matcher.group("beaconY"));
-            int manhattenDistanceBetweenSensorAndBeacon = Math.abs(beaconX-sensorX)+Math.abs(beaconY-sensorY);
-            iterateRows(impossibleBeaconXRangesPerY,sensorX,sensorY,minBounds,maxBounds,manhattenDistanceBetweenSensorAndBeacon,-1);
-            iterateRows(impossibleBeaconXRangesPerY,sensorX,sensorY,minBounds,maxBounds,manhattenDistanceBetweenSensorAndBeacon,1);
+            int manhattenDistanceBetweenSensorAndBeacon = Math.abs(beaconX - sensorX) + Math.abs(beaconY - sensorY);
+            sensors[sensorIndex] = new Sensor(sensorX, sensorY, manhattenDistanceBetweenSensorAndBeacon);
             beaconXLocationsPerY.computeIfAbsent(beaconY,__ -> new HashSet<>()).add(beaconX);
         }
-        int impossibleBeaconXLocationSum = -Optional.ofNullable(beaconXLocationsPerY.get(targetRowY)).map(Set::size).orElse(0);
-        Collection<Range> impossibleBeaconXRangesAtTargetRowY = impossibleBeaconXRangesPerY[targetRowY-minBounds];
-        if (impossibleBeaconXRangesAtTargetRowY != null) {
-            for (Range range : impossibleBeaconXRangesAtTargetRowY) {
-                impossibleBeaconXLocationSum += range.getEndExclusive() - range.getStartInclusive();
+
+        // Part A
+        Collection<Range> impossibleBeaconXRangesForTargetRow = new ArrayList<>();
+        for (Sensor sensor : sensors) {
+            int sensorX = sensor.getSensorX();
+            int sensorY = sensor.getSensorY();
+            int yDistanceBetweenSensorAndTargetRow = Math.abs(targetRowY-sensorY);
+            int sensorManhattanDistanceToNearestBeacon = sensor.getManhattanDistanceToNearestBeacon();
+            int sensorRangeXStartInclusiveForTargetRow = sensorX - sensorManhattanDistanceToNearestBeacon + yDistanceBetweenSensorAndTargetRow;
+            int sensorRangeXEndInclusiveForTargetRow = sensorX + sensorManhattanDistanceToNearestBeacon - yDistanceBetweenSensorAndTargetRow;
+            if (sensorRangeXStartInclusiveForTargetRow <= sensorRangeXEndInclusiveForTargetRow) {
+                addRangeToCollection(impossibleBeaconXRangesForTargetRow, new Range(sensorRangeXStartInclusiveForTargetRow, sensorRangeXEndInclusiveForTargetRow+1));
             }
         }
+        int impossibleBeaconXLocationCountForTargetRow = -Optional.ofNullable(beaconXLocationsPerY.get(targetRowY)).map(Set::size).orElse(0);
+        for (Range impossibleBeaconXRangeForTargetRow : impossibleBeaconXRangesForTargetRow) {
+            impossibleBeaconXLocationCountForTargetRow += impossibleBeaconXRangeForTargetRow.getEndExclusive() - impossibleBeaconXRangeForTargetRow.getStartInclusive();
+        }
+
+        // Part B
         Set<Long> tuningFrequencies = new HashSet<>();
-        Comparator<Range> rangeComparator = Comparator.comparing(Range::getStartInclusive).thenComparing(Range::getEndExclusive);
-        for (int y=minBounds, arrayY=0; y<=maxBounds; y++, arrayY++) {
-            Collection<Range> existingImpossibleBeaconXRangesAtY = impossibleBeaconXRangesPerY[arrayY];
-            if (existingImpossibleBeaconXRangesAtY == null || existingImpossibleBeaconXRangesAtY.isEmpty()) {
-                addTuningFrequencies(tuningFrequencies, tuningFrequencyXMultiplier, y, minBounds, maxBounds);
-            } else {
-                if (existingImpossibleBeaconXRangesAtY.size() > 1) {
-                    List<Range> existingImpossibleBeaconXRangesAtYList = new ArrayList<>(existingImpossibleBeaconXRangesAtY);
-                    existingImpossibleBeaconXRangesAtY = existingImpossibleBeaconXRangesAtYList;
-                    Collections.sort(existingImpossibleBeaconXRangesAtYList, rangeComparator);
-                }
-                int minEncounteredX = Integer.MAX_VALUE;
-                int maxEncounteredX = Integer.MIN_VALUE;
-                int lastRangeMaxX = 0;
-                boolean isFirstRange = true;
-                for (Range range : existingImpossibleBeaconXRangesAtY) {
-                    int rangeMinX = range.getStartInclusive();
-                    int rangeMaxX = range.getEndExclusive()-1;
-                    if (rangeMaxX < minBounds || rangeMinX > maxBounds) {
-                        // Range is entirely outside of bounds, ignore.
-                        continue;
-                    }
-                    int adjustedRangeMinX = Math.min(Math.max(rangeMinX, minBounds), maxBounds);
-                    int adjustedRangeMaxX = Math.min(Math.max(rangeMaxX, minBounds), maxBounds);
-                    minEncounteredX = Math.min(minEncounteredX, adjustedRangeMinX);
-                    maxEncounteredX = Math.max(maxEncounteredX, adjustedRangeMaxX);
-                    if (isFirstRange) {
-                        isFirstRange = false;
+        for (int y=minBounds; y<=maxBounds; y++) {
+            int x = minBounds;
+            do {
+                boolean inSensorRange = false;
+                int nextXOfInterest = maxBounds + 1;
+                for (Sensor sensor : sensors) {
+                    int sensorX = sensor.getSensorX();
+                    int sensorY = sensor.getSensorY();
+                    int sensorManhattanDistanceToNearestBeacon = sensor.getManhattanDistanceToNearestBeacon();
+                    int xDistanceToSensor = Math.abs(x - sensorX);
+                    int yDistanceToSensor = Math.abs(y - sensorY);
+                    int manhattenDistanceToSensor = xDistanceToSensor + yDistanceToSensor;
+                    if (manhattenDistanceToSensor <= sensorManhattanDistanceToNearestBeacon) {
+                        nextXOfInterest = sensorX + sensorManhattanDistanceToNearestBeacon - yDistanceToSensor + 1;
+                        inSensorRange = true;
+                        break;
                     } else {
-                        addTuningFrequencies(tuningFrequencies, tuningFrequencyXMultiplier, y, lastRangeMaxX+1, adjustedRangeMinX-1);
+                        int sensorRangeXStartInclusiveForY = sensorX - sensorManhattanDistanceToNearestBeacon + yDistanceToSensor;
+                        if (sensorRangeXStartInclusiveForY > x && sensorRangeXStartInclusiveForY < nextXOfInterest) {
+                            nextXOfInterest = sensorRangeXStartInclusiveForY;
+                        }
                     }
-                    lastRangeMaxX = adjustedRangeMaxX;
                 }
-                if (minEncounteredX > minBounds) {
-                    addTuningFrequencies(tuningFrequencies, tuningFrequencyXMultiplier, y, minBounds, minEncounteredX-1);
+                if (!inSensorRange) {
+                    addTuningFrequencies(tuningFrequencies, tuningFrequencyXMultiplier, y, x, nextXOfInterest - 1);
                 }
-                if (maxEncounteredX < maxBounds) {
-                    addTuningFrequencies(tuningFrequencies, tuningFrequencyXMultiplier, y, maxEncounteredX+1, maxBounds);
-                }
-            }
+                x = nextXOfInterest;
+            } while (x <= maxBounds);
         }
+        long tuningFrequency;
         int tuningFrequencyCount = tuningFrequencies.size();
         switch (tuningFrequencyCount) {
             case 0:
                 throw new IllegalStateException("No tuning frequencies found.");
             case 1:
-                return new BasicPuzzleResults<>(
-                    impossibleBeaconXLocationSum,
-                    tuningFrequencies.iterator().next()
-                );
+                tuningFrequency = tuningFrequencies.iterator().next();
+                break;
             default:
                 throw new IllegalStateException("More than 1 tuning frequency found (Actually " + tuningFrequencyCount + " were found).");
         }
+
+        // Result
+        return new BasicPuzzleResults<>(
+            impossibleBeaconXLocationCountForTargetRow,
+            tuningFrequency
+        );
     }
 }
