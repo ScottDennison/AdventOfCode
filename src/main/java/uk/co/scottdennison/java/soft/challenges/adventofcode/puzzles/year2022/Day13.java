@@ -247,33 +247,6 @@ public class Day13 implements IPuzzle {
         }
     }
 
-    @Override
-    public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
-        List<PacketDataPair> packetDataPairList = new ArrayList<>();
-        int lineIndex = 0;
-        PacketData leftPacketData = null;
-        for (char[] inputLineCharacters : LineReader.charArrays(inputCharacters)) {
-            switch (lineIndex++) {
-                case 0:
-                    leftPacketData = parsePacketData(inputLineCharacters);
-                    break;
-                case 1:
-                    packetDataPairList.add(new PacketDataPair(leftPacketData, parsePacketData(inputLineCharacters)));
-                    break;
-                case 2:
-                    if (inputLineCharacters.length != 0) {
-                        throw new IllegalStateException("Expected a blank line");
-                    }
-                    lineIndex = 0;
-                    break;
-            }
-        }
-        return new BasicPuzzleResults<>(
-            solvePartA(printWriter, packetDataPairList),
-            solvePartB(printWriter, packetDataPairList)
-        );
-    }
-
     private static int solvePartA(PrintWriter printWriter, List<PacketDataPair> packetDataPairList) {
         int packetDataPairCount = packetDataPairList.size();
         int packetPairSum = 0;
@@ -296,7 +269,6 @@ public class Day13 implements IPuzzle {
     }
 
     private static int solvePartB(PrintWriter printWriter, List<PacketDataPair> packetDataPairList) {
-        // Part B
         int packetDataPairCount = packetDataPairList.size();
         PacketData[] packetDataArray = new PacketData[packetDataPairCount*2];
         int packetDataIndex = 0;
@@ -327,5 +299,32 @@ public class Day13 implements IPuzzle {
             decoderKey *= decoderKeyPart;
         }
         return decoderKey;
+    }
+
+    @Override
+    public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+        List<PacketDataPair> packetDataPairList = new ArrayList<>();
+        int lineIndex = 0;
+        PacketData leftPacketData = null;
+        for (char[] inputLineCharacters : LineReader.charArrays(inputCharacters)) {
+            switch (lineIndex++) {
+                case 0:
+                    leftPacketData = parsePacketData(inputLineCharacters);
+                    break;
+                case 1:
+                    packetDataPairList.add(new PacketDataPair(leftPacketData, parsePacketData(inputLineCharacters)));
+                    break;
+                case 2:
+                    if (inputLineCharacters.length != 0) {
+                        throw new IllegalStateException("Expected a blank line");
+                    }
+                    lineIndex = 0;
+                    break;
+            }
+        }
+        return new BasicPuzzleResults<>(
+            solvePartA(printWriter, packetDataPairList),
+            solvePartB(printWriter, packetDataPairList)
+        );
     }
 }
