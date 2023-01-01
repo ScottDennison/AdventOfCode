@@ -7,14 +7,19 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Day16 implements IPuzzle {
     private static final class Valve {
@@ -41,12 +46,119 @@ public class Day16 implements IPuzzle {
         }
     }
 
-    private static final boolean DEBUG = true;
+    private static class IntermediateState {
+        private final int currentValveIndex;
+        private final int openedValveBitset;
+        private final int timeElapsed;
+        private final transient int pressureReliefRate;
+        private final int pressureRelieved;
+
+        private IntermediateState(int currentValveIndex, int openedValveBitset, int timeElapsed, int pressureReliefRate, int pressureRelieved) {
+            this.currentValveIndex = currentValveIndex;
+            this.openedValveBitset = openedValveBitset;
+            this.timeElapsed = timeElapsed;
+            this.pressureReliefRate = pressureReliefRate;
+            this.pressureRelieved = pressureRelieved;
+        }
+
+        public int getCurrentValveIndex() {
+            return this.currentValveIndex;
+        }
+
+        public int getOpenedValveBitset() {
+            return this.openedValveBitset;
+        }
+
+        public int getTimeElapsed() {
+            return this.timeElapsed;
+        }
+
+        public int getPressureReliefRate() {
+            return this.pressureReliefRate;
+        }
+
+        public int getPressureRelieved() {
+            return this.pressureRelieved;
+        }
+
+        @Override
+        public boolean equals(Object otherObject) {
+            if (this == otherObject) return true;
+            if (otherObject == null || this.getClass() != otherObject.getClass()) return false;
+
+            IntermediateState otherState = (IntermediateState) otherObject;
+
+            if (this.currentValveIndex != otherState.currentValveIndex) return false;
+            if (this.openedValveBitset != otherState.openedValveBitset) return false;
+            if (this.timeElapsed != otherState.timeElapsed) return false;
+            if (this.pressureRelieved != otherState.pressureRelieved) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = this.currentValveIndex;
+            result = 31 * result + this.openedValveBitset;
+            result = 31 * result + this.timeElapsed;
+            result = 31 * result + this.pressureRelieved;
+            return result;
+        }
+    }
+
+    private static final class FinalState {
+        private final int openedValveBitset;
+        private final int totalPressureRelieved;
+
+        public FinalState(int openedValveBitset, int totalPressureRelieved) {
+            this.openedValveBitset = openedValveBitset;
+            this.totalPressureRelieved = totalPressureRelieved;
+        }
+
+        public int getOpenedValveBitset() {
+            return this.openedValveBitset;
+        }
+
+        public int getTotalPressureRelieved() {
+            return this.totalPressureRelieved;
+        }
+    }
+
     private static final Pattern PATTERN_LINE = Pattern.compile("^Valve (?<name>[A-Z]+) has flow rate=(?<flowRate>[0-9]+); (?:(?:tunnels lead to valves)|(?:tunnel leads to valve)) (?<connectedTunnels>[A-Z]+(?: *, *[A-Z]+)*)$");
+    private static final String STARTING_VALVE_NAME = "AA";
 
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
-        Map<String,Valve> valves = new HashMap<>();
+        Map<String, Valve> allValves = parseValves(inputCharacters);
+        Map<String, Map<String, Integer>> allValvesDistancesMap = createDistancesMap(allValves);
+        Valve startingValve = allValves.get(STARTING_VALVE_NAME);
+        if (startingValve == null) {
+            throw new IllegalStateException("Starting valve does not exist");
+        }
+        Valve[] valvesOfInterest = Stream.concat(Stream.of(startingValve),allValves.values().stream().filter(valve -> valve.getFlowRate() > 0 && !valve.getName().equals(STARTING_VALVE_NAME)).sorted(Comparator.comparing(Valve::getName))).toArray(Valve[]::new);
+        int valvesOfInterestCount = valvesOfInterest.length;
+        if (valvesOfInterestCount > Integer.SIZE) {
+            throw new IllegalStateException("Too many valves of interest");
+        }
+        int[][] distanceBetweenValves = new int[valvesOfInterestCount][valvesOfInterestCount];
+        int[] flowRates = new int[valvesOfInterestCount];
+        for (int valveIndex1=0; valveIndex1<valvesOfInterestCount; valveIndex1++) {
+            Valve valve1 = valvesOfInterest[valveIndex1];
+            flowRates[valveIndex1] = valve1.getFlowRate();
+            for (int valveIndex2=0; valveIndex2<valvesOfInterestCount; valveIndex2++) {
+                Valve valve2 = valvesOfInterest[valveIndex2];
+                distanceBetweenValves[valveIndex1][valveIndex2] = allValvesDistancesMap.get(valve1.getName()).get(valve2.getName());
+            }
+        }
+        boolean considerStartingValve = startingValve.getFlowRate()>0;
+        return new BasicPuzzleResults<>(
+            solve(distanceBetweenValves,flowRates,0,considerStartingValve,30,1),
+            solve(distanceBetweenValves,flowRates,0,considerStartingValve,26,2)
+        );
+    }
+
+    private static Map<String, Valve> parseValves(char[] inputCharacters) {
+        Map<String, Valve> valves = new HashMap<>();
         for (String inputLine : LineReader.strings(inputCharacters)) {
             Matcher matcher = PATTERN_LINE.matcher(inputLine);
             if (!matcher.matches()) {
@@ -65,7 +177,11 @@ public class Day16 implements IPuzzle {
             );
             valves.put(valve.getName(),valve);
         }
-        Map<String,Map<String,Integer>> distances = new HashMap<>();
+        return valves;
+    }
+
+    private static Map<String, Map<String, Integer>> createDistancesMap(Map<String, Valve> valves) {
+        Map<String,Map<String,Integer>> allDistances = new HashMap<>();
         for (String valveName : valves.keySet()) {
             Set<String> pendingVisitValveNames = new HashSet<>();
             Map<String,Integer> distancesForThisValve = new HashMap<>();
@@ -84,215 +200,70 @@ public class Day16 implements IPuzzle {
                 pendingVisitValveNames = newPendingVisitValveNames;
                 distance++;
             }
-            distances.put(valveName,distancesForThisValve);
+            allDistances.put(valveName,distancesForThisValve);
         }
-        String[] valveNamesOfInterest = valves.entrySet().stream().filter(entry -> entry.getValue().getFlowRate() > 0).map(Map.Entry::getKey).sorted().toArray(String[]::new);
-        int valvesOfInterestCount = valveNamesOfInterest.length;
-        Map<String,Integer> valveNameToIndexMap = new HashMap<>();
-        for (String valveNameOfInterest : valveNamesOfInterest) {
-            valveNameToIndexMap.put(valveNameOfInterest,valveNameToIndexMap.size());
-        }
-        int[] flatValveFlowRates = new int[valvesOfInterestCount];
-        int[][] flatBetweenTimes = new int[valvesOfInterestCount][valvesOfInterestCount];
-        int[] flatInitialTimes = new int[valvesOfInterestCount];
-        Map<String,Integer> initialDistances = distances.get("AA");
-        for (String valveNameOfInterest1 : valveNamesOfInterest) {
-            int valveIndex1 = valveNameToIndexMap.get(valveNameOfInterest1);
-            flatValveFlowRates[valveIndex1] = valves.get(valveNameOfInterest1).getFlowRate();
-            flatInitialTimes[valveIndex1] = initialDistances.get(valveNameOfInterest1)+1;
-            Map<String,Integer> distancesFromValve1 = distances.get(valveNameOfInterest1);
-            for (String valveNameOfInterest2 : valveNamesOfInterest) {
-                flatBetweenTimes[valveIndex1][valveNameToIndexMap.get(valveNameOfInterest2)] = distancesFromValve1.get(valveNameOfInterest2)+1;
-            }
-        }
-        return new BasicPuzzleResults<>(
-            solve(printWriter,"A",valveNamesOfInterest,valvesOfInterestCount,flatInitialTimes,flatBetweenTimes,flatValveFlowRates,1,30),
-            solve(printWriter,"B",valveNamesOfInterest,valvesOfInterestCount,flatInitialTimes,flatBetweenTimes,flatValveFlowRates,2,26)
+        return allDistances;
+    }
+
+    private static int solve(int[][] distanceBetweenValves, int[] flowRates, int startIndex, boolean considerStartingValve, int availableTime, int actorCount) {
+        Set<IntermediateState> knownStates = new HashSet<>();
+        Deque<IntermediateState> pendingStates = new LinkedList<>();
+        IntermediateState initialState = new IntermediateState(
+            startIndex,
+            0,
+            0,
+            0,
+            0
         );
-    }
-
-    private static int solve(PrintWriter printWriter, String part, String[] valveNames, int valveCount, int[] initialTimes, int[][] betweenTimes, int[] flowRates, int actorCount, int time) {
-        Solver solver = new Solver(valveCount, valveNames, initialTimes, betweenTimes, flowRates, actorCount, time);
-        solver.solve();
-        if (DEBUG) {
-            printWriter.format("==== Part %s ====%n",part);
-            solver.summarize(printWriter);
-        }
-        return solver.getBestPressureRelieved();
-    }
-
-    private static class Solver {
-        private final int valveCount;
-        private final String[] valveNames;
-        private final int[] initialTimes;
-        private final int[][] betweenTimes;
-        private final int[] flowRates;
-        private final boolean[] assignedValves;
-        private final int actorCount;
-        private final int[] actorTargetLocations;
-        private final int[] actorTimesUntilUnbusy;
-        private final int[] actorValveOpenHistoryCounts;
-        private final int[][] actorValveOpenHistory;
-        private final int maxHistoryCount;
-        private final int time;
-
-        private boolean previouslySolved = false;
-        private int bestPressureRelieved = -1;
-        private final int[] resultActorValveOpenHistoryCounts;
-        private final int[][] resultActorValveOpenHistory;
-
-        public Solver(int valveCount, String[] valveNames, int[] initialTimes, int[][] betweenTimes, int[] flowRates, int actorCount, int time) {
-            this.valveCount = valveCount;
-            this.valveNames = valveNames;
-            this.initialTimes = initialTimes;
-            this.betweenTimes = betweenTimes;
-            this.flowRates = flowRates;
-            this.assignedValves = new boolean[valveCount];
-            this.actorCount = actorCount;
-            this.actorTargetLocations = new int[actorCount];
-            this.actorTimesUntilUnbusy = new int[actorCount];
-            this.maxHistoryCount = Math.min(time,valveCount);
-            this.actorValveOpenHistoryCounts = new int[actorCount];
-            this.actorValveOpenHistory = new int[actorCount][this.maxHistoryCount];
-            this.resultActorValveOpenHistoryCounts = new int[actorCount];
-            this.resultActorValveOpenHistory = new int[actorCount][this.maxHistoryCount];
-            this.time = time;
-        }
-
-        public synchronized void solve() {
-            Arrays.fill(this.assignedValves, false);
-            Arrays.fill(this.actorTargetLocations, -1);
-            Arrays.fill(this.actorTimesUntilUnbusy, -1);
-            Arrays.fill(this.actorValveOpenHistoryCounts, 0);
-            for (int actorIndex=0; actorIndex>actorCount; actorIndex++) {
-                Arrays.fill(this.actorValveOpenHistory[actorIndex], this.maxHistoryCount);
-            }
-            this.bestPressureRelieved = -1;
-            this.solveInitialAssignment(0);
-            this.previouslySolved = true;
-        }
-
-        private void solveInitialAssignment(int actorIndex) {
-            if (actorIndex == this.actorCount) {
-                this.solveMain(this.time, 0, 0);
-            } else {
-                int nextActorIndex = actorIndex+1;
-                int bestPressureRelieved = 0;
-                for (int valveIndex=0; valveIndex<this.valveCount; valveIndex++) {
-                    if (this.initialTimes[valveIndex] < this.time && !this.assignedValves[valveIndex]) {
-                        this.actorTargetLocations[actorIndex] = valveIndex;
-                        this.actorTimesUntilUnbusy[actorIndex] = this.initialTimes[valveIndex];
-                        this.assignedValves[valveIndex] = true;
-                        this.solveInitialAssignment(nextActorIndex);
-                        this.assignedValves[valveIndex] = false;
-                    }
-                }
-            }
-        }
-
-        private final void solveMain(int remainingTime, int currentPressureReliefRate, int currentPressureRelieved) {
-            int minTimeUntilUnbusy = Integer.MAX_VALUE;
-            int actorFinishingWorkIndex = -1;
-            for (int actorIndex=0; actorIndex<this.actorCount; actorIndex++) {
-                int actorTimeUntilUnbusy = this.actorTimesUntilUnbusy[actorIndex];
-                if (actorTimeUntilUnbusy < minTimeUntilUnbusy) {
-                    actorFinishingWorkIndex = actorIndex;
-                    minTimeUntilUnbusy = actorTimeUntilUnbusy;
-                }
-            }
-            if (remainingTime < minTimeUntilUnbusy) {
-                currentPressureRelieved += remainingTime*currentPressureReliefRate;
-                if (currentPressureRelieved > this.bestPressureRelieved) {
-                    this.bestPressureRelieved = currentPressureRelieved;
-                    for (int actorIndex=0; actorIndex<this.actorCount; actorIndex++) {
-                        int thisActorValveOpenHistoryCount = this.actorValveOpenHistoryCounts[actorIndex];
-                        int[] thisActorValveOpenHistory = this.actorValveOpenHistory[actorIndex];
-                        int[] resultThisActorValveOpenHistory = this.resultActorValveOpenHistory[actorIndex];
-                        this.resultActorValveOpenHistoryCounts[actorIndex] = thisActorValveOpenHistoryCount;
-                        for (int historyIndex=0; historyIndex<thisActorValveOpenHistoryCount; historyIndex++) {
-                            resultThisActorValveOpenHistory[historyIndex] = thisActorValveOpenHistory[historyIndex];
+        Map<Integer,Integer> bestPressureRelievedPerOpenedValveBitsetMap = new HashMap<>();
+        knownStates.add(initialState);
+        pendingStates.add(initialState);
+        IntermediateState oldState;
+        int valveCount = flowRates.length;
+        while ((oldState = pendingStates.pollFirst()) != null) {
+            int currentValveIndex = oldState.getCurrentValveIndex();
+            int openedValveBitset = oldState.getOpenedValveBitset();
+            int timeElapsed = oldState.getTimeElapsed();
+            int pressureReliefRate = oldState.getPressureReliefRate();
+            int pressureRelieved = oldState.getPressureRelieved();
+            bestPressureRelievedPerOpenedValveBitsetMap.merge(openedValveBitset,pressureRelieved+((availableTime-timeElapsed)*pressureReliefRate),Math::max);
+            for (int targetValveIndex=0, toValveBit=1; targetValveIndex<valveCount; targetValveIndex++, toValveBit<<=1) {
+                if (!(targetValveIndex == startIndex && considerStartingValve) && (openedValveBitset & toValveBit) == 0) {
+                    int timeTakenForThisValve = distanceBetweenValves[currentValveIndex][targetValveIndex] + 1;
+                    int newTimeElapsed = timeElapsed + timeTakenForThisValve;
+                    if (newTimeElapsed <= availableTime) {
+                        IntermediateState newState = new IntermediateState(
+                            targetValveIndex,
+                            openedValveBitset | toValveBit,
+                            newTimeElapsed,
+                            pressureReliefRate + flowRates[targetValveIndex],
+                            pressureRelieved + (pressureReliefRate*timeTakenForThisValve)
+                        );
+                        if (!knownStates.contains(newState)) {
+                            pendingStates.addLast(newState);
                         }
                     }
                 }
-            } else {
-                for (int actorIndex=0; actorIndex<this.actorCount; actorIndex++) {
-                    this.actorTimesUntilUnbusy[actorIndex] -= minTimeUntilUnbusy;
-                }
-                int currentValveIndex = this.actorTargetLocations[actorFinishingWorkIndex];
-                this.actorValveOpenHistory[actorFinishingWorkIndex][this.actorValveOpenHistoryCounts[actorFinishingWorkIndex]++] = currentValveIndex;
-                currentPressureRelieved += minTimeUntilUnbusy * currentPressureReliefRate;
-                currentPressureReliefRate += this.flowRates[currentValveIndex];
-                remainingTime -= minTimeUntilUnbusy;
-                boolean newWorkAvaialble = false;
-                int[] betweenTimesFromCurrentValve = this.betweenTimes[currentValveIndex];
-                for (int newTargetValveIndex = 0; newTargetValveIndex < this.valveCount; newTargetValveIndex++) {
-                    if (!this.assignedValves[newTargetValveIndex]) {
-                        newWorkAvaialble = true;
-                        this.actorTargetLocations[actorFinishingWorkIndex] = newTargetValveIndex;
-                        this.actorTimesUntilUnbusy[actorFinishingWorkIndex] = betweenTimesFromCurrentValve[newTargetValveIndex];
-                        this.assignedValves[newTargetValveIndex] = true;
-                        this.solveMain(remainingTime, currentPressureReliefRate, currentPressureRelieved);
-                        this.assignedValves[newTargetValveIndex] = false;
-                    }
-                }
-                if (newWorkAvaialble) {
-                    this.actorTargetLocations[actorFinishingWorkIndex] = currentValveIndex;
-                } else {
-                    this.actorTimesUntilUnbusy[actorFinishingWorkIndex] = Integer.MAX_VALUE;
-                    this.solveMain(remainingTime, currentPressureReliefRate, currentPressureRelieved);
-                }
-                this.actorValveOpenHistoryCounts[actorFinishingWorkIndex]--;
-                this.actorTimesUntilUnbusy[actorFinishingWorkIndex] = 0;
-                for (int actorIndex=0; actorIndex<this.actorCount; actorIndex++) {
-                    this.actorTimesUntilUnbusy[actorIndex] += minTimeUntilUnbusy;
-                }
             }
         }
-
-        public synchronized void summarize(PrintWriter printWriter) {
-            for (int actorIndex=0; actorIndex<this.actorCount; actorIndex++) {
-                printWriter.format("Actor #%d%n",actorIndex+1);
-                int thisActorValveOpenHistoryCount = this.resultActorValveOpenHistoryCounts[actorIndex];
-                int[] thisActorValveOpenHistory = this.resultActorValveOpenHistory[actorIndex];
-                int timeElapsed = 0;
-                int lastValveIndex = -1;
-                for (int historyIndex=0; historyIndex<thisActorValveOpenHistoryCount; historyIndex++) {
-                    int valveIndex = thisActorValveOpenHistory[historyIndex];
-                    if (historyIndex == 0) {
-                        timeElapsed += this.initialTimes[valveIndex];
-                    } else {
-                        timeElapsed += this.betweenTimes[lastValveIndex][valveIndex];
-                    }
-                    lastValveIndex = valveIndex;
-                    printWriter.format("  Valve %s opened at time %d%n",this.valveNames[valveIndex],timeElapsed);
-                }
-            }
-        }
-
-        public synchronized int getBestPressureRelieved() {
-            if (!this.previouslySolved) {
-                throw new IllegalStateException("No solution.");
-            }
-            return this.bestPressureRelieved;
-        }
+        FinalState[] finalStates = bestPressureRelievedPerOpenedValveBitsetMap.entrySet().stream().map(entry -> new FinalState(entry.getKey(),entry.getValue())).sorted(Comparator.comparing(FinalState::getTotalPressureRelieved)).toArray(FinalState[]::new);
+        return recurseActorAssignment(finalStates,finalStates.length, 0, actorCount,0,0,0);
     }
 
-    /*
-    private static int recurse(Map<String,Valve> valves, Map<String,Map<String,Integer>> distances, Set<String> valveNamesOfInterest, Set<String> onValves, String currentValve, int remainingTime, int currentPressureReliefRate, int currentPressureRelieved) {
-        int bestPressureRelieved = currentPressureRelieved + (remainingTime*currentPressureReliefRate);
-        Map<String, Integer> distancesFromCurrentValve = distances.get(currentValve);
-        for (String targetValveName : valveNamesOfInterest) {
-            if (!onValves.contains(targetValveName)) {
-                int timeToTurnOnValve = distancesFromCurrentValve.get(targetValveName)+1;
-                int remainingTimeAfterTurningOnValve = remainingTime-timeToTurnOnValve;
-                if (remainingTime >= 0) {
-                    onValves.add(targetValveName);
-                    bestPressureRelieved = Math.max(bestPressureRelieved, recurse(valves, distances, valveNamesOfInterest, onValves, targetValveName, remainingTimeAfterTurningOnValve, currentPressureReliefRate + valves.get(targetValveName).getFlowRate(), currentPressureRelieved+(timeToTurnOnValve*currentPressureReliefRate)));
-                    onValves.remove(targetValveName);
+    private static int recurseActorAssignment(FinalState[] finalStates, int finalStateCount, int finalStateStartIndex, int actorCount, int actorIndex, int openedValveBitset, int pressureRelieved) {
+        if (actorIndex == actorCount) {
+            return pressureRelieved;
+        } else {
+            int nextActorIndex = actorIndex+1;
+            int maximumPressureRelieved = 0;
+            for (int finalStateIndex=finalStateStartIndex; finalStateIndex<finalStateCount; finalStateIndex++) {
+                FinalState finalState = finalStates[finalStateIndex];
+                int finalStateOpenedValveBitset = finalState.getOpenedValveBitset();
+                if ((openedValveBitset & finalStateOpenedValveBitset) == 0) {
+                    maximumPressureRelieved = Math.max(maximumPressureRelieved, recurseActorAssignment(finalStates,finalStateCount,finalStateIndex+1,actorCount,nextActorIndex,openedValveBitset|finalStateOpenedValveBitset,pressureRelieved+finalState.getTotalPressureRelieved()));
                 }
             }
+            return maximumPressureRelieved;
         }
-        return bestPressureRelieved;
     }
-    */
 }
