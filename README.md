@@ -204,6 +204,31 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2022 | 23 | No                                                                                                      |  |
 | 2022 | 24 | No                                                                                                      |  |
 | 2022 | 25 | No                                                                                                      |  |
+| 2023 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day01.java) | Yes |
+| 2023 | 02 | Not yet released at the time of writing                                                                 | |
+| 2023 | 03 | Not yet released at the time of writing                                                                 | |
+| 2023 | 04 | Not yet released at the time of writing                                                                 | |
+| 2023 | 05 | Not yet released at the time of writing                                                                 | |
+| 2023 | 06 | Not yet released at the time of writing                                                                 | |
+| 2023 | 07 | Not yet released at the time of writing                                                                 | |
+| 2023 | 08 | Not yet released at the time of writing                                                                 | |
+| 2023 | 09 | Not yet released at the time of writing                                                                 | |
+| 2023 | 10 | Not yet released at the time of writing                                                                 | |
+| 2023 | 11 | Not yet released at the time of writing                                                                 | |
+| 2023 | 12 | Not yet released at the time of writing                                                                 | |
+| 2023 | 13 | Not yet released at the time of writing                                                                 | |
+| 2023 | 14 | Not yet released at the time of writing                                                                 | |
+| 2023 | 15 | Not yet released at the time of writing                                                                 | |
+| 2023 | 16 | Not yet released at the time of writing                                                                 | |
+| 2023 | 17 | Not yet released at the time of writing                                                                 | |
+| 2023 | 18 | Not yet released at the time of writing                                                                 | |
+| 2023 | 19 | Not yet released at the time of writing                                                                 | |
+| 2023 | 20 | Not yet released at the time of writing                                                                 | |
+| 2023 | 21 | Not yet released at the time of writing                                                                 | |
+| 2023 | 22 | Not yet released at the time of writing                                                                 | |
+| 2023 | 23 | Not yet released at the time of writing                                                                 | |
+| 2023 | 24 | Not yet released at the time of writing                                                                 | |
+| 2023 | 25 | Not yet released at the time of writing                                                                 | |
 
 Note that timing is done on a machine of the following spec:
 * Intel i9-10900K CPU @ 3.70GHz
