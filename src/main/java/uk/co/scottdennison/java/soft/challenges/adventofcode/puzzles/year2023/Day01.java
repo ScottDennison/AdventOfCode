@@ -96,22 +96,22 @@ public class Day01 implements IPuzzle {
 	}
 
 	private static OptionalInt solve(String inputLine, boolean useSpeltOutDigits) {
-		OptionalInt firstDigit = findDigit(inputLine, String::indexOf, Integer.MAX_VALUE, (a, b) -> a < b, useSpeltOutDigits);
+		OptionalInt firstDigit = findDigit(inputLine, String::indexOf, (a, b) -> a < b, useSpeltOutDigits);
 		if (!firstDigit.isPresent()) {
 			return OptionalInt.empty();
 		}
-		OptionalInt lastDigit = findDigit(inputLine, String::lastIndexOf, Integer.MIN_VALUE, (a, b) -> a > b, useSpeltOutDigits);
+		OptionalInt lastDigit = findDigit(inputLine, String::lastIndexOf, (a, b) -> a > b, useSpeltOutDigits);
 		if (!lastDigit.isPresent()) {
 			throw new IllegalStateException("Somehow found first digit but didn't find last digit. This should be impossible.");
 		}
 		return OptionalInt.of((firstDigit.getAsInt() * 10) + lastDigit.getAsInt());
 	}
 
-	private static OptionalInt findDigit(String inputLine, ToIntBiFunction<String, String> indexOfFunction, int startPosition, IntBinaryPredicate isBestPredicate, boolean useSpeltOutDigits) {
+	private static OptionalInt findDigit(String inputLine, ToIntBiFunction<String, String> indexOfFunction, IntBinaryPredicate isBestPredicate, boolean useSpeltOutDigits) {
 		List<DigitResult> digitResults = new ArrayList<>();
-		findDigit(digitResults, inputLine, indexOfFunction, startPosition, isBestPredicate, TextualDigit::getDigitRawString);
+		findDigit(digitResults, inputLine, indexOfFunction, TextualDigit::getDigitRawString);
 		if (useSpeltOutDigits) {
-			findDigit(digitResults, inputLine, indexOfFunction, startPosition, isBestPredicate, TextualDigit::getDigitSpeltOutString);
+			findDigit(digitResults, inputLine, indexOfFunction, TextualDigit::getDigitSpeltOutString);
 		}
 		Optional<DigitResult> bestDigitResult = digitResults.stream().reduce((left,right) -> isBestPredicate.test(left.getIndex(),right.getIndex())?left:right);
 		if (bestDigitResult.isPresent()) {
@@ -121,7 +121,7 @@ public class Day01 implements IPuzzle {
 		}
 	}
 
-	private static void findDigit(List<DigitResult> digitResultsSink, String inputLine, ToIntBiFunction<String, String> indexOfFunction, int startPosition, IntBinaryPredicate isBestPredicate, Function<TextualDigit,String> textualDigitToStringFunction) {
+	private static void findDigit(List<DigitResult> digitResultsSink, String inputLine, ToIntBiFunction<String, String> indexOfFunction, Function<TextualDigit,String> textualDigitToStringFunction) {
 		for (TextualDigit textualDigit : TEXTUAL_DIGITS) {
 			int index = indexOfFunction.applyAsInt(inputLine, textualDigitToStringFunction.apply(textualDigit));
 			if (index >= 0) {
