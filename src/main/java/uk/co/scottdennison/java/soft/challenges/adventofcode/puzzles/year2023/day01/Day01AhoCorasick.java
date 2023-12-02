@@ -145,10 +145,12 @@ public class Day01AhoCorasick implements IPuzzle {
 		public static class Builder {
 			private final CharArrayOrderingProvider charArrayOrderingProvider;
 			private final Node rootNode;
+			private boolean built;
 
 			private Builder(CharArrayOrderingProvider charArrayOrderingProvider) {
 				this.charArrayOrderingProvider = charArrayOrderingProvider;
 				this.rootNode = new Node(null, '\0');
+				this.built = false;
 			}
 
 			public void addEntry(char[] chars, int value) {
@@ -163,6 +165,10 @@ public class Day01AhoCorasick implements IPuzzle {
 			}
 
 			public AhoCorasickGraph build() {
+				if (built) {
+					throw new IllegalStateException("Cannot re-build");
+				}
+				built = true;
 				rootNode.setSuffixNode(null);
 				Deque<Node> nodesToProcess = new LinkedList<>();
 				rootNode.forEachChildNode(
