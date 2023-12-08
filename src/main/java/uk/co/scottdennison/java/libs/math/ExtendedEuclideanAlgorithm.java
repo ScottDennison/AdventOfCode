@@ -27,6 +27,10 @@ public class ExtendedEuclideanAlgorithm {
         }
     }
 
+    public static long solveBasic(long a, long b) {
+        return solve(a, b).getGcd();
+    }
+
     // Based on https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm#Pseudocode
     public static Result solve(long a, long b) {
         long s = 0;
