@@ -47,10 +47,10 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2016 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day16.java) | Yes |
 | 2016 | 17 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day17.java) | Yes |
 | 2016 | 18 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day18.java) | Yes |
-| 2016 | 19 | No                                                                                                      |  |
-| 2016 | 20 | No                                                                                                      |  |
-| 2016 | 21 | No                                                                                                      |  |
-| 2016 | 22 | No                                                                                                      |  |
+| 2016 | 19 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day19.java) | No - Worst dataset is approximately 1,500ms |
+| 2016 | 20 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day20.java) | Yes |
+| 2016 | 21 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day21.java) | Yes |
+| 2016 | 21 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day22.java) | Yes |
 | 2016 | 23 | No                                                                                                      |  |
 | 2016 | 24 | No                                                                                                      |  |
 | 2016 | 25 | No                                                                                                      |  |
@@ -210,7 +210,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2023 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day04.java) | Yes |
 | 2023 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day05.java) | Yes |
 | 2023 | 06 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day06.java) | Yes |
-| 2023 | 07 | Not yet released at the time of writing                                                                 | |
+| 2023 | 07 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day07.java) | Yes |
 | 2023 | 08 | Not yet released at the time of writing                                                                 | |
 | 2023 | 09 | Not yet released at the time of writing                                                                 | |
 | 2023 | 10 | Not yet released at the time of writing                                                                 | |
