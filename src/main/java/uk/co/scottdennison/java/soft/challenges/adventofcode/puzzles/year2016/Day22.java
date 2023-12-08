@@ -218,6 +218,7 @@ public class Day22 implements IPuzzle {
         printGrid(fileSystemClassificationGrid, maxY, maxX, printWriter);
         int moveOperations = moveBetween(fileSystemClassificationGrid, emptyFileSystemY, emptyFileSystemX, 0, maxX-1, maxY, maxX, printWriter);
         for (int topSwapStep=maxX-1; topSwapStep>0; topSwapStep--) {
+            // Note, if there are too many walls in the second row, this may produce a not-the-minimum result. It seems as though in all input data this isn't the case however.
             moveOperations += swapBetween(fileSystemClassificationGrid, 0, topSwapStep, 0, topSwapStep+1, maxY, maxX, printWriter);
             moveOperations += moveBetween(fileSystemClassificationGrid, 0, topSwapStep+1, 0, topSwapStep-1, maxY, maxX, printWriter);
         }
