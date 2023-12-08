@@ -1,11 +1,8 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.common;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -64,8 +61,105 @@ public class AssembunnyComputer {
 		InstructionFactory getToggleInstructionFactory();
 	}
 
+	public enum InstructionType {
+		OPTIMIZED_AWAY,
+		INCREMENT_REGISTER_BY,
+		INCREMENT_REGISTER_BY_MULTIPLICATION,
+		COPY_INTO_REGISTER,
+		INCREMENT_REGISTER,
+		DECREMENT_REGISTER,
+		JUMP_ALWAYS,
+		JUMP_IF_REGISTER_NOT_ZERO,
+		NOOP,
+		TOGGLE;
+	}
+
 	public static interface Instruction {
 		void run(State state);
+		InstructionType getInstructionType();
+	}
+
+	private static class OptimizedAwayInstruction implements Instruction {
+		public static final OptimizedAwayInstruction INSTANCE = new OptimizedAwayInstruction();
+
+		private OptimizedAwayInstruction() {}
+
+		@Override
+		public void run(State state) {
+			state.deoptimize();
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.OPTIMIZED_AWAY;
+		}
+	}
+
+	private static class IncrementRegisterByInstruction implements Instruction {
+		private int resultRegister;
+		private int sourceRegister;
+
+		public IncrementRegisterByInstruction(int resultRegister, int sourceRegister) {
+			this.resultRegister = resultRegister;
+			this.sourceRegister = sourceRegister;
+		}
+
+		public int getResultRegister() {
+			return resultRegister;
+		}
+
+		public int getSourceRegister() {
+			return sourceRegister;
+		}
+
+		@Override
+		public void run(State state) {
+			state.setRegisterValue(this.resultRegister, state.getRegisterValue(this.resultRegister) + state.getRegisterValue(this.sourceRegister));
+			state.setRegisterValue(this.sourceRegister, 0);
+			state.adjustPC(3);
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.INCREMENT_REGISTER_BY;
+		}
+	}
+
+	private static class IncrementRegisterByMultiplicationInstruction implements Instruction {
+		private int resultRegister;
+		private int sourceRegister1;
+		private int sourceRegister2;
+
+		public IncrementRegisterByMultiplicationInstruction(int resultRegister, int sourceRegister1, int sourceRegister2) {
+			this.resultRegister = resultRegister;
+			this.sourceRegister1 = sourceRegister1;
+			this.sourceRegister2 = sourceRegister2;
+		}
+
+		public int getResultRegister() {
+			return resultRegister;
+		}
+
+		public int getSourceRegister1() {
+			return sourceRegister1;
+		}
+
+		public int getSourceRegister2() {
+			return sourceRegister2;
+		}
+
+		@Override
+		public void run(State state) {
+			state.setRegisterValue(this.resultRegister, state.getRegisterValue(this.resultRegister) + (state.getRegisterValue(this.sourceRegister1) * state.getRegisterValue(this.sourceRegister2)));
+			state.setRegisterValue(this.sourceRegister1, 0);
+			state.setRegisterValue(this.sourceRegister2, 0);
+			state.adjustPC(5);
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.INCREMENT_REGISTER_BY_MULTIPLICATION;
+		}
 	}
 
 	private static abstract class AbstractOneOperandInstructionFactory implements InstructionFactory {
@@ -114,57 +208,49 @@ public class AssembunnyComputer {
 		protected abstract Instruction createInstruction(int register);
 	}
 
-	private static final class CopyRegisterToRegisterInstruction implements Instruction {
-		private final int sourceRegister;
+	private static final class CopyIntoRegisterInstruction implements Instruction {
+		private final LongValueRetriever source;
 		private final int destinationRegister;
 
-		public CopyRegisterToRegisterInstruction(int sourceRegister, int destinationRegister) {
-			this.sourceRegister = sourceRegister;
+		public CopyIntoRegisterInstruction(LongValueRetriever source, int destinationRegister) {
+			this.source = source;
 			this.destinationRegister = destinationRegister;
+		}
+
+		public LongValueRetriever getSource() {
+			return source;
+		}
+
+		public int getDestinationRegister() {
+			return destinationRegister;
 		}
 
 		@Override
 		public void run(State state) {
-			state.setRegisterValue(destinationRegister, state.getRegisterValue(sourceRegister));
+			state.setRegisterValue(destinationRegister, source.getLongValue(state));
 			state.adjustPC(1);
-		}
-	}
-
-	private static final class SetRegisterValueInstruction implements Instruction {
-		private final long sourceValue;
-		private final int destinationRegister;
-
-		public SetRegisterValueInstruction(long sourceValue, int destinationRegister) {
-			this.sourceValue = sourceValue;
-			this.destinationRegister = destinationRegister;
 		}
 
 		@Override
-		public void run(State state) {
-			state.setRegisterValue(destinationRegister, sourceValue);
-			state.adjustPC(1);
+		public InstructionType getInstructionType() {
+			return InstructionType.COPY_INTO_REGISTER;
 		}
 	}
 
-	private static final class CopyInstructionFactory extends AbstractTwoOperandInstructionFactory {
-		public static final CopyInstructionFactory INSTANCE = new CopyInstructionFactory();
+	private static final class CopyIntoRegisterInstructionFactory extends AbstractTwoOperandInstructionFactory {
+		public static final CopyIntoRegisterInstructionFactory INSTANCE = new CopyIntoRegisterInstructionFactory();
 
-		private CopyInstructionFactory() {}
+		private CopyIntoRegisterInstructionFactory() {}
 
 		@Override
 		protected Instruction createInstruction(Operand firstOperand, Operand secondOperand) throws InvalidInstructionOperandsException {
 			if (secondOperand.getOperandType() != OperandType.REGISTER) {
 				throw new InvalidInstructionOperandsException("Second operand should be a register");
 			}
-			int destinationRegister = ((RegisterOperand)secondOperand).getRegister();
-			switch (firstOperand.getOperandType()) {
-				case REGISTER:
-					return new CopyRegisterToRegisterInstruction(((RegisterOperand)firstOperand).getRegister(),destinationRegister);
-				case VALUE:
-					return new SetRegisterValueInstruction(((ValueOperand)firstOperand).getValue(),destinationRegister);
-				default:
-					throw new InvalidInstructionOperandsException("Unexpected first operand type");
-			}
+			return new CopyIntoRegisterInstruction(
+				LongValueRetriever.createForOperand(firstOperand),
+				((RegisterOperand)secondOperand).getRegister()
+			);
 		}
 	}
 
@@ -175,10 +261,19 @@ public class AssembunnyComputer {
 			this.register = register;
 		}
 
+		public int getRegister() {
+			return register;
+		}
+
 		@Override
 		public void run(State state) {
 			state.mutateRegisterValue(register, 1);
 			state.adjustPC(1);
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.INCREMENT_REGISTER;
 		}
 	}
 
@@ -205,10 +300,19 @@ public class AssembunnyComputer {
 			this.register = register;
 		}
 
+		public int getRegister() {
+			return register;
+		}
+
 		@Override
 		public void run(State state) {
 			state.mutateRegisterValue(register, -1);
 			state.adjustPC(1);
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.DECREMENT_REGISTER;
 		}
 	}
 
@@ -223,8 +327,14 @@ public class AssembunnyComputer {
 		}
 	}
 
+	private static enum ValueRetrieverType {
+		STATIC,
+		REGISTER
+	}
+
 	private static interface IntValueRetriever {
 		int getIntValue(State state);
+		ValueRetrieverType getType();
 
 		public static IntValueRetriever createForOperand(Operand operand) throws InvalidInstructionOperandsException {
 			switch (operand.getOperandType()) {
@@ -252,9 +362,18 @@ public class AssembunnyComputer {
 			return new StaticIntValueRetriever((int)value);
 		}
 
+		public int getIntValue() {
+			return value;
+		}
+
 		@Override
 		public int getIntValue(State state) {
 			return this.value;
+		}
+
+		@Override
+		public ValueRetrieverType getType() {
+			return ValueRetrieverType.STATIC;
 		}
 	}
 
@@ -265,6 +384,10 @@ public class AssembunnyComputer {
 			this.register = register;
 		}
 
+		public int getRegister() {
+			return register;
+		}
+
 		@Override
 		public int getIntValue(State state) {
 			long registerValue = state.getRegisterValue(this.register);
@@ -272,6 +395,63 @@ public class AssembunnyComputer {
 				throw new IllegalStateException("Value out of bounds");
 			}
 			return (int)registerValue;
+		}
+
+		@Override
+		public ValueRetrieverType getType() {
+			return ValueRetrieverType.REGISTER;
+		}
+	}
+
+	private static interface LongValueRetriever {
+		long getLongValue(State state);
+		ValueRetrieverType getType();
+
+		public static LongValueRetriever createForOperand(Operand operand) throws InvalidInstructionOperandsException {
+			switch (operand.getOperandType()) {
+				case REGISTER:
+					return new RegisterLongValueRetriever(((RegisterOperand)operand).getRegister());
+				case VALUE:
+					return new StaticLongValueRetriever(((ValueOperand)operand).getValue());
+				default:
+					throw new InvalidInstructionOperandsException("Unexpected operand type");
+			}
+		}
+	}
+
+	private static class StaticLongValueRetriever implements LongValueRetriever {
+		private final long value;
+
+		public StaticLongValueRetriever(long value) {
+			this.value = value;
+		}
+
+		@Override
+		public long getLongValue(State state) {
+			return this.value;
+		}
+
+		@Override
+		public ValueRetrieverType getType() {
+			return ValueRetrieverType.STATIC;
+		}
+	}
+
+	private static class RegisterLongValueRetriever implements LongValueRetriever {
+		private final int register;
+
+		public RegisterLongValueRetriever(int register) {
+			this.register = register;
+		}
+
+		@Override
+		public long getLongValue(State state) {
+			return state.getRegisterValue(this.register);
+		}
+
+		@Override
+		public ValueRetrieverType getType() {
+			return ValueRetrieverType.REGISTER;
 		}
 	}
 
@@ -284,20 +464,29 @@ public class AssembunnyComputer {
 
 		public abstract boolean shouldJump(State state);
 
+		public IntValueRetriever getOffsetRetriever() {
+			return offsetRetriever;
+		}
+
 		@Override
 		public final void run(State state) {
 			state.adjustPC(shouldJump(state)?this.offsetRetriever.getIntValue(state):1);
 		}
 	}
 
-	private static final class JumpInstruction extends AbstractJumpInstruction {
-		public JumpInstruction(IntValueRetriever offsetRetriever) {
+	private static final class JumpAlwaysInstruction extends AbstractJumpInstruction {
+		public JumpAlwaysInstruction(IntValueRetriever offsetRetriever) {
 			super(offsetRetriever);
 		}
 
 		@Override
 		public boolean shouldJump(State state) {
 			return true;
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.JUMP_ALWAYS;
 		}
 	}
 
@@ -309,9 +498,18 @@ public class AssembunnyComputer {
 			this.register = register;
 		}
 
+		public int getRegister() {
+			return register;
+		}
+
 		@Override
 		public boolean shouldJump(State state) {
 			return state.getRegisterValue(this.register) != 0;
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.JUMP_IF_REGISTER_NOT_ZERO;
 		}
 	}
 
@@ -323,6 +521,11 @@ public class AssembunnyComputer {
 		@Override
 		public void run(State state) {
 			state.adjustPC(1);
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.NOOP;
 		}
 	}
 
@@ -342,7 +545,7 @@ public class AssembunnyComputer {
 					if (value == 0) {
 						return NoopInstruction.INSTANCE;
 					} else {
-						return new JumpInstruction(offsetRetriever);
+						return new JumpAlwaysInstruction(offsetRetriever);
 					}
 				default:
 					throw new InvalidInstructionOperandsException("Unexpected first operand type");
@@ -351,7 +554,7 @@ public class AssembunnyComputer {
 
 		@Override
 		public InstructionFactory getToggleInstructionFactory() {
-			return CopyInstructionFactory.INSTANCE;
+			return CopyIntoRegisterInstructionFactory.INSTANCE;
 		}
 	}
 
@@ -362,13 +565,22 @@ public class AssembunnyComputer {
 			this.offsetRetriever = offsetRetriever;
 		}
 
+		public IntValueRetriever getOffsetRetriever() {
+			return offsetRetriever;
+		}
+
 		@Override
 		public final void run(State state) {
 			int instructionIndex = state.getPC() + this.offsetRetriever.getIntValue(state);
 			if (state.isValidInstructionIndex(instructionIndex)) {
-				state.getInstructionPair(instructionIndex).toggle();
+				state.toggleInstruction(instructionIndex);
 			}
 			state.adjustPC(1);
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.TOGGLE;
 		}
 	}
 
@@ -405,63 +617,132 @@ public class AssembunnyComputer {
 		}
 	}
 
-	public static class ToggleableInstructionPair extends InstructionPair {
-		private Instruction currentInstruction;
-		private boolean toggled;
-
-		public ToggleableInstructionPair(InstructionPair instructionPair) {
-			super(instructionPair);
-			init();
-		}
-
-		public ToggleableInstructionPair(Instruction normalInstruction, Instruction toggledInstruction) {
-			super(normalInstruction, toggledInstruction);
-			init();
-		}
-
-		private void init() {
-			this.currentInstruction = getNormalInstruction();
-			this.toggled = false;
-		}
-
-		public Instruction getCurrentInstruction() {
-			return this.currentInstruction;
-		}
-
-		public void toggle() {
-			if (this.toggled) {
-				this.toggled = false;
-				this.currentInstruction = getNormalInstruction();
-			} else {
-				this.toggled = true;
-				this.currentInstruction = getToggledInstruction();
-			}
-		}
-	}
-
 	public static class State {
-		private final ToggleableInstructionPair[] instructionsPairs;
+		private final InstructionPair[] instructionsPairs;
+		private final Instruction[] programWithToggles;
+		private Instruction[] programWithTogglesAndOptimizations;
+		private final boolean[] instructionsToggled;
 		private final int instructionCount;
 		private final long[] registers;
 		private int pc;
 
 		public State(InstructionPair[] instructionsPairs, int registerCount) {
 			int instructionCount = instructionsPairs.length;
-			this.instructionCount = instructionCount;
-			ToggleableInstructionPair[] toggleableInstructionPairs = new ToggleableInstructionPair[instructionCount];
+			this.instructionsPairs = Arrays.copyOf(instructionsPairs,instructionCount);
+			this.programWithToggles = new Instruction[instructionCount];
 			for (int instructionIndex=0; instructionIndex<instructionCount; instructionIndex++) {
-				toggleableInstructionPairs[instructionIndex] = new ToggleableInstructionPair(instructionsPairs[instructionIndex]);
+				this.programWithToggles[instructionIndex] = instructionsPairs[instructionIndex].getNormalInstruction();
 			}
-			this.instructionsPairs = toggleableInstructionPairs;
+			this.optimize();
+			this.instructionsToggled = new boolean[instructionCount];
+			this.instructionCount = instructionCount;
 			this.registers = new long[registerCount];
+		}
+
+		private static boolean isInstructionJumpIfNotZeroOfRegisterAndOffset(Instruction instruction, int wantedRegister, int wantedOffset) {
+			if (instruction.getInstructionType() != InstructionType.JUMP_IF_REGISTER_NOT_ZERO) {
+				return false;
+			}
+			JumpIfRegisterNotZeroInstruction jumpIfRegisterNotZeroInstruction = (JumpIfRegisterNotZeroInstruction)instruction;
+			if (jumpIfRegisterNotZeroInstruction.getRegister() != wantedRegister) {
+				return false;
+			}
+			IntValueRetriever offsetRetriever = jumpIfRegisterNotZeroInstruction.getOffsetRetriever();
+			if (offsetRetriever.getType() != ValueRetrieverType.STATIC) {
+				return false;
+			}
+			StaticIntValueRetriever staticOffsetRetriever = (StaticIntValueRetriever)offsetRetriever;
+			if (staticOffsetRetriever.getIntValue() != wantedOffset) {
+				return false;
+			}
+			return true;
+		}
+
+		private void optimize() {
+			this.programWithTogglesAndOptimizations = this.programWithToggles;
+			boolean optimizationFound = false;
+			int iterationsForIncrementBy = this.instructionCount-3;
+			int iterationsForIncrementByMultiply = this.instructionCount-5;
+			int instructionIndexIncrease = 1;
+			for (int instructionIndex=0; instructionIndex<iterationsForIncrementBy; instructionIndex+=instructionIndexIncrease) {
+				instructionIndexIncrease = 1;
+				Instruction instruction1 = this.programWithTogglesAndOptimizations[instructionIndex];
+				Instruction instruction2 = this.programWithTogglesAndOptimizations[instructionIndex+1];
+				IncrementRegisterInstruction incrementRegisterInstruction;
+				DecrementRegisterInstruction decrementRegisterInstruction;
+				if (instruction1.getInstructionType() == InstructionType.INCREMENT_REGISTER && instruction2.getInstructionType() == InstructionType.DECREMENT_REGISTER) {
+					incrementRegisterInstruction = (IncrementRegisterInstruction)instruction1;
+					decrementRegisterInstruction = (DecrementRegisterInstruction)instruction2;
+				}
+				else if (instruction1.getInstructionType() == InstructionType.DECREMENT_REGISTER && instruction2.getInstructionType() == InstructionType.INCREMENT_REGISTER) {
+					decrementRegisterInstruction = (DecrementRegisterInstruction)instruction1;
+					incrementRegisterInstruction = (IncrementRegisterInstruction)instruction2;
+				}
+				else {
+					continue;
+				}
+				int resultRegister = incrementRegisterInstruction.getRegister();
+				int sourceRegister = decrementRegisterInstruction.getRegister();
+				if (resultRegister == sourceRegister) {
+					continue;
+				}
+				Instruction instruction3 = this.programWithToggles[instructionIndex+2];
+				if (!isInstructionJumpIfNotZeroOfRegisterAndOffset(instruction3, sourceRegister, -2)) {
+					continue;
+				}
+				if (!optimizationFound) {
+					optimizationFound = true;
+					this.programWithTogglesAndOptimizations = Arrays.copyOf(this.programWithToggles,this.instructionCount);
+				}
+				this.programWithTogglesAndOptimizations[instructionIndex+0] = new IncrementRegisterByInstruction(resultRegister,sourceRegister);
+				this.programWithTogglesAndOptimizations[instructionIndex+1] = OptimizedAwayInstruction.INSTANCE;
+				this.programWithTogglesAndOptimizations[instructionIndex+2] = OptimizedAwayInstruction.INSTANCE;
+				instructionIndexIncrease = 3;
+				if (instructionIndex < iterationsForIncrementByMultiply) {
+					Instruction instruction4 = this.programWithTogglesAndOptimizations[instructionIndex+3];
+					if (instruction4.getInstructionType() != InstructionType.DECREMENT_REGISTER) {
+						continue;
+					}
+					DecrementRegisterInstruction decrementRegisterInstruction2 = (DecrementRegisterInstruction)instruction4;
+					int sourceRegister2 = decrementRegisterInstruction2.getRegister();
+					if (sourceRegister2 == sourceRegister || sourceRegister2 == resultRegister) {
+						continue;
+					}
+					Instruction instruction5 = this.programWithToggles[instructionIndex+4];
+					if (!isInstructionJumpIfNotZeroOfRegisterAndOffset(instruction5, sourceRegister2, -5)) {
+						continue;
+					}
+					this.programWithTogglesAndOptimizations[instructionIndex+0] = new IncrementRegisterByMultiplicationInstruction(resultRegister, sourceRegister, sourceRegister2);
+					this.programWithTogglesAndOptimizations[instructionIndex+3] = OptimizedAwayInstruction.INSTANCE;
+					this.programWithTogglesAndOptimizations[instructionIndex+4] = OptimizedAwayInstruction.INSTANCE;
+					instructionIndexIncrease = 5;
+				}
+			}
+		}
+
+		public void toggleInstruction(int index) {
+			// Intentional = not ==
+			InstructionPair instructionPair = this.instructionsPairs[index];
+			Instruction instruction;
+			if (this.instructionsToggled[index] = !this.instructionsToggled[index]) {
+				instruction = instructionPair.getToggledInstruction();
+			} else {
+				instruction = instructionPair.getNormalInstruction();
+			}
+			this.programWithToggles[index] = instruction;
+			this.optimize();
+		}
+
+		public void deoptimize() {
+			this.programWithTogglesAndOptimizations = this.programWithToggles;
 		}
 
 		public boolean isValidInstructionIndex(int index) {
 			return (index >= 0 && index < instructionCount);
 		}
 
-		public ToggleableInstructionPair getInstructionPair(int index) {
-			return instructionsPairs[index];
+		public Instruction getInstruction(int index) {
+			return programWithTogglesAndOptimizations[index];
 		}
 
 		public long getRegisterValue(int index) {
@@ -487,7 +768,7 @@ public class AssembunnyComputer {
 
 	private static final Map<String,InstructionFactory> INSTRUCTION_FACTORY_MAP = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 	static {
-		INSTRUCTION_FACTORY_MAP.put("cpy",CopyInstructionFactory.INSTANCE);
+		INSTRUCTION_FACTORY_MAP.put("cpy", CopyIntoRegisterInstructionFactory.INSTANCE);
 		INSTRUCTION_FACTORY_MAP.put("inc",IncrementRegisterInstructionFactory.INSTANCE);
 		INSTRUCTION_FACTORY_MAP.put("dec",DecrementRegisterInstructionFactory.INSTANCE);
 		INSTRUCTION_FACTORY_MAP.put("jnz",JumpIfNotZeroInstructionFactory.INSTANCE);
@@ -560,7 +841,7 @@ public class AssembunnyComputer {
 			if (!state.isValidInstructionIndex(pc)) {
 				break;
 			}
-			state.getInstructionPair(pc).getCurrentInstruction().run(state);
+			state.getInstruction(pc).run(state);
 		}
 		return state.getRegisterValue(outputRegisterIndex);
 	}

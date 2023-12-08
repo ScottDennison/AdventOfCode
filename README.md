@@ -51,7 +51,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2016 | 20 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day20.java) | Yes |
 | 2016 | 21 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day21.java) | Yes |
 | 2016 | 22 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day22.java) | Yes |
-| 2016 | 23 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day23.java) | No - Worst dataset is approximately 22,500ms |
+| 2016 | 23 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day23.java) | No - Worst dataset is approximately 500ms |
 | 2016 | 24 | No                                                                                                      |  |
 | 2016 | 25 | No                                                                                                      |  |
 | 2017 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day01.java) | Yes |

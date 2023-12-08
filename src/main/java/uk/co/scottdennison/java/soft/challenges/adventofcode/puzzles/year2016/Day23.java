@@ -9,22 +9,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 import java.io.PrintWriter;
 
 public class Day23 implements IPuzzle {
-	/**
-	 * The problem text strongly hints that the problem can be optimized by replacing some instructions with a new multiply instruction
-	 *
-	 * Specifically:
-	 *
-	 * inc r1 or dec r2
-	 * dec r2 or inc r1 (the unused instruction from above)
-	 * jnz r2 -2
-	 * dec r3
-	 * jnz r3 -5
-	 *
-	 * Is the same as incrementing r1 by (r2 * r3), and in the process clearing r2 and r3.
-	 *
-	 * However, with the toggle mechanics, I feel uncomfortable creating an optimizer for such a case, so have decided to leave this solution taking 20+ seconds.
-	 */
-
 	private static final int REGISTER_COUNT = 4;
 	private static final int OUTPUT_REGISTER_INDEX = 0;
 	private static final int INPUT_REGISTER_INDEX = 0;
