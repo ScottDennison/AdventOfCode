@@ -735,7 +735,7 @@ public class AssembunnyComputer {
 				}
 				if (!optimizationFound) {
 					optimizationFound = true;
-					this.programWithTogglesAndOptimizations = Arrays.copyOf(this.programWithToggles,this.instructionCount);
+					this.programWithTogglesAndOptimizations = Arrays.copyOf(this.programWithTogglesAndOptimizations,this.instructionCount);
 				}
 				this.programWithTogglesAndOptimizations[instructionIndex+0] = new IncrementRegisterByInstruction(resultRegister,sourceRegister);
 				this.programWithTogglesAndOptimizations[instructionIndex+1] = OptimizedAwayInstruction.INSTANCE;
@@ -764,9 +764,9 @@ public class AssembunnyComputer {
 		}
 
 		public void toggleInstruction(int index) {
-			// Intentional = not ==
 			InstructionPair instructionPair = this.instructionsPairs[index];
 			Instruction instruction;
+			// Intentional = not ==
 			if (this.instructionsToggled[index] = !this.instructionsToggled[index]) {
 				instruction = instructionPair.getToggledInstruction();
 			} else {
