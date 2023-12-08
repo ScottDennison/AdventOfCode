@@ -71,7 +71,8 @@ public class AssembunnyComputer {
 		JUMP_ALWAYS,
 		JUMP_IF_REGISTER_NOT_ZERO,
 		NOOP,
-		TOGGLE;
+		TOGGLE,
+		OUT;
 	}
 
 	public static interface Instruction {
@@ -595,6 +596,43 @@ public class AssembunnyComputer {
 		}
 	}
 
+	private static class OutInstruction implements Instruction {
+		private final LongValueRetriever longValueRetriever;
+
+		private OutInstruction(LongValueRetriever longValueRetriever) {
+			this.longValueRetriever = longValueRetriever;
+		}
+
+		public LongValueRetriever getLongValueRetriever() {
+			return longValueRetriever;
+		}
+
+		@Override
+		public void run(State state) {
+			OutputHandler outputHandler = state.getOutputHandler();
+			if (outputHandler != null) {
+				outputHandler.handleOutput(this.longValueRetriever.getLongValue(state));
+			}
+			state.adjustPC(1);
+		}
+
+		@Override
+		public InstructionType getInstructionType() {
+			return InstructionType.OUT;
+		}
+	}
+
+	private static class OutInstructionFactory extends AbstractOneOperandInstructionFactory {
+		public static final OutInstructionFactory INSTANCE = new OutInstructionFactory();
+
+		private OutInstructionFactory() {}
+
+		@Override
+		protected Instruction createInstruction(Operand operand) throws InvalidInstructionOperandsException {
+			return new OutInstruction(LongValueRetriever.createForOperand(operand));
+		}
+	}
+
 	public static class InstructionPair {
 		private final Instruction normalInstruction;
 		private final Instruction toggledInstruction;
@@ -617,6 +655,10 @@ public class AssembunnyComputer {
 		}
 	}
 
+	public static interface OutputHandler {
+		void handleOutput(long output);
+	}
+
 	public static class State {
 		private final InstructionPair[] instructionsPairs;
 		private final Instruction[] programWithToggles;
@@ -625,6 +667,7 @@ public class AssembunnyComputer {
 		private final int instructionCount;
 		private final long[] registers;
 		private int pc;
+		private OutputHandler outputHandler;
 
 		public State(InstructionPair[] instructionsPairs, int registerCount) {
 			int instructionCount = instructionsPairs.length;
@@ -633,9 +676,9 @@ public class AssembunnyComputer {
 			for (int instructionIndex=0; instructionIndex<instructionCount; instructionIndex++) {
 				this.programWithToggles[instructionIndex] = instructionsPairs[instructionIndex].getNormalInstruction();
 			}
-			this.optimize();
 			this.instructionsToggled = new boolean[instructionCount];
 			this.instructionCount = instructionCount;
+			this.optimize();
 			this.registers = new long[registerCount];
 		}
 
@@ -764,6 +807,14 @@ public class AssembunnyComputer {
 		public int getPC() {
 			return pc;
 		}
+
+		public void setOutputHandler(OutputHandler outputHandler) {
+			this.outputHandler = outputHandler;
+		}
+
+		public OutputHandler getOutputHandler() {
+			return this.outputHandler;
+		}
 	}
 
 	private static final Map<String,InstructionFactory> INSTRUCTION_FACTORY_MAP = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -773,6 +824,7 @@ public class AssembunnyComputer {
 		INSTRUCTION_FACTORY_MAP.put("dec",DecrementRegisterInstructionFactory.INSTANCE);
 		INSTRUCTION_FACTORY_MAP.put("jnz",JumpIfNotZeroInstructionFactory.INSTANCE);
 		INSTRUCTION_FACTORY_MAP.put("tgl",ToggleInstructionFactory.INSTANCE);
+		INSTRUCTION_FACTORY_MAP.put("out",OutInstructionFactory.INSTANCE);
 	}
 
 	private static InstructionPair parseInstructionStringIntoInstructionPair(String instructionString, int registerCount) {

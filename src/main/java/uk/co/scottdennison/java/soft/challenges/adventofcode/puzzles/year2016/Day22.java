@@ -1,6 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2016;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.BasicOrthoganalAStar;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -11,6 +12,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -82,71 +85,6 @@ public class Day22 implements IPuzzle {
             return this.character;
         }
     };
-
-    private static class AStarPoint {
-        private final int x;
-        private final int y;
-        private AStarPoint cameFrom = null;
-        private int fScore = Integer.MAX_VALUE;
-        private int gScore = Integer.MAX_VALUE;
-
-        private AStarPoint(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public int getX() {
-            return this.x;
-        }
-
-        public int getY() {
-            return this.y;
-        }
-
-        public AStarPoint getCameFrom() {
-            return this.cameFrom;
-        }
-
-        public void setCameFrom(AStarPoint cameFrom) {
-            this.cameFrom = cameFrom;
-        }
-
-        public int getFScore() {
-            return this.fScore;
-        }
-
-        public void setFScore(int hScore) {
-            this.fScore = hScore;
-        }
-
-        public int getGScore() {
-            return this.gScore;
-        }
-
-        public void setGScore(int gScore) {
-            this.gScore = gScore;
-        }
-
-        @Override
-        public boolean equals(Object otherObject) {
-            if (this == otherObject) return true;
-            if (otherObject == null || this.getClass() != otherObject.getClass()) return false;
-
-            AStarPoint otherAStarPoint = (AStarPoint) otherObject;
-
-            if (this.x != otherAStarPoint.x) return false;
-            if (this.y != otherAStarPoint.y) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = this.x;
-            result = 31 * result + this.y;
-            return result;
-        }
-    }
 
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
@@ -229,83 +167,33 @@ public class Day22 implements IPuzzle {
         );
     }
 
-    private static int moveBetweenAStarHeuristic(int fromY, int fromX, int toY, int toX) {
-        return Math.abs(toY-fromY)+Math.abs(toX-fromX);
-    }
-
-    private static void moveBetweenCheckNeighbour(FileSystemClassification[][] fileSystemClassificationGrid, PriorityQueue<AStarPoint> openSet, AStarPoint[][] knownPoints, AStarPoint currentPoint, int neighbourY, int neighbourX, int targetY, int targetX) {
-        if (fileSystemClassificationGrid[neighbourY][neighbourX] != FileSystemClassification.STANDARD) {
-            return;
-        }
-        AStarPoint neighbourPoint = knownPoints[neighbourY][neighbourX];
-        boolean newPoint = false;
-        if (neighbourPoint == null) {
-            newPoint = true;
-            neighbourPoint = new AStarPoint(neighbourX,neighbourY);
-            knownPoints[neighbourY][neighbourX] = neighbourPoint;
-        }
-        int potentialGScore = currentPoint.getGScore() + 1;
-        if (potentialGScore < neighbourPoint.getGScore()) {
-            if (!newPoint) {
-                openSet.remove(neighbourPoint);
-            }
-            neighbourPoint.setCameFrom(currentPoint);
-            neighbourPoint.setGScore(potentialGScore);
-            neighbourPoint.setFScore(potentialGScore + moveBetweenAStarHeuristic(neighbourY,neighbourX,targetY,targetX));
-            openSet.add(neighbourPoint);
-        }
-    }
-
     private static int moveBetween(FileSystemClassification[][] fileSystemClassificationGrid, int sourceY, int sourceX, int targetY, int targetX, int maxY, int maxX, PrintWriter printWriter) {
-        PriorityQueue<AStarPoint> openSet = new PriorityQueue<>(Comparator.comparing(AStarPoint::getFScore));
-        AStarPoint[][] knownPoints = new AStarPoint[maxY+1][maxX+1];
-        AStarPoint startPoint = new AStarPoint(sourceX, sourceY);
-        startPoint.setGScore(0);
-        startPoint.setFScore(moveBetweenAStarHeuristic(sourceY,sourceX,targetY,targetX));
-        knownPoints[sourceY][sourceX] = startPoint;
-        openSet.add(startPoint);
-        while (true) {
-            AStarPoint aStarPoint = openSet.poll();
-            if (aStarPoint == null) {
-                throw new IllegalStateException("No route found.");
-            }
-            if (aStarPoint.getY() == targetY && aStarPoint.getX() == targetX) {
-                Deque<AStarPoint> steps = new LinkedList<>();
-                steps.addFirst(aStarPoint);
-                while (true) {
-                    aStarPoint = aStarPoint.getCameFrom();
-                    if (aStarPoint == null) {
-                        break;
-                    }
-                    steps.addFirst(aStarPoint);
-                }
-                int moveOperations = 0;
-                AStarPoint moveFromPoint = steps.removeFirst();
-                while (true) {
-                    AStarPoint moveToPoint = steps.pollFirst();
-                    if (moveToPoint == null) {
-                        break;
-                    }
-                    moveOperations += swapBetween(fileSystemClassificationGrid, moveFromPoint.getY(), moveFromPoint.getX(), moveToPoint.getY(), moveToPoint.getX(), maxY, maxX, printWriter);
-                    moveFromPoint = moveToPoint;
-                }
-                return moveOperations;
-            }
-            int y = aStarPoint.getY();
-            int x = aStarPoint.getX();
-            for (int yDelta=-1; yDelta<=1; yDelta+=2) {
-                int newY = y+yDelta;
-                if (newY >= 0 && newY <= maxY) {
-                    moveBetweenCheckNeighbour(fileSystemClassificationGrid,openSet,knownPoints,aStarPoint,newY,x,targetY,targetX);
-                }
-            }
-            for (int xDelta=-1; xDelta<=1; xDelta+=2) {
-                int newX = x+xDelta;
-                if (newX >= 0 && newX <= maxX) {
-                    moveBetweenCheckNeighbour(fileSystemClassificationGrid,openSet,knownPoints,aStarPoint,y,newX,targetY,targetX);
-                }
-            }
+        Optional<Deque<BasicOrthoganalAStar.Point>> optionalSteps = BasicOrthoganalAStar.run(
+            (neighbourY, neighbourX) -> fileSystemClassificationGrid[neighbourY][neighbourX] == Day22.FileSystemClassification.STANDARD,
+            sourceY,
+            sourceX,
+            targetY,
+            targetX,
+            0,
+            0,
+            maxY,
+            maxX
+        );
+        if (!optionalSteps.isPresent()) {
+            throw new IllegalStateException("No route found.");
         }
+        Deque<BasicOrthoganalAStar.Point> steps = optionalSteps.get();
+        int moveOperations = 0;
+        BasicOrthoganalAStar.Point moveFromPoint = steps.removeFirst();
+        while (true) {
+            BasicOrthoganalAStar.Point moveToPoint = steps.pollFirst();
+            if (moveToPoint == null) {
+                break;
+            }
+            moveOperations += swapBetween(fileSystemClassificationGrid, moveFromPoint.getY(), moveFromPoint.getX(), moveToPoint.getY(), moveToPoint.getX(), maxY, maxX, printWriter);
+            moveFromPoint = moveToPoint;
+        }
+        return moveOperations;
     }
 
     private static int swapBetween(FileSystemClassification[][] fileSystemClassificationGrid, int sourceY, int sourceX, int targetY, int targetX, int maxY, int maxX, PrintWriter printWriter) {
