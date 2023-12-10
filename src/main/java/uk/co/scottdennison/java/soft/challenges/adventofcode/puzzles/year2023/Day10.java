@@ -7,9 +7,13 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.ToIntFunction;
 
 public class Day10 implements IPuzzle {
@@ -28,6 +32,44 @@ public class Day10 implements IPuzzle {
 
         public int getXDelta() {
             return this.xDelta;
+        }
+    }
+
+    private static class Point {
+        private final int y;
+        private final int x;
+
+        public Point(int y, int x) {
+            this.y = y;
+            this.x = x;
+        }
+
+        public int getY() {
+            return this.y;
+        }
+
+        public int getX() {
+            return this.x;
+        }
+
+        @Override
+        public boolean equals(Object otherObject) {
+            if (this == otherObject) return true;
+            if (otherObject == null || this.getClass() != otherObject.getClass()) return false;
+
+            Point otherPoint = (Point) otherObject;
+
+            if (this.y != otherPoint.y) return false;
+            if (this.x != otherPoint.x) return false;
+
+            return true;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = this.y;
+            result = 31 * result + this.x;
+            return result;
         }
     }
 
@@ -151,6 +193,7 @@ public class Day10 implements IPuzzle {
         if (startTileType == null) {
             throw new IllegalStateException("No potential start tile types found.");
         }
+        boolean[][] partOfMainPipe = new boolean[height][width];
         tileTypeGrid[startY][startX] = startTileType;
         int currentY = startY;
         int currentX = startX;
@@ -171,10 +214,101 @@ public class Day10 implements IPuzzle {
                     break;
                 }
             }
+            partOfMainPipe[currentY][currentX] = true;
         } while (!(currentY == startY && currentX == startX));
+
+        // Begin part B solve, this is almost certainly not the optimal solution, but it is all I could come up with.
+        int expandedHeight = height*2+1;
+        int expandedWidth = width*2+1;
+        boolean[][] expandedVisited = new boolean[expandedHeight][expandedWidth];
+        for (int y=0, expandedY=1; y<height; y++, expandedY+=2) {
+            for (int x=0, expandedX=1; x<width; x++, expandedX+=2) {
+                if (partOfMainPipe[y][x]) {
+                    expandedVisited[expandedY][expandedX] = true;
+                }
+            }
+        }
+        for (int expandedY=2, lesserY=0, greaterY=1; greaterY<height; expandedY+=2, lesserY++, greaterY++) {
+            for (int expandedX=1, x=0; expandedX<expandedWidth; expandedX+=2, x++) {
+                if (partOfMainPipe[lesserY][x] && partOfMainPipe[greaterY][x]) {
+                    boolean visit = true;
+                    switch (tileTypeGrid[lesserY][x]) {
+                        case VERTICAL:
+                        case BEND_SE:
+                        case BEND_SW:
+                            break;
+                        default:
+                            visit = false;
+                    }
+                    switch (tileTypeGrid[greaterY][x]) {
+                        case VERTICAL:
+                        case BEND_NE:
+                        case BEND_NW:
+                            break;
+                        default:
+                            visit = false;
+                    }
+                    if (visit) {
+                        expandedVisited[expandedY][expandedX] = true;
+                    }
+                }
+            }
+        }
+        for (int expandedY=1, y=0; expandedY<expandedHeight; expandedY+=2, y++) {
+            for (int expandedX=2, lesserX=0, greaterX=1; greaterX<width; expandedX+=2, lesserX++, greaterX++) {
+                if (partOfMainPipe[y][lesserX] && partOfMainPipe[y][greaterX]) {
+                    boolean visit = true;
+                    switch (tileTypeGrid[y][lesserX]) {
+                        case HORIZONTAL:
+                        case BEND_NE:
+                        case BEND_SE:
+                            break;
+                        default:
+                            visit = false;
+                    }
+                    switch (tileTypeGrid[y][greaterX]) {
+                        case HORIZONTAL:
+                        case BEND_NW:
+                        case BEND_SW:
+                            break;
+                        default:
+                            visit = false;
+                    }
+                    if (visit) {
+                        expandedVisited[expandedY][expandedX] = true;
+                    }
+                }
+            }
+        }
+        Deque<Point> pendingPoints = new LinkedList<>();
+        pendingPoints.addFirst(new Point(0,0));
+        while (true) {
+            Point point = pendingPoints.pollFirst();
+            if (point == null) {
+                break;
+            }
+            int expandedY = point.getY();
+            int expandedX = point.getX();
+            if (expandedY >= 0 && expandedY < expandedHeight && expandedX >= 0 && expandedX < expandedWidth && !expandedVisited[expandedY][expandedX]) {
+                expandedVisited[expandedY][expandedX] = true;
+                pendingPoints.addLast(new Point(expandedY-1,expandedX));
+                pendingPoints.addLast(new Point(expandedY+1,expandedX));
+                pendingPoints.addLast(new Point(expandedY,expandedX-1));
+                pendingPoints.addLast(new Point(expandedY,expandedX+1));
+            }
+        }
+        int enclosedTiles = 0;
+        for (int expandedY=1; expandedY<expandedHeight; expandedY+=2) {
+            for (int expandedX=1; expandedX<expandedWidth; expandedX+=2) {
+                if (!expandedVisited[expandedY][expandedX]) {
+                    enclosedTiles++;
+                }
+            }
+        }
+
         return new BasicPuzzleResults<>(
             pathLength/2,
-            null
+            enclosedTiles
         );
     }
 }
