@@ -24,8 +24,10 @@ import java.nio.file.Paths;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -108,12 +110,40 @@ public class Main {
 	}
 
 	private static class PuzzleRunPartResults {
+		public enum State {
+			SUCCESS ("\u001B[32m"),
+			UNKNOWN ("\u001B[33m"),
+			FAILURE ("\u001B[31m");
+
+			private final String ansiString;
+
+			State(String ansiColourCode) {
+				this.ansiString = ansiColourCode + this.name() + "\u001B[0m";
+			}
+
+			public String getAnsiString() {
+				return ansiString;
+			}
+		}
+
 		private final String expectedResult;
 		private final String actualResult;
+		private final State state;
 
 		public PuzzleRunPartResults(String expectedResult, String actualResult) {
 			this.expectedResult = expectedResult;
 			this.actualResult = actualResult;
+			if (expectedResult != null) {
+				if (Objects.equals(actualResult, expectedResult)) {
+					this.state = State.SUCCESS;
+				}
+				else {
+					this.state = State.FAILURE;
+				}
+			}
+			else {
+				this.state = State.UNKNOWN;
+			}
 		}
 
 		public boolean hasExpectedResult() {
@@ -126,6 +156,10 @@ public class Main {
 
 		public String getActualResult() {
 			return this.actualResult;
+		}
+
+		public State getState() {
+			return this.state;
 		}
 	}
 
@@ -190,38 +224,42 @@ public class Main {
 			displayTextualTableBuilder.setDefaultHorizontalAlignment(DisplayTextualTableBuilder.HorizontalAlignment.CENTER_BLOCK);
 			displayTextualTableBuilder.setDefaultVerticalAlignment(DisplayTextualTableBuilder.VerticalAlignment.MIDDLE);
 			NumberFormat numberFormat = NumberFormat.getNumberInstance();
+			Map<PuzzleRunPartResults.State,Integer> stateCounts = new EnumMap<>(PuzzleRunPartResults.State.class);
 			for (PuzzleRunResults puzzleRunResultsEntry : puzzleRunResults) {
 				displayTextualTableBuilder.addRow(true);
 				displayTextualTableBuilder.addEntry("Data Set", puzzleRunResultsEntry.getDataSetName(), DisplayTextualTableBuilder.HorizontalAlignment.LEFT);
 				displayTextualTableBuilder.addEntry("Time taken (ns)", numberFormat.format(puzzleRunResultsEntry.getNanoseconds()), DisplayTextualTableBuilder.HorizontalAlignment.RIGHT);
-				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, "A", puzzleRunResultsEntry.getPartAResults());
-				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, "B", puzzleRunResultsEntry.getPartBResults());
+				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, stateCounts, "A", puzzleRunResultsEntry.getPartAResults());
+				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, stateCounts, "B", puzzleRunResultsEntry.getPartBResults());
 			}
 			consoleWriter.write(displayTextualTableBuilder.build("\t", restrictedCharacterSet ? DisplayTextualTableBuilder.CharacterSet.ASCII : DisplayTextualTableBuilder.CharacterSet.BASIC_BOX_DRAWING_DOUBLE_WIDTH_OUTER, true, null));
+			boolean first = true;
+			for (Map.Entry<PuzzleRunPartResults.State,Integer> stateCountEntry : stateCounts.entrySet()) {
+				int count = stateCountEntry.getValue();
+				if (count < 1) {
+					continue;
+				}
+				if (first) {
+					consoleWriter.write("\tSummary: ");
+					first = false;
+				}
+				else {
+					consoleWriter.write(", ");
+				}
+				consoleWriter.format("%d x %s",count,stateCountEntry.getKey().getAnsiString());
+			}
+			if (!first) {
+				consoleWriter.format("%n");
+			}
 			consoleWriter.flush();
 		}
 
-		private void addPuzzleRunPartResultsToTable(DisplayTextualTableBuilder displayTextualTableBuilder, String partCode, PuzzleRunPartResults partResults) {
-			boolean hasExpectedResult = partResults.hasExpectedResult();
-			String expectedResult;
-			String actualResult = partResults.getActualResult();
-			String resultState;
-			if (hasExpectedResult) {
-				expectedResult = partResults.getExpectedResult();
-				if (Objects.equals(actualResult, expectedResult)) {
-					resultState = "\u001B[32mSUCCESS\u001B[0m";
-				}
-				else {
-					resultState = "\u001B[31mFAILURE\u001B[0m";
-				}
-			}
-			else {
-				expectedResult = "";
-				resultState = "\u001B[33mUNKNOWN\u001B[0m";
-			}
-			displayTextualTableBuilder.addEntry("Part " + partCode + " - Expected Answer", expectedResult, DisplayTextualTableBuilder.HorizontalAlignment.RIGHT_BLOCK);
-			displayTextualTableBuilder.addEntry("Part " + partCode + " - Actual Answer", actualResult, DisplayTextualTableBuilder.HorizontalAlignment.RIGHT_BLOCK);
-			displayTextualTableBuilder.addEntry("Part " + partCode + " - State", resultState);
+		private void addPuzzleRunPartResultsToTable(DisplayTextualTableBuilder displayTextualTableBuilder, Map<PuzzleRunPartResults.State,Integer> stateCounts, String partCode, PuzzleRunPartResults partResults) {
+			PuzzleRunPartResults.State state = partResults.getState();
+			displayTextualTableBuilder.addEntry("Part " + partCode + " - Expected Answer", partResults.hasExpectedResult()?partResults.getExpectedResult():"", DisplayTextualTableBuilder.HorizontalAlignment.RIGHT_BLOCK);
+			displayTextualTableBuilder.addEntry("Part " + partCode + " - Actual Answer", partResults.getActualResult(), DisplayTextualTableBuilder.HorizontalAlignment.RIGHT_BLOCK);
+			displayTextualTableBuilder.addEntry("Part " + partCode + " - State", state.getAnsiString());
+			stateCounts.put(state, stateCounts.getOrDefault(state,0) + 1);
 		}
 
 		private List<PuzzleRunResults> runWithDataSets(PrintWriter consoleWriter, Path dataPath, String dataSetsNameSingular, String dataSetsNamePlural, String dataSetsFolderName, boolean preRunForJIT, Set<String> filters) {

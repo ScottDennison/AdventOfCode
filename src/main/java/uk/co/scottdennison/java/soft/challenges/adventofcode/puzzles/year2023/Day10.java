@@ -231,24 +231,19 @@ public class Day10 implements IPuzzle {
         for (int expandedY=2, lesserY=0, greaterY=1; greaterY<height; expandedY+=2, lesserY++, greaterY++) {
             for (int expandedX=1, x=0; expandedX<expandedWidth; expandedX+=2, x++) {
                 if (partOfMainPipe[lesserY][x] && partOfMainPipe[greaterY][x]) {
-                    boolean visit = true;
-                    switch (tileTypeGrid[lesserY][x]) {
-                        case VERTICAL:
-                        case BEND_SE:
-                        case BEND_SW:
-                            break;
-                        default:
-                            visit = false;
+                    boolean lesserNeedsConnection = false;
+                    for (TileLinkDelta tileLinkDelta : tileTypeGrid[lesserY][x]) {
+                        if (tileLinkDelta.getXDelta() == 0 && tileLinkDelta.getYDelta() == 1) {
+                            lesserNeedsConnection = true;
+                        }
                     }
-                    switch (tileTypeGrid[greaterY][x]) {
-                        case VERTICAL:
-                        case BEND_NE:
-                        case BEND_NW:
-                            break;
-                        default:
-                            visit = false;
+                    boolean greaterNeedsConnection = false;
+                    for (TileLinkDelta tileLinkDelta : tileTypeGrid[greaterY][x]) {
+                        if (tileLinkDelta.getXDelta() == 0 && tileLinkDelta.getYDelta() == -1) {
+                            greaterNeedsConnection = true;
+                        }
                     }
-                    if (visit) {
+                    if (lesserNeedsConnection && greaterNeedsConnection) {
                         expandedVisited[expandedY][expandedX] = true;
                     }
                 }
@@ -257,24 +252,19 @@ public class Day10 implements IPuzzle {
         for (int expandedY=1, y=0; expandedY<expandedHeight; expandedY+=2, y++) {
             for (int expandedX=2, lesserX=0, greaterX=1; greaterX<width; expandedX+=2, lesserX++, greaterX++) {
                 if (partOfMainPipe[y][lesserX] && partOfMainPipe[y][greaterX]) {
-                    boolean visit = true;
-                    switch (tileTypeGrid[y][lesserX]) {
-                        case HORIZONTAL:
-                        case BEND_NE:
-                        case BEND_SE:
-                            break;
-                        default:
-                            visit = false;
+                    boolean lesserNeedsConnection = false;
+                    for (TileLinkDelta tileLinkDelta : tileTypeGrid[y][lesserX]) {
+                        if (tileLinkDelta.getXDelta() == 1 && tileLinkDelta.getYDelta() == 0) {
+                            lesserNeedsConnection = true;
+                        }
                     }
-                    switch (tileTypeGrid[y][greaterX]) {
-                        case HORIZONTAL:
-                        case BEND_NW:
-                        case BEND_SW:
-                            break;
-                        default:
-                            visit = false;
+                    boolean greaterNeedsConnection = false;
+                    for (TileLinkDelta tileLinkDelta : tileTypeGrid[y][greaterX]) {
+                        if (tileLinkDelta.getXDelta() == -1 && tileLinkDelta.getYDelta() == 0) {
+                            greaterNeedsConnection = true;
+                        }
                     }
-                    if (visit) {
+                    if (lesserNeedsConnection && greaterNeedsConnection) {
                         expandedVisited[expandedY][expandedX] = true;
                     }
                 }
