@@ -56,7 +56,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2016 | 25 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2016/Day25.java) | Yes |
 | 2017 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day01.java) | Yes |
 | 2017 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day02.java) | Yes |
-| 2017 | 03 | No                                                                                                      |  |
+| 2017 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day03.java) | Yes |
 | 2017 | 04 | No                                                                                                      |  |
 | 2017 | 05 | No                                                                                                      |  |
 | 2017 | 06 | No                                                                                                      |  |
@@ -214,8 +214,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2023 | 08 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day08.java) | Yes |
 | 2023 | 09 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day09.java) | Yes |
 | 2023 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day10.java) | Yes |
-| 2023 | 11 | Not yet released at the time of writing                                                                 | |
-| 2023 | 12 | Not yet released at the time of writing                                                                 | |
+| 2023 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day11.java) | Yes |
+| 2023 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day12.java) | Yes |
 | 2023 | 13 | Not yet released at the time of writing                                                                 | |
 | 2023 | 14 | Not yet released at the time of writing                                                                 | |
 | 2023 | 15 | Not yet released at the time of writing                                                                 | |
