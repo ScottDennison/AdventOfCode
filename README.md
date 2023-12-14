@@ -217,7 +217,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2023 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day11.java) | Yes |
 | 2023 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day12.java) | Yes |
 | 2023 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day13.java) | Yes |
-| 2023 | 14 | Not yet released at the time of writing                                                                 | |
+| 2023 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day14.java) | Yes |
 | 2023 | 15 | Not yet released at the time of writing                                                                 | |
 | 2023 | 16 | Not yet released at the time of writing                                                                 | |
 | 2023 | 17 | Not yet released at the time of writing                                                                 | |
