@@ -81,7 +81,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2017 | 25 | No                                                                                                      |  |
 | 2018 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day01.java) | Yes |
 | 2018 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day02.java) | Yes |
-| 2018 | 03 | No                                                                                                      |  |
+| 2018 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day03.java) | Yes |
 | 2018 | 04 | No                                                                                                      |  |
 | 2018 | 05 | No                                                                                                      |  |
 | 2018 | 06 | No                                                                                                      |  |
@@ -216,7 +216,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2023 | 10 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day10.java) | Yes |
 | 2023 | 11 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day11.java) | Yes |
 | 2023 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day12.java) | Yes |
-| 2023 | 13 | Not yet released at the time of writing                                                                 | |
+| 2023 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day13.java) | Yes |
 | 2023 | 14 | Not yet released at the time of writing                                                                 | |
 | 2023 | 15 | Not yet released at the time of writing                                                                 | |
 | 2023 | 16 | Not yet released at the time of writing                                                                 | |
