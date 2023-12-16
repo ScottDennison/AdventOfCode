@@ -57,8 +57,8 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2017 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day01.java) | Yes |
 | 2017 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day02.java) | Yes |
 | 2017 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day03.java) | Yes |
-| 2017 | 04 | No                                                                                                      |  |
-| 2017 | 05 | No                                                                                                      |  |
+| 2017 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day04.java) | Yes |
+| 2017 | 05 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day05.java) | Yes |
 | 2017 | 06 | No                                                                                                      |  |
 | 2017 | 07 | No                                                                                                      |  |
 | 2017 | 08 | No                                                                                                      |  |
@@ -82,7 +82,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2018 | 01 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day01.java) | Yes |
 | 2018 | 02 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day02.java) | Yes |
 | 2018 | 03 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day03.java) | Yes |
-| 2018 | 04 | No                                                                                                      |  |
+| 2018 | 04 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day04.java) | Yes |
 | 2018 | 05 | No                                                                                                      |  |
 | 2018 | 06 | No                                                                                                      |  |
 | 2018 | 07 | No                                                                                                      |  |
@@ -218,7 +218,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2023 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day12.java) | Yes |
 | 2023 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day13.java) | Yes |
 | 2023 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day14.java) | Yes |
-| 2023 | 15 | Not yet released at the time of writing                                                                 | |
+| 2023 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day15.java) | Yes |
 | 2023 | 16 | Not yet released at the time of writing                                                                 | |
 | 2023 | 17 | Not yet released at the time of writing                                                                 | |
 | 2023 | 18 | Not yet released at the time of writing                                                                 | |
