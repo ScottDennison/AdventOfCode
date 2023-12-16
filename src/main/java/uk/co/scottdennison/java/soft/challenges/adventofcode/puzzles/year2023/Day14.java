@@ -28,86 +28,37 @@ public class Day14 implements IPuzzle {
         return destGrid;
     }
 
-    private static void runMovementNorth(char[][] grid, int height, int width) {
-        for (int y=0; y<height; y++) {
-            for (int x=0; x<width; x++) {
-                if (grid[y][x] == 'O') {
-                    int stopY=0;
-                    for (int y2=y-1; y2>=0; y2--) {
-                        if (grid[y2][x] != '.') {
-                            stopY = y2+1;
-                            break;
-                        }
-                    }
-                    if (stopY != y) {
-                        grid[y][x] = '.';
-                        grid[stopY][x] = 'O';
-                    }
+    private static void runMovement(char[][] grid, int scanYStart, int scanYStop, int scanYDelta, int scanXStart, int scanXStop, int scanXDelta, int moveYStop, int moveYDelta, int moveXStop, int moveXDelta) {
+        for (int scanY=scanYStart; scanY!=scanYStop; scanY+=scanYDelta) {
+            for (int scanX=scanXStart; scanX!=scanXStop; scanX+=scanXDelta) {
+                if (grid[scanY][scanX] == 'O') {
+                    int moveY = scanY;
+                    int moveX = scanX;
+                    do {
+                        moveY += moveYDelta;
+                        moveX += moveXDelta;
+                    } while (moveY != moveYStop && moveX != moveXStop && grid[moveY][moveX] == '.');
+                    grid[scanY][scanX] = '.';
+                    grid[moveY - moveYDelta][moveX - moveXDelta] = 'O';
                 }
             }
         }
+    }
+
+    private static void runMovementNorth(char[][] grid, int height, int width) {
+        runMovement(grid, 0, height, 1, 0, width, 1, -1, -1, width, 0);
     }
 
     private static void runMovementWest(char[][] grid, int height, int width) {
-        for (int x=0; x<width; x++) {
-            for (int y=0; y<height; y++) {
-                if (grid[y][x] == 'O') {
-                    int stopX=0;
-                    for (int x2=x-1; x2>=0; x2--) {
-                        if (grid[y][x2] != '.') {
-                            stopX = x2+1;
-                            break;
-                        }
-                    }
-                    if (stopX != x) {
-                        grid[y][x] = '.';
-                        grid[y][stopX] = 'O';
-                    }
-                }
-            }
-        }
+        runMovement(grid, 0, height, 1, 0, width, 1, height, 0, -1, -1);
     }
 
     private static void runMovementSouth(char[][] grid, int height, int width) {
-        int defaultStopY=height-1;
-        for (int y=height-1; y>=0; y--) {
-            for (int x=0; x<width; x++) {
-                if (grid[y][x] == 'O') {
-                    int stopY=defaultStopY;
-                    for (int y2=y+1; y2<height; y2++) {
-                        if (grid[y2][x] != '.') {
-                            stopY = y2-1;
-                            break;
-                        }
-                    }
-                    if (stopY != y) {
-                        grid[y][x] = '.';
-                        grid[stopY][x] = 'O';
-                    }
-                }
-            }
-        }
+        runMovement(grid, height-1, -1, -1, 0, width, 1, height, 1, width, 0);
     }
 
     private static void runMovementEast(char[][] grid, int height, int width) {
-        int defaultStopX=width-1;
-        for (int x=width-1; x>=0; x--) {
-            for (int y=0; y<height; y++) {
-                if (grid[y][x] == 'O') {
-                    int stopX=defaultStopX;
-                    for (int x2=x+1; x2<width; x2++) {
-                        if (grid[y][x2] != '.') {
-                            stopX = x2-1;
-                            break;
-                        }
-                    }
-                    if (stopX != x) {
-                        grid[y][x] = '.';
-                        grid[y][stopX] = 'O';
-                    }
-                }
-            }
-        }
+        runMovement(grid, 0, height, 1, width-1, -1, -1, height, 0, width, 1);
     }
 
     private static void runSpinCycle(char[][] grid, int height, int width) {
@@ -165,11 +116,7 @@ public class Day14 implements IPuzzle {
                 partBLoad = load;
                 break;
             }
-            IdentityHashMap<char[][],Integer> seenGridsForThisLoad = seenGridsByLoad.get(load);
-            if (seenGridsForThisLoad == null) {
-                seenGridsForThisLoad = new IdentityHashMap<>();
-                seenGridsByLoad.put(load, seenGridsForThisLoad);
-            }
+            IdentityHashMap<char[][],Integer> seenGridsForThisLoad = seenGridsByLoad.computeIfAbsent(load, __ -> new IdentityHashMap<>());
             for (char[][] seenGridForThisLoad : seenGridsForThisLoad.keySet()) {
                 if (isSame(partBGrid, seenGridForThisLoad, height, width)) {
                     int repetitionCycleLength = spinCycleNumber - seenGridsForThisLoad.get(seenGridForThisLoad);
