@@ -1,14 +1,13 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2016;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.common.BasicOrthoganalAStar;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStar;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -63,11 +62,31 @@ public class Day24 implements IPuzzle {
 				Point toPoint = numberLocations.get(numberTo);
 				int toY = toPoint.getY();
 				int toX = toPoint.getX();
-				Optional<Deque<BasicOrthoganalAStar.Point>> steps = BasicOrthoganalAStar.run((y, x) -> grid[y][x] != '#', fromY, fromX, toY, toX, 0, 0, maxY, maxX);
-				if (!steps.isPresent()) {
+				Optional<AStar.ResultingRoute<AStar.PointNodeAdapter.Point>> optionalRoute = AStar.run(
+					new AStar.PointNodeAdapter(
+						new AStar.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
+							@Override
+							public boolean canMoveBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
+								return grid[linkedToPoint.getY()][linkedToPoint.getX()] != '#';
+							}
+
+							@Override
+							public int getCostOfMovingBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
+								return 1;
+							}
+						},
+						0,
+						maxY,
+						0,
+						maxX
+					),
+					new AStar.PointNodeAdapter.Point(fromY, fromX),
+					new AStar.PointNodeAdapter.Point(toY, toX)
+				);
+				if (!optionalRoute.isPresent()) {
 					throw new IllegalStateException("Unable to calculate route");
 				}
-				int stepCount = steps.get().size()-1;
+				int stepCount = optionalRoute.get().getSteps().length-1;
 				distances[numberFrom][numberTo] = stepCount;
 				distances[numberTo][numberFrom] = stepCount;
 			}

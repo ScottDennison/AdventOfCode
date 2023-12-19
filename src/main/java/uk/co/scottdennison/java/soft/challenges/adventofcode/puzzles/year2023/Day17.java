@@ -1,6 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2023;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStar;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -12,7 +13,9 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.function.Consumer;
 
 public class Day17 implements IPuzzle {
     private static enum Direction {
@@ -114,76 +117,6 @@ public class Day17 implements IPuzzle {
         }
     }
 
-    public static class Node {
-        private final NodeKey nodeKey;
-        private Node cameFrom;
-        private int fScore = Integer.MAX_VALUE;
-        private int gScore = Integer.MAX_VALUE;
-
-        private Node(NodeKey nodeKey) {
-            this.nodeKey = nodeKey;
-        }
-
-        public NodeKey getNodeKey() {
-            return this.nodeKey;
-        }
-
-        private Node getCameFrom() {
-            return this.cameFrom;
-        }
-
-        private void setCameFrom(Node cameFrom) {
-            this.cameFrom = cameFrom;
-        }
-
-        private int getFScore() {
-            return this.fScore;
-        }
-
-        private void setFScore(int hScore) {
-            this.fScore = hScore;
-        }
-
-        private int getGScore() {
-            return this.gScore;
-        }
-
-        private void setGScore(int gScore) {
-            this.gScore = gScore;
-        }
-
-        @Override
-        public boolean equals(Object otherObject) {
-            if (this == otherObject) return true;
-            if (otherObject == null || this.getClass() != otherObject.getClass()) return false;
-
-            Node otherNode = (Node) otherObject;
-
-            if (this.nodeKey != null ? !this.nodeKey.equals(otherNode.nodeKey) : otherNode.nodeKey != null)
-                return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            return this.nodeKey != null ? this.nodeKey.hashCode() : 0;
-        }
-
-        @Override
-        public String toString() {
-            return "Node{" +
-                "nodeKey=" + this.nodeKey + ", " +
-                "cameFrom=" + this.cameFrom + ", " +
-                "fScore=" + this.fScore + ", " +
-                "gScore=" + this.gScore + "}";
-        }
-    }
-
-    private static int heuristic(int fromY, int fromX, int toY, int toX) {
-        return Math.abs(toY-fromY)+Math.abs(toX-fromX);
-    }
-
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
         char[][] costCharGrid = LineReader.charArraysArray(inputCharacters, true);
@@ -202,75 +135,69 @@ public class Day17 implements IPuzzle {
     }
 
     private static int solve(int[][] costsGrid, int height, int width, int minimumTurnOrStopStraightLineDistance, int maximumStraightLineDistance) {
-        int targetY = height - 1;
-        int targetX = width - 1;
-        PriorityQueue<Node> openSet = new PriorityQueue<>(Comparator.comparing(Node::getFScore));
-        NodeKey startNodeKey = new NodeKey(0, 0, null, 0);
-        Node startNode = new Node(startNodeKey);
-        startNode.setGScore(0);
-        startNode.setFScore(heuristic(0, 0, targetY, targetX));
-        Map<NodeKey, Node> knownNodesByKey = new HashMap<>();
-        knownNodesByKey.put(startNodeKey, startNode);
-        openSet.add(startNode);
-        while (true) {
-            Node currentNode = openSet.poll();
-            if (currentNode == null) {
-                throw new IllegalStateException("No path found");
-            }
-            NodeKey currentNodeKey = currentNode.getNodeKey();
-            int currentY = currentNodeKey.getY();
-            int currentX = currentNodeKey.getX();
-            int currentStraightLineDistance = currentNodeKey.getStraightLineDistance();
-            int currentGScore = currentNode.getGScore();
-            if (currentY == targetY && currentX == targetX && currentStraightLineDistance >= minimumTurnOrStopStraightLineDistance) {
-                return currentGScore;
-            }
-            Direction currentDirection = currentNodeKey.getDirection();
-            Direction oppositeDirection = currentDirection == null ? null : currentDirection.getOppositeDirection();
-            for (Direction travelDirection : Direction.values()) {
-                if (travelDirection == oppositeDirection) {
-                    continue;
-                }
-                int neighbourY = currentY + travelDirection.getYDelta();
-                if (neighbourY < 0 || neighbourY >= height) {
-                    continue;
-                }
-                int neighbourX = currentX + travelDirection.getXDelta();
-                if (neighbourX < 0 || neighbourX >= width) {
-                    continue;
-                }
-                int neighbourStraightLineDistance;
-                if (travelDirection == currentDirection) {
-                    neighbourStraightLineDistance = currentStraightLineDistance+1;
-                    if (neighbourStraightLineDistance > maximumStraightLineDistance) {
-                        continue;
+        Optional<AStar.ResultingRoute<NodeKey>> optionalResultingRoute = AStar.run(
+            new AStar.NodeAdapter<NodeKey>() {
+                @Override
+                public void getLinkedNodeKeys(NodeKey fromNodeKey, Consumer<NodeKey> linkedNodeKeyConsumer) {
+                    int fromY = fromNodeKey.getY();
+                    int fromX = fromNodeKey.getX();
+                    int fromStraightLineDistance = fromNodeKey.getStraightLineDistance();
+                    Direction fromDirection = fromNodeKey.getDirection();
+                    Direction oppositeDirection = fromDirection == null ? null : fromDirection.getOppositeDirection();
+                    for (Direction travelDirection : Direction.values()) {
+                        if (travelDirection == oppositeDirection) {
+                            continue;
+                        }
+                        int neighbourY = fromY + travelDirection.getYDelta();
+                        if (neighbourY < 0 || neighbourY >= height) {
+                            continue;
+                        }
+                        int neighbourX = fromX + travelDirection.getXDelta();
+                        if (neighbourX < 0 || neighbourX >= width) {
+                            continue;
+                        }
+                        int neighbourStraightLineDistance;
+                        if (travelDirection == fromDirection) {
+                            neighbourStraightLineDistance = fromStraightLineDistance + 1;
+                            if (neighbourStraightLineDistance > maximumStraightLineDistance) {
+                                continue;
+                            }
+                        } else {
+                            if (fromDirection != null && fromStraightLineDistance < minimumTurnOrStopStraightLineDistance) {
+                                continue;
+                            }
+                            neighbourStraightLineDistance = 1;
+                        }
+                        linkedNodeKeyConsumer.accept(new NodeKey(neighbourY, neighbourX, travelDirection, neighbourStraightLineDistance));
                     }
                 }
-                else {
-                    if (currentDirection != null && currentStraightLineDistance < minimumTurnOrStopStraightLineDistance) {
-                        continue;
-                    }
-                    neighbourStraightLineDistance = 1;
+
+                @Override
+                public int getCostOfMovingBetweenLinkedNodes(NodeKey linkedFromNodeKey, NodeKey linkedToNodeKey) {
+                    return costsGrid[linkedToNodeKey.getY()][linkedToNodeKey.getX()];
                 }
-                NodeKey neighbourNodeKey = new NodeKey(neighbourY, neighbourX, travelDirection, neighbourStraightLineDistance);
-                Node neighbourNode = knownNodesByKey.get(neighbourNodeKey);
-                boolean newPoint = false;
-                if (neighbourNode == null) {
-                    newPoint = true;
-                    neighbourNode = new Node(neighbourNodeKey);
-                    knownNodesByKey.put(neighbourNodeKey, neighbourNode);
+
+                @Override
+                public int getCostEstimateOfMovingBetweenNodes(NodeKey fromNodeKey, NodeKey toNodeKey) {
+                    return Math.abs(toNodeKey.getY()-fromNodeKey.getY())+Math.abs(toNodeKey.getX()-fromNodeKey.getX());
                 }
-                int potentialGScore = currentGScore + costsGrid[neighbourY][neighbourX];
-                if (potentialGScore < neighbourNode.getGScore()) {
-                    if (!newPoint) {
-                        openSet.remove(neighbourNode);
-                    }
-                    neighbourNode.setCameFrom(currentNode);
-                    neighbourNode.setGScore(potentialGScore);
-                    neighbourNode.setFScore(potentialGScore + heuristic(neighbourY, neighbourX, targetY, targetX));
-                    openSet.add(neighbourNode);
+
+                @Override
+                public boolean isValidEndingNode(NodeKey nodeKey) {
+                    return nodeKey.getStraightLineDistance() >= minimumTurnOrStopStraightLineDistance;
                 }
-            }
+
+                @Override
+                public Class<NodeKey> getClazz() {
+                    return NodeKey.class;
+                }
+            },
+            new NodeKey(0, 0, null, 0),
+            new NodeKey(height-1, width-1, null, 0)
+        );
+        if (!optionalResultingRoute.isPresent()) {
+            throw new IllegalStateException("No route found");
         }
+        return optionalResultingRoute.get().getCost();
     }
 }

@@ -1,7 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2016;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.common.BasicOrthoganalAStar;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStar;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -9,12 +9,9 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -168,25 +165,36 @@ public class Day22 implements IPuzzle {
     }
 
     private static int moveBetween(FileSystemClassification[][] fileSystemClassificationGrid, int sourceY, int sourceX, int targetY, int targetX, int maxY, int maxX, PrintWriter printWriter) {
-        Optional<Deque<BasicOrthoganalAStar.Point>> optionalSteps = BasicOrthoganalAStar.run(
-            (neighbourY, neighbourX) -> fileSystemClassificationGrid[neighbourY][neighbourX] == Day22.FileSystemClassification.STANDARD,
-            sourceY,
-            sourceX,
-            targetY,
-            targetX,
-            0,
-            0,
-            maxY,
-            maxX
+        Optional<AStar.ResultingRoute<AStar.PointNodeAdapter.Point>> optionalRoute = AStar.run(
+            new AStar.PointNodeAdapter(
+                new AStar.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
+                    @Override
+                    public boolean canMoveBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
+                        return fileSystemClassificationGrid[linkedToPoint.getY()][linkedToPoint.getX()] == FileSystemClassification.STANDARD;
+                    }
+
+                    @Override
+                    public int getCostOfMovingBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
+                        return 1;
+                    }
+                },
+                0,
+                maxY,
+                0,
+                maxX
+            ),
+            new AStar.PointNodeAdapter.Point(sourceY, sourceX),
+            new AStar.PointNodeAdapter.Point(targetY, targetX)
         );
-        if (!optionalSteps.isPresent()) {
+        if (!optionalRoute.isPresent()) {
             throw new IllegalStateException("No route found.");
         }
-        Deque<BasicOrthoganalAStar.Point> steps = optionalSteps.get();
+        AStar.ResultingRoute<AStar.PointNodeAdapter.Point> resultingRoute = optionalRoute.get();
+        Deque<AStar.PointNodeAdapter.Point> steps = new LinkedList<>(Arrays.asList(resultingRoute.getSteps()));
         int moveOperations = 0;
-        BasicOrthoganalAStar.Point moveFromPoint = steps.removeFirst();
+        AStar.PointNodeAdapter.Point moveFromPoint = steps.removeFirst();
         while (true) {
-            BasicOrthoganalAStar.Point moveToPoint = steps.pollFirst();
+            AStar.PointNodeAdapter.Point moveToPoint = steps.pollFirst();
             if (moveToPoint == null) {
                 break;
             }
