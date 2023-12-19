@@ -1,7 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2016;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStar;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStarSolver;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -165,17 +165,18 @@ public class Day22 implements IPuzzle {
     }
 
     private static int moveBetween(FileSystemClassification[][] fileSystemClassificationGrid, int sourceY, int sourceX, int targetY, int targetX, int maxY, int maxX, PrintWriter printWriter) {
-        Optional<AStar.ResultingRoute<AStar.PointNodeAdapter.Point>> optionalRoute = AStar.run(
-            new AStar.PointNodeAdapter(
-                new AStar.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
+        Integer one = 1;
+        Optional<AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer>> optionalRoute = AStarSolver.run(
+            new AStarSolver.PointNodeAdapter<>(
+                new AStarSolver.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
                     @Override
-                    public boolean canMoveBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
+                    public boolean canMoveBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
                         return fileSystemClassificationGrid[linkedToPoint.getY()][linkedToPoint.getX()] == FileSystemClassification.STANDARD;
                     }
 
                     @Override
-                    public int getCostOfMovingBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
-                        return 1;
+                    public Integer getCostOfMovingBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
+                        return one;
                     }
                 },
                 0,
@@ -183,18 +184,19 @@ public class Day22 implements IPuzzle {
                 0,
                 maxX
             ),
-            new AStar.PointNodeAdapter.Point(sourceY, sourceX),
-            new AStar.PointNodeAdapter.Point(targetY, targetX)
+            AStarSolver.MinimizeIntegerCostAdapter.INSTANCE,
+            new AStarSolver.PointNodeAdapter.Point(sourceY, sourceX),
+            new AStarSolver.PointNodeAdapter.Point(targetY, targetX)
         );
         if (!optionalRoute.isPresent()) {
             throw new IllegalStateException("No route found.");
         }
-        AStar.ResultingRoute<AStar.PointNodeAdapter.Point> resultingRoute = optionalRoute.get();
-        Deque<AStar.PointNodeAdapter.Point> steps = new LinkedList<>(Arrays.asList(resultingRoute.getSteps()));
+        AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer> resultingRoute = optionalRoute.get();
+        Deque<AStarSolver.PointNodeAdapter.Point> steps = new LinkedList<>(Arrays.asList(resultingRoute.getSteps()));
         int moveOperations = 0;
-        AStar.PointNodeAdapter.Point moveFromPoint = steps.removeFirst();
+        AStarSolver.PointNodeAdapter.Point moveFromPoint = steps.removeFirst();
         while (true) {
-            AStar.PointNodeAdapter.Point moveToPoint = steps.pollFirst();
+            AStarSolver.PointNodeAdapter.Point moveToPoint = steps.pollFirst();
             if (moveToPoint == null) {
                 break;
             }

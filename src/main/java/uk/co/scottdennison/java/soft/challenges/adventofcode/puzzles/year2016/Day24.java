@@ -1,7 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2016;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStar;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStarSolver;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -52,6 +52,7 @@ public class Day24 implements IPuzzle {
 				throw new IllegalStateException("Non contiguous numbers.");
 			}
 		}
+		Integer one = 1;
 		int[][] distances = new int[maxNumber+1][maxNumber+1];
 		for (int numberFrom=0; numberFrom<=maxNumber; numberFrom++) {
 			Point fromPoint = numberLocations.get(numberFrom);
@@ -62,17 +63,17 @@ public class Day24 implements IPuzzle {
 				Point toPoint = numberLocations.get(numberTo);
 				int toY = toPoint.getY();
 				int toX = toPoint.getX();
-				Optional<AStar.ResultingRoute<AStar.PointNodeAdapter.Point>> optionalRoute = AStar.run(
-					new AStar.PointNodeAdapter(
-						new AStar.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
+				Optional<AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer>> optionalRoute = AStarSolver.run(
+					new AStarSolver.PointNodeAdapter<>(
+						new AStarSolver.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
 							@Override
-							public boolean canMoveBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
+							public boolean canMoveBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
 								return grid[linkedToPoint.getY()][linkedToPoint.getX()] != '#';
 							}
 
 							@Override
-							public int getCostOfMovingBetweenLinkedPoints(AStar.PointNodeAdapter.Point linkedFromPoint, AStar.PointNodeAdapter.Point linkedToPoint) {
-								return 1;
+							public Integer getCostOfMovingBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
+								return one;
 							}
 						},
 						0,
@@ -80,8 +81,9 @@ public class Day24 implements IPuzzle {
 						0,
 						maxX
 					),
-					new AStar.PointNodeAdapter.Point(fromY, fromX),
-					new AStar.PointNodeAdapter.Point(toY, toX)
+					AStarSolver.MinimizeIntegerCostAdapter.INSTANCE,
+					new AStarSolver.PointNodeAdapter.Point(fromY, fromX),
+					new AStarSolver.PointNodeAdapter.Point(toY, toX)
 				);
 				if (!optionalRoute.isPresent()) {
 					throw new IllegalStateException("Unable to calculate route");

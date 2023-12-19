@@ -1,20 +1,14 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2023;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStar;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AStarSolver;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.function.Consumer;
 
 public class Day17 implements IPuzzle {
@@ -122,10 +116,10 @@ public class Day17 implements IPuzzle {
         char[][] costCharGrid = LineReader.charArraysArray(inputCharacters, true);
         int height = costCharGrid.length;
         int width = costCharGrid[0].length;
-        int[][] costsGrid = new int[height][width];
+        Integer[][] costsGrid = new Integer[height][width];
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                costsGrid[y][x] += costCharGrid[y][x] - '0';
+                costsGrid[y][x] = costCharGrid[y][x] - '0';
             }
         }
         return new BasicPuzzleResults<>(
@@ -134,9 +128,9 @@ public class Day17 implements IPuzzle {
         );
     }
 
-    private static int solve(int[][] costsGrid, int height, int width, int minimumTurnOrStopStraightLineDistance, int maximumStraightLineDistance) {
-        Optional<AStar.ResultingRoute<NodeKey>> optionalResultingRoute = AStar.run(
-            new AStar.NodeAdapter<NodeKey>() {
+    private static int solve(Integer[][] costsGrid, int height, int width, int minimumTurnOrStopStraightLineDistance, int maximumStraightLineDistance) {
+        Optional<AStarSolver.ResultingRoute<NodeKey,Integer>> optionalResultingRoute = AStarSolver.run(
+            new AStarSolver.NodeAdapter<NodeKey,Integer>() {
                 @Override
                 public void getLinkedNodeKeys(NodeKey fromNodeKey, Consumer<NodeKey> linkedNodeKeyConsumer) {
                     int fromY = fromNodeKey.getY();
@@ -173,12 +167,12 @@ public class Day17 implements IPuzzle {
                 }
 
                 @Override
-                public int getCostOfMovingBetweenLinkedNodes(NodeKey linkedFromNodeKey, NodeKey linkedToNodeKey) {
+                public Integer getCostOfMovingBetweenLinkedNodes(NodeKey linkedFromNodeKey, NodeKey linkedToNodeKey) {
                     return costsGrid[linkedToNodeKey.getY()][linkedToNodeKey.getX()];
                 }
 
                 @Override
-                public int getCostEstimateOfMovingBetweenNodes(NodeKey fromNodeKey, NodeKey toNodeKey) {
+                public Integer getCostEstimateOfMovingBetweenNodes(NodeKey fromNodeKey, NodeKey toNodeKey) {
                     return Math.abs(toNodeKey.getY()-fromNodeKey.getY())+Math.abs(toNodeKey.getX()-fromNodeKey.getX());
                 }
 
@@ -192,6 +186,7 @@ public class Day17 implements IPuzzle {
                     return NodeKey.class;
                 }
             },
+            AStarSolver.MinimizeIntegerCostAdapter.INSTANCE,
             new NodeKey(0, 0, null, 0),
             new NodeKey(height-1, width-1, null, 0)
         );
