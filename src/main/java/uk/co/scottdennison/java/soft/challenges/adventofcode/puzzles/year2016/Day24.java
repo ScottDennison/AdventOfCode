@@ -65,23 +65,15 @@ public class Day24 implements IPuzzle {
 				int toX = toPoint.getX();
 				Optional<AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer>> optionalRoute = AStarSolver.run(
 					new AStarSolver.PointNodeAdapter<>(
-						new AStarSolver.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
-							@Override
-							public boolean canMoveBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
-								return grid[linkedToPoint.getY()][linkedToPoint.getX()] != '#';
-							}
-
-							@Override
-							public Integer getCostOfMovingBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
-								return one;
-							}
-						},
+						(linkedFromPoint, linkedToPoint) -> grid[linkedToPoint.getY()][linkedToPoint.getX()] != '#',
+						AStarSolver.PointNodeAdapter.UnchangingActualMoveCostAdapter.One.Of.INTEGER,
+						AStarSolver.PointNodeAdapter.EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer.INSTANCE,
 						0,
 						maxY,
 						0,
 						maxX
 					),
-					AStarSolver.MinimizeIntegerCostAdapter.INSTANCE,
+					AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
 					new AStarSolver.PointNodeAdapter.Point(fromY, fromX),
 					new AStarSolver.PointNodeAdapter.Point(toY, toX)
 				);

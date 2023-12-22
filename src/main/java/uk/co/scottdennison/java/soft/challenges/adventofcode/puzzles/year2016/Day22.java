@@ -168,23 +168,15 @@ public class Day22 implements IPuzzle {
         Integer one = 1;
         Optional<AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer>> optionalRoute = AStarSolver.run(
             new AStarSolver.PointNodeAdapter<>(
-                new AStarSolver.PointNodeAdapter.OrthagonalEstimatingPointAdapter() {
-                    @Override
-                    public boolean canMoveBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
-                        return fileSystemClassificationGrid[linkedToPoint.getY()][linkedToPoint.getX()] == FileSystemClassification.STANDARD;
-                    }
-
-                    @Override
-                    public Integer getCostOfMovingBetweenLinkedPoints(AStarSolver.PointNodeAdapter.Point linkedFromPoint, AStarSolver.PointNodeAdapter.Point linkedToPoint) {
-                        return one;
-                    }
-                },
+                (linkedFromPoint, linkedToPoint) -> fileSystemClassificationGrid[linkedToPoint.getY()][linkedToPoint.getX()] == FileSystemClassification.STANDARD,
+                AStarSolver.PointNodeAdapter.UnchangingActualMoveCostAdapter.One.Of.INTEGER,
+                AStarSolver.PointNodeAdapter.EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer.INSTANCE,
                 0,
                 maxY,
                 0,
                 maxX
             ),
-            AStarSolver.MinimizeIntegerCostAdapter.INSTANCE,
+            AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
             new AStarSolver.PointNodeAdapter.Point(sourceY, sourceX),
             new AStarSolver.PointNodeAdapter.Point(targetY, targetX)
         );

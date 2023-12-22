@@ -186,7 +186,7 @@ public class Day17 implements IPuzzle {
                     return NodeKey.class;
                 }
             },
-            AStarSolver.MinimizeIntegerCostAdapter.INSTANCE,
+            AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
             new NodeKey(0, 0, null, 0),
             new NodeKey(height-1, width-1, null, 0)
         );

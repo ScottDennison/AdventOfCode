@@ -1,13 +1,14 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.common;
 
 import java.lang.reflect.Array;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.function.Consumer;
@@ -17,42 +18,118 @@ public class AStarSolver {
 
 	public static interface CostAdapter<CostType> {
 		CostType addCosts(CostType cost1, CostType cost2);
-		boolean isCostBetter(CostType newCost, CostType existingCost);
-		boolean areCostsEqual(CostType cost1, CostType cost2);
 		Comparator<CostType> getComparator();
 		CostType getZeroCost();
-	}
 
-	public static abstract class IntegerCostAdapter implements CostAdapter<Integer> {
-		@Override
-		public Integer addCosts(Integer cost1, Integer cost2) {
-			return cost1 + cost2;
-		}
+		public static final class CommonTypes {
+			public static final class Of {
+				private static abstract class AbstractComparableCostAdapter<T extends Comparable<T>> implements CostAdapter<T> {
+					@Override
+					public Comparator<T> getComparator() {
+						return Comparator.naturalOrder();
+					}
+				}
 
-		@Override
-		public boolean areCostsEqual(Integer cost1, Integer cost2) {
-			return Objects.equals(cost1, cost2);
-		}
+				public static final class Integer extends AbstractComparableCostAdapter<java.lang.Integer> {
+					public static final Integer INSTANCE = new Integer();
 
-		@Override
-		public Comparator<Integer> getComparator() {
-			return Comparator.naturalOrder();
-		}
+					private Integer() {}
 
-		@Override
-		public Integer getZeroCost() {
-			return 0;
-		}
-	}
+					@Override
+					public java.lang.Integer addCosts(java.lang.Integer cost1, java.lang.Integer cost2) {
+						return cost1 + cost2;
+					}
 
-	public static class MinimizeIntegerCostAdapter extends IntegerCostAdapter {
-		public static final MinimizeIntegerCostAdapter INSTANCE = new MinimizeIntegerCostAdapter();
+					@Override
+					public java.lang.Integer getZeroCost() {
+						return 0;
+					}
+				}
 
-		private MinimizeIntegerCostAdapter() {}
+				public static final class Long extends AbstractComparableCostAdapter<java.lang.Long> {
+					public static final Long INSTANCE = new Long();
 
-		@Override
-		public boolean isCostBetter(Integer newCost, Integer existingCost) {
-			return newCost < existingCost;
+					private Long() {}
+
+					@Override
+					public java.lang.Long addCosts(java.lang.Long cost1, java.lang.Long cost2) {
+						return cost1 + cost2;
+					}
+
+					@Override
+					public java.lang.Long getZeroCost() {
+						return 0L;
+					}
+				}
+
+				public static final class Float extends AbstractComparableCostAdapter<java.lang.Float> {
+					public static final Float INSTANCE = new Float();
+
+					private Float() {}
+
+					@Override
+					public java.lang.Float addCosts(java.lang.Float cost1, java.lang.Float cost2) {
+						return cost1 + cost2;
+					}
+
+					@Override
+					public java.lang.Float getZeroCost() {
+						return 0F;
+					}
+				}
+
+				public static final class Double extends AbstractComparableCostAdapter<java.lang.Double> {
+					public static final Double INSTANCE = new Double();
+
+					private Double() {}
+
+					@Override
+					public java.lang.Double addCosts(java.lang.Double cost1, java.lang.Double cost2) {
+						return cost1 + cost2;
+					}
+
+					@Override
+					public java.lang.Double getZeroCost() {
+						return 0D;
+					}
+				}
+
+				public static final class BigInteger extends AbstractComparableCostAdapter<java.math.BigInteger> {
+					public static final BigInteger INSTANCE = new BigInteger();
+
+					private BigInteger() {}
+
+					@Override
+					public java.math.BigInteger addCosts(java.math.BigInteger cost1, java.math.BigInteger cost2) {
+						return cost1.add(cost2);
+					}
+
+					@Override
+					public java.math.BigInteger getZeroCost() {
+						return java.math.BigInteger.ZERO;
+					}
+				}
+
+				public static final class BigDecimal extends AbstractComparableCostAdapter<java.math.BigDecimal> {
+					public static final BigDecimal INSTANCE = new BigDecimal();
+
+					private BigDecimal() {}
+
+					@Override
+					public java.math.BigDecimal addCosts(java.math.BigDecimal cost1, java.math.BigDecimal cost2) {
+						return cost1.add(cost2);
+					}
+
+					@Override
+					public java.math.BigDecimal getZeroCost() {
+						return java.math.BigDecimal.ZERO;
+					}
+				}
+
+				private Of() {}
+			}
+
+			private CommonTypes() {}
 		}
 	}
 
@@ -65,16 +142,315 @@ public class AStarSolver {
 	}
 
 	public final static class PointNodeAdapter<CostType> implements NodeAdapter<PointNodeAdapter.Point,CostType> {
-		public static interface PointAdapter<CostType> {
+		@FunctionalInterface
+		public static interface CanMoveAdapter {
 			boolean canMoveBetweenLinkedPoints(Point linkedFromPoint, Point linkedToPoint);
-			CostType getCostOfMovingBetweenLinkedPoints(Point linkedFromPoint, Point linkedToPoint);
-			CostType getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint);
 		}
 
-		public static abstract class OrthagonalEstimatingPointAdapter implements PointAdapter<Integer> {
+		public static final class AlwaysTrueCanMoveAdapter implements CanMoveAdapter {
+			public static final AlwaysTrueCanMoveAdapter INSTANCE = new AlwaysTrueCanMoveAdapter();
+
+			private AlwaysTrueCanMoveAdapter() {}
+
 			@Override
-			public final Integer getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
-				return Math.abs(toPoint.getY()-fromPoint.getY())+Math.abs(toPoint.getX()-fromPoint.getX());
+			public boolean canMoveBetweenLinkedPoints(Point linkedFromPoint, Point linkedToPoint) {
+				return true;
+			}
+		}
+
+		@FunctionalInterface
+		public static interface ActualMoveCostAdapter<CostType> {
+			CostType getCostOfMovingBetweenLinkedPoints(Point linkedFromPoint, Point linkedToPoint);
+		}
+
+		public static final class UnchangingActualMoveCostAdapter<CostType> implements ActualMoveCostAdapter<CostType> {
+			public static final class One {
+				public static final class Of {
+					public static final UnchangingActualMoveCostAdapter<Integer> INTEGER = new UnchangingActualMoveCostAdapter<>(1);
+					public static final UnchangingActualMoveCostAdapter<Long> LONG = new UnchangingActualMoveCostAdapter<>(1L);
+					public static final UnchangingActualMoveCostAdapter<Float> FLOAT = new UnchangingActualMoveCostAdapter<>(1F);
+					public static final UnchangingActualMoveCostAdapter<Double> DOUBLE = new UnchangingActualMoveCostAdapter<>(1D);
+					public static final UnchangingActualMoveCostAdapter<BigInteger> BIGINTEGER = new UnchangingActualMoveCostAdapter<>(BigInteger.ONE);
+					public static final UnchangingActualMoveCostAdapter<BigDecimal> BIGDECIMAL = new UnchangingActualMoveCostAdapter<>(BigDecimal.ONE);
+
+					private Of() {}
+				}
+
+				private One() {}
+			}
+
+			private final CostType cost;
+
+			public UnchangingActualMoveCostAdapter(CostType cost) {
+				this.cost = cost;
+			}
+
+			@Override
+			public CostType getCostOfMovingBetweenLinkedPoints(Point linkedFromPoint, Point linkedToPoint) {
+				return cost;
+			}
+		}
+
+		@FunctionalInterface
+		public static interface EstimatedMoveCostAdapter<CostType> {
+			CostType getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint);
+
+			public static final class CommonAlgorithms {
+				public static final class Manhattan {
+					public static final class Of {
+						public static final class Integer implements EstimatedMoveCostAdapter<java.lang.Integer> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer();
+
+							private Integer() {}
+
+							@Override
+							public final java.lang.Integer getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return Math.abs(toPoint.getY()-fromPoint.getY())+Math.abs(toPoint.getX()-fromPoint.getX());
+							}
+						}
+
+						public static final class Long implements EstimatedMoveCostAdapter<java.lang.Long> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Long INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Long();
+
+							private Long() {}
+
+							@Override
+							public final java.lang.Long getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return Math.abs((long)toPoint.getY()-(long)fromPoint.getY())+Math.abs((long)toPoint.getX()-(long)fromPoint.getX());
+							}
+						}
+
+						public static final class Float implements EstimatedMoveCostAdapter<java.lang.Float> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Float INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Float();
+
+							private Float() {}
+
+							@Override
+							public final java.lang.Float getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return (float)Math.abs((long)toPoint.getY()-(long)fromPoint.getY())+Math.abs((long)toPoint.getX()-(long)fromPoint.getX());
+							}
+						}
+
+						public static final class Double implements EstimatedMoveCostAdapter<java.lang.Double> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Double INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Double();
+
+							private Double() {}
+
+							@Override
+							public final java.lang.Double getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return (double)Math.abs((long)toPoint.getY()-(long)fromPoint.getY())+Math.abs((long)toPoint.getX()-(long)fromPoint.getX());
+							}
+						}
+
+						public static final class BigInteger implements EstimatedMoveCostAdapter<java.math.BigInteger> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.BigInteger INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.BigInteger();
+
+							private BigInteger() {}
+
+							@Override
+							public final java.math.BigInteger getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return java.math.BigInteger.valueOf(Math.abs((long)toPoint.getY()-(long)fromPoint.getY())+Math.abs((long)toPoint.getX()-(long)fromPoint.getX()));
+							}
+						}
+
+						public static final class BigDecimal implements EstimatedMoveCostAdapter<java.math.BigDecimal> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.BigDecimal INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.BigDecimal();
+
+							private BigDecimal() {}
+
+							@Override
+							public final java.math.BigDecimal getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return java.math.BigDecimal.valueOf(Math.abs((long)toPoint.getY()-(long)fromPoint.getY())+Math.abs((long)toPoint.getX()-(long)fromPoint.getX()));
+							}
+						}
+
+						private Of() {}
+					}
+
+					private Manhattan() {}
+				}
+
+				public static final class Diagonal {
+					public static final class Of {
+						public static final class Integer implements EstimatedMoveCostAdapter<java.lang.Integer> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Integer INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Integer();
+
+							private Integer() {}
+
+							@Override
+							public final java.lang.Integer getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return Math.max(Math.abs(toPoint.getY()-fromPoint.getY()),Math.abs(toPoint.getX()-fromPoint.getX()));
+							}
+						}
+
+						public static final class Long implements EstimatedMoveCostAdapter<java.lang.Long> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Long INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Long();
+
+							private Long() {}
+
+							@Override
+							public final java.lang.Long getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return Math.max(Math.abs((long)toPoint.getY()-(long)fromPoint.getY()),Math.abs((long)toPoint.getX()-(long)fromPoint.getX()));
+							}
+						}
+
+						public static final class Float implements EstimatedMoveCostAdapter<java.lang.Float> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Float INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Float();
+
+							private Float() {}
+
+							@Override
+							public final java.lang.Float getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return (float)Math.max(Math.abs((long)toPoint.getY()-(long)fromPoint.getY()),Math.abs((long)toPoint.getX()-(long)fromPoint.getX()));
+							}
+						}
+
+						public static final class Double implements EstimatedMoveCostAdapter<java.lang.Double> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Double INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.Double();
+
+							private Double() {}
+
+							@Override
+							public final java.lang.Double getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return (double)Math.max(Math.abs((long)toPoint.getY()-(long)fromPoint.getY()),Math.abs((long)toPoint.getX()-(long)fromPoint.getX()));
+							}
+						}
+
+						public static final class BigInteger implements EstimatedMoveCostAdapter<java.math.BigInteger> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.BigInteger INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.BigInteger();
+
+							private BigInteger() {}
+
+							@Override
+							public final java.math.BigInteger getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return java.math.BigInteger.valueOf(Math.max(Math.abs((long)toPoint.getY()-(long)fromPoint.getY()),Math.abs((long)toPoint.getX()-(long)fromPoint.getX())));
+							}
+						}
+
+						public static final class BigDecimal implements EstimatedMoveCostAdapter<java.math.BigDecimal> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.BigDecimal INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Diagonal.Of.BigDecimal();
+
+							private BigDecimal() {}
+
+							@Override
+							public final java.math.BigDecimal getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								return java.math.BigDecimal.valueOf(Math.max(Math.abs((long)toPoint.getY()-(long)fromPoint.getY()),Math.abs((long)toPoint.getX()-(long)fromPoint.getX())));
+							}
+						}
+
+						private Of() {}
+					}
+
+					private Diagonal() {}
+				}
+
+				public static final class Euclidean {
+					public static final class Of {
+						public static final class Integer implements EstimatedMoveCostAdapter<java.lang.Integer> {
+							private final double scale;
+
+							private Integer(double scale) {
+								this.scale = scale;
+							}
+
+							@Override
+							public final java.lang.Integer getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								int yTheta = (toPoint.getY() - fromPoint.getY());
+								int xTheta = (toPoint.getX() - fromPoint.getX());
+								return (int)(scale*Math.sqrt((yTheta*yTheta)+(xTheta*xTheta)));
+							}
+
+							public static final Integer createWithScale(int scale) {
+								return new Integer(scale);
+							}
+						}
+
+						public static final class Long implements EstimatedMoveCostAdapter<java.lang.Long> {
+							private final double scale;
+
+							private Long(double scale) {
+								this.scale = scale;
+							}
+
+							@Override
+							public final java.lang.Long getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								long yTheta = ((long)toPoint.getY() - (long)fromPoint.getY());
+								long xTheta = ((long)toPoint.getX() - (long)fromPoint.getX());
+								return (long)(scale*Math.sqrt((yTheta*yTheta)+(xTheta*xTheta)));
+							}
+
+							public static final Long createWithScale(long scale) {
+								return new Long(scale);
+							}
+						}
+
+						public static final class Float implements EstimatedMoveCostAdapter<java.lang.Float> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Euclidean.Of.Float INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Euclidean.Of.Float();
+
+							private Float() {}
+
+							@Override
+							public final java.lang.Float getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								float yTheta = ((long)toPoint.getY() - (long)fromPoint.getY());
+								float xTheta = ((long)toPoint.getX() - (long)fromPoint.getX());
+								return (float)Math.sqrt((yTheta*yTheta)+(xTheta*xTheta));
+							}
+						}
+
+						public static final class Double implements EstimatedMoveCostAdapter<java.lang.Double> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Euclidean.Of.Double INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Euclidean.Of.Double();
+
+							private Double() {}
+
+							@Override
+							public final java.lang.Double getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								double yTheta = ((long)toPoint.getY() - (long)fromPoint.getY());
+								double xTheta = ((long)toPoint.getX() - (long)fromPoint.getX());
+								return Math.sqrt((yTheta*yTheta)+(xTheta*xTheta));
+							}
+						}
+
+						public static final class BigInteger implements EstimatedMoveCostAdapter<java.math.BigInteger> {
+							private final double scale;
+
+							private BigInteger(double scale) {
+								this.scale = scale;
+							}
+
+							@Override
+							public final java.math.BigInteger getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								// Unfortunately java 8 does not have a sqrt() method on BigInteger. This is however introduced in java 9. For now, just use the same approach as .Of.Long
+								long yTheta = ((long)toPoint.getY() - (long)fromPoint.getY());
+								long xTheta = ((long)toPoint.getX() - (long)fromPoint.getX());
+								return java.math.BigInteger.valueOf((long)(scale*Math.sqrt((yTheta*yTheta)+(xTheta*xTheta))));
+							}
+
+							public static final BigInteger createWithScale(long scale) {
+								return new BigInteger(scale);
+							}
+						}
+
+						public static final class BigDecimal implements EstimatedMoveCostAdapter<java.math.BigDecimal> {
+							public static final EstimatedMoveCostAdapter.CommonAlgorithms.Euclidean.Of.BigDecimal INSTANCE = new EstimatedMoveCostAdapter.CommonAlgorithms.Euclidean.Of.BigDecimal();
+
+							private BigDecimal() {}
+
+							@Override
+							public final java.math.BigDecimal getCostEstimateOfMovingBetweenPoints(Point fromPoint, Point toPoint) {
+								// Unfortunately java 8 does not have a sqrt() method on BigDecimal. This is however introduced in java 9. For now, just use the same approach as .Of.Double
+								double yTheta = ((long)toPoint.getY() - (long)fromPoint.getY());
+								double xTheta = ((long)toPoint.getX() - (long)fromPoint.getX());
+								return java.math.BigDecimal.valueOf(Math.sqrt((yTheta*yTheta)+(xTheta*xTheta)));
+							}
+						}
+
+						private Of() {}
+					}
+
+					private Euclidean() {}
+				}
+
+				private CommonAlgorithms() {}
 			}
 		}
 
@@ -116,14 +492,18 @@ public class AStarSolver {
 			}
 		}
 
-		private final PointAdapter<CostType> pointAdapter;
+		private final CanMoveAdapter canMoveAdapter;
+		private final ActualMoveCostAdapter<CostType> actualMoveCostAdapter;
+		private final EstimatedMoveCostAdapter<CostType> estimatedMoveCostAdapter;
 		private final int minY;
 		private final int maxY;
 		private final int minX;
 		private final int maxX;
 
-		public PointNodeAdapter(PointAdapter<CostType> pointAdapter, int minY, int maxY, int minX, int maxX) {
-			this.pointAdapter = pointAdapter;
+		public PointNodeAdapter(CanMoveAdapter canMoveAdapter, ActualMoveCostAdapter<CostType> actualMoveCostAdapter, EstimatedMoveCostAdapter<CostType> estimatedMoveCostAdapter, int minY, int maxY, int minX, int maxX) {
+			this.canMoveAdapter = canMoveAdapter;
+			this.actualMoveCostAdapter = actualMoveCostAdapter;
+			this.estimatedMoveCostAdapter = estimatedMoveCostAdapter;
 			this.minY = minY;
 			this.maxY = maxY;
 			this.minX = minX;
@@ -132,7 +512,7 @@ public class AStarSolver {
 
 		private void checkAndConsumeLink(Point fromPoint, Consumer<Point> linkedPointConsumer, int toY, int toX) {
 			Point toPoint = new Point(toY, toX);
-			if (pointAdapter.canMoveBetweenLinkedPoints(fromPoint, toPoint)) {
+			if (canMoveAdapter.canMoveBetweenLinkedPoints(fromPoint, toPoint)) {
 				linkedPointConsumer.accept(toPoint);
 			}
 		}
@@ -157,12 +537,12 @@ public class AStarSolver {
 
 		@Override
 		public CostType getCostOfMovingBetweenLinkedNodes(Point linkedFromPoint, Point linkedToPoint) {
-			return pointAdapter.getCostOfMovingBetweenLinkedPoints(linkedFromPoint, linkedToPoint);
+			return actualMoveCostAdapter.getCostOfMovingBetweenLinkedPoints(linkedFromPoint, linkedToPoint);
 		}
 
 		@Override
 		public CostType getCostEstimateOfMovingBetweenNodes(Point fromPoint, Point toPoint) {
-			return pointAdapter.getCostEstimateOfMovingBetweenPoints(fromPoint, toPoint);
+			return estimatedMoveCostAdapter.getCostEstimateOfMovingBetweenPoints(fromPoint, toPoint);
 		}
 
 		@Override
@@ -242,7 +622,7 @@ public class AStarSolver {
 			}
 			NodeKeyType currentNodeKey = currentNode.getNodeKey();
 			CostType currentGScore = currentNode.getGScore();
-			if (costAdapter.areCostsEqual(currentGScore,currentNode.getFScore()) && nodeAdapter.isValidEndingNode(currentNodeKey)) {
+			if (costTypeComparator.compare(currentGScore,currentNode.getFScore()) == 0 && nodeAdapter.isValidEndingNode(currentNodeKey)) {
 				CostType cost = currentNode.getFScore();
 				Deque<NodeKeyType> steps = new LinkedList<>();
 				steps.addFirst(currentNodeKey);
@@ -273,7 +653,7 @@ public class AStarSolver {
 						knownNodes.put(linkedNodeKey, linkedNode);
 						openSet.add(linkedNode);
 					}
-					else if (costAdapter.isCostBetter(potentialGScore,linkedNode.getGScore())) {
+					else if (costTypeComparator.compare(potentialGScore,linkedNode.getGScore()) < 0) {
 						openSet.remove(linkedNode);
 						linkedNode.update(
 							currentNode,
