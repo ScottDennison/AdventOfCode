@@ -220,13 +220,13 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2023 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day14.java) | Yes |
 | 2023 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day15.java) | Yes |
 | 2023 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day16.java) | No - Worst dataset is approximately 200ms |
-| 2023 | 17 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day17.java) | No - Worst dataset is approximately 800ms |
+| 2023 | 17 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day17.java) | No - Worst dataset is approximately 750ms |
 | 2023 | 18 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day18.java) | Yes |
 | 2023 | 19 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day19.java) | Yes |
-| 2023 | 20 | Not yet released at the time of writing                                                                 | |
-| 2023 | 21 | Not yet released at the time of writing                                                                 | |
-| 2023 | 22 | Not yet released at the time of writing                                                                 | |
-| 2023 | 23 | Not yet released at the time of writing                                                                 | |
+| 2023 | 20 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day20.java) | Yes |
+| 2023 | 21 | Not yet solved due to lack of time between the problem's release and the time of writing                | |
+| 2023 | 22 | Not yet solved due to lack of time between the problem's release and the time of writing                | |
+| 2023 | 23 | Not yet solved due to lack of time between the problem's release and the time of writing                | |
 | 2023 | 24 | Not yet released at the time of writing                                                                 | |
 | 2023 | 25 | Not yet released at the time of writing                                                                 | |
 

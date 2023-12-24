@@ -27,7 +27,11 @@ public class ExtendedEuclideanAlgorithm {
         }
     }
 
-    public static long solveBasic(long a, long b) {
+    public static long solveForLcmOnly(long a, long b) {
+        return Math.multiplyExact(a,b) / solveForGcdOnly(a, b);
+    }
+
+    public static long solveForGcdOnly(long a, long b) {
         return solve(a, b).getGcd();
     }
 

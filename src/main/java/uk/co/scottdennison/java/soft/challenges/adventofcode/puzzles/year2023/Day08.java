@@ -1,6 +1,5 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2023;
 
-import uk.co.scottdennison.java.libs.math.ChineseNumberTheorem;
 import uk.co.scottdennison.java.libs.math.ExtendedEuclideanAlgorithm;
 import uk.co.scottdennison.java.libs.text.input.LineReader;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
@@ -9,18 +8,14 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class Day08 implements IPuzzle {
 	private static final Pattern NODES_PATTERN = Pattern.compile("^(?<name>[0-9A-Z]+) = \\((?<leftName>[0-9A-Z]+), (?<rightName>[0-9A-Z]+)\\)$");
@@ -150,7 +145,7 @@ public class Day08 implements IPuzzle {
 				if (nextLoopNumber == null) {
 					break;
 				}
-				loopGCD = ExtendedEuclideanAlgorithm.solveBasic(loopGCD, nextLoopNumber);
+				loopGCD = ExtendedEuclideanAlgorithm.solveForGcdOnly(loopGCD, nextLoopNumber);
 			}
 			if (loopGCD != firstLoopNumber) {
 				if (partBPotentiallyUnsolvable) {
@@ -160,7 +155,7 @@ public class Day08 implements IPuzzle {
 					throw new IllegalStateException("Unsolvable by this solution.");
 				}
 			}
-			overallLCM = (overallLCM * loopGCD) / ExtendedEuclideanAlgorithm.solveBasic(overallLCM, loopGCD);
+			overallLCM = (overallLCM * loopGCD) / ExtendedEuclideanAlgorithm.solveForGcdOnly(overallLCM, loopGCD);
 		}
 		return overallLCM;
 	}
