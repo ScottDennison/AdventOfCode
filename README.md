@@ -224,9 +224,9 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2023 | 18 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day18.java) | Yes |
 | 2023 | 19 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day19.java) | Yes |
 | 2023 | 20 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2023/Day20.java) | Yes |
-| 2023 | 21 | Not yet solved due to lack of time between the problem's release and the time of writing                | |
-| 2023 | 22 | Not yet solved due to lack of time between the problem's release and the time of writing                | |
-| 2023 | 23 | Not yet solved due to lack of time between the problem's release and the time of writing                | |
+| 2023 | 21 | No                                                                                                      |  |
+| 2023 | 22 | No                                                                                                      |  |
+| 2023 | 23 | No                                                                                                      |  |
 | 2023 | 24 | Not yet released at the time of writing                                                                 | |
 | 2023 | 25 | Not yet released at the time of writing                                                                 | |
 
