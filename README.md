@@ -168,7 +168,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2021 | 12 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day12.java) | Yes |
 | 2021 | 13 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day13.java) | Yes |
 | 2021 | 14 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day14.java) | Yes |
-| 2021 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day15.java) | No - Worst dataset is approximately 5,250ms |
+| 2021 | 15 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day15.java) | No - Worst dataset is approximately 375ms |
 | 2021 | 16 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day16.java) | Yes |
 | 2021 | 17 | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2021/Day17.java) | Yes |
 | 2021 | 18 | No                                                                                                      |  |

@@ -330,19 +330,11 @@ public class Day11 implements IPuzzle {
         }
         final long moduloArithmaticModulo;
         if (useModuloArithmatic) {
-            long gcd = 1;
-            long product = 1;
-            for (Monkey monkey : monkeys) {
-                long testDivisor = monkey.getTestDivisor();
-                product = Math.multiplyExact(product,testDivisor);
-                gcd = ExtendedEuclideanAlgorithm.solve(gcd, testDivisor).getGcd();
-            }
-            final long lcm = product / gcd;
-            if (lcm > Integer.MAX_VALUE) {
+            moduloArithmaticModulo = Arrays.stream(monkeys).mapToLong(Monkey::getTestDivisor).reduce(1, ExtendedEuclideanAlgorithm::solveForLcmOnly);
+            if (moduloArithmaticModulo > Integer.MAX_VALUE) {
                 // old * old in danger of overflowing
                 throw new IllegalStateException("Modulo arithmatic too large - danger of overflow.");
             }
-            moduloArithmaticModulo = lcm;
             if (DEBUG_ROUND || DEBUG_SLINGING) {
                 printWriter.format(
                     "All worry values are modulo %d%n%n",
