@@ -8,7 +8,7 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2023.da
 import java.io.PrintWriter;
 
 public class Day21 implements IPuzzle {
-    private final IPuzzle instance = new Day21PartialAttempt2B();
+    private final IPuzzle instance = new Day21PartialAttempt2C();
 
     @Override
     public IPuzzleResults runPuzzle(final char[] inputCharacters, final IPuzzleConfigProvider configProvider, final boolean partBPotentiallyUnsolvable, final PrintWriter printWriter) {

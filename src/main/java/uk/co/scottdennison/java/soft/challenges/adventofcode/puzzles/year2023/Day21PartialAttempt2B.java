@@ -219,9 +219,6 @@ public class Day21PartialAttempt2B implements IPuzzle {
 					if (visited[currentY][currentX] != 2) {
 						visited[currentY][currentX] = 2;
 						visitedCount++;
-						if (repetitionCoordinate.getX() == 0 && repetitionCoordinate.getY() == 0 && currentY == 0 && currentX >= 8) {
-							System.out.println("hi1");
-						}
 						for (Direction direction : DIRECTIONS) {
 							int newY = currentY + direction.getYDelta();
 							int newX = currentX + direction.getXDelta();
@@ -251,9 +248,6 @@ public class Day21PartialAttempt2B implements IPuzzle {
 									}
 								}
 								else {
-									if ((repetitionCoordinate.getY() + repetitionCoordinateYDelta) == -1) {
-										System.out.println("hi2");
-									}
 									outsideCoordinatesSink.add(new CoordinatePair(new Coordinate(repetitionCoordinate.getY() + repetitionCoordinateYDelta, repetitionCoordinate.getX() + repetitionCoordinateXDelta), new Coordinate(newY, newX)));
 								}
 							}
@@ -330,11 +324,19 @@ public class Day21PartialAttempt2B implements IPuzzle {
 			int completeGridGardenPlotCount = 0;
 			Grid grid = new Grid(startCoordinatePair.getRepetitionCoordinate(), 0);
 			grid.acceptFromOutside(startCoordinatePair.getGridCoordinate(),0);
-			Set<CoordinatePair> outsideCoordinatePairsToIgnore = new HashSet<>();
-			while (!grid.isStalledWithoutOutputInput()) {
-				grid.advanceInside(outsideCoordinatePairsToIgnore,0);
+			Set<CoordinatePair> outsideCoordinatePairs = new HashSet<>();
+			while (true) {
+				grid.advanceInside(outsideCoordinatePairs,0);
+				for (CoordinatePair outsideCoordinatePair : outsideCoordinatePairs) {
+					grid.acceptFromOutside(outsideCoordinatePair.getGridCoordinate(), 0);
+				}
+				if (grid.isStalledWithoutOutputInput()) {
+					break;
+				}
+				outsideCoordinatePairs.clear();
+
 			}
-			this.completeGridGardenPlotCount = 63;//grid.getVisitedCount();
+			this.completeGridGardenPlotCount = grid.getVisitedCount();
 		}
 
 		public void run(PrintWriter printWriter) {
@@ -387,7 +389,7 @@ public class Day21PartialAttempt2B implements IPuzzle {
 						grid.acceptFromOutside(pendingOutsideCoordinatesPair.getGridCoordinate(), stepsTaken);
 					}
 				}
-				if (stepsTaken <= stepsToSimulate) {
+				if (stepsTaken == stepsToSimulate) {
 					IntSummaryStatistics repetitionYStats = incompleteGridsByRepetitionCoordinate.keySet().stream().mapToInt(Coordinate::getY).summaryStatistics();
 					IntSummaryStatistics repetitionXStats = incompleteGridsByRepetitionCoordinate.keySet().stream().mapToInt(Coordinate::getX).summaryStatistics();
 					int minRepetitionY = repetitionYStats.getMin();
@@ -395,7 +397,7 @@ public class Day21PartialAttempt2B implements IPuzzle {
 					int minRepetitionX = repetitionXStats.getMin();
 					int maxRepetitionX = repetitionXStats.getMax();
 					printWriter.println("stepsTaken=" + stepsTaken + " / y=" + minRepetitionY + ",x=" + minRepetitionX + " to y=" + maxRepetitionY + ",x=" + maxRepetitionX);
-					if (stepsTaken <= 150 || stepsTaken == stepsToSimulate) {
+					if (stepsTaken > 10000000) {
 						char[][] displayGrid = new char[((maxRepetitionY-minRepetitionY)+1)*gridHeight][((maxRepetitionX-minRepetitionX)+1)*gridWidth];
 						for (int repetitionY=minRepetitionY, displayRepetitionStartY=0; repetitionY<=maxRepetitionY; repetitionY++, displayRepetitionStartY+=gridHeight) {
 							for (int repetitionX=minRepetitionX, displayRepetitionStartX=0; repetitionX<=maxRepetitionX; repetitionX++, displayRepetitionStartX+=gridHeight) {
