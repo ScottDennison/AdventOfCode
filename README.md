@@ -85,7 +85,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2018 | 04  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day04.java) | Yes                                          |
 | 2018 | 05  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day05.java) | Yes                                          |
 | 2018 | 06  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day06.java) | No - Worst dataset is approximately 500ms    |
-| 2018 | 07  | No                                                                                                      |                                              |
+| 2018 | 07  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day07.java) | Yes                                          |
 | 2018 | 08  | No                                                                                                      |                                              |
 | 2018 | 09  | No                                                                                                      |                                              |
 | 2018 | 10  | No                                                                                                      |                                              |
@@ -233,7 +233,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2024 | 02  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day02.java) | Yes                                          |
 | 2024 | 03  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day03.java) | Yes                                          |
 | 2024 | 04  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day04.java) | Yes                                          |
-| 2024 | 05  | Not yet released at the time of writing                                                                 |                                              |
+| 2024 | 05  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day05.java) | Yes                                          |
 | 2024 | 06  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 07  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 08  | Not yet released at the time of writing                                                                 |                                              |
