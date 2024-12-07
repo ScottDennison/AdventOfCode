@@ -34,7 +34,7 @@ public class Day07 implements IPuzzle {
         }
         if (includeConcatenation) {
             long concatDivisor = (long)Math.pow(10, Math.ceil(Math.log10(operand + 1)));
-            if (runnihgTotal > concatDivisor) {
+            if (runnihgTotal >= concatDivisor) {
                 long concatResult = runnihgTotal / concatDivisor;
                 if (concatResult >= firstOperand && ((runnihgTotal - (concatDivisor * concatResult)) == operand)) {
                     if (recurse(firstOperand, concatResult, operands, nextOperandIndex, true)) {
