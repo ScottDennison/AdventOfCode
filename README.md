@@ -235,7 +235,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2024 | 04  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day04.java) | Yes                                          |
 | 2024 | 05  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day05.java) | Yes                                          |
 | 2024 | 06  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day06.java) | No - Worst dataset is approximately 275ms    |
-| 2024 | 07  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day07.java) | No - Worst dataset is approximately 275ms    |
+| 2024 | 07  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day07.java) | Yes                                          |
 | 2024 | 08  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 09  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 10  | Not yet released at the time of writing                                                                 |                                              |

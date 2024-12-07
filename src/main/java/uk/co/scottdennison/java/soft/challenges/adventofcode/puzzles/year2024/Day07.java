@@ -9,12 +9,9 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 import java.io.PrintWriter;
 
 public class Day07 implements IPuzzle {
-    private static boolean recurse(long target, long runnihgTotal, long[] operands, int operandIndex, int operandCount, boolean includeConcatenation) {
-        if (runnihgTotal > target) {
-            return false;
-        }
-        if (operandIndex >= operandCount) {
-            if (runnihgTotal == target) {
+    private static boolean recurse(long firstOperand, long runnihgTotal, long[] operands, int operandIndex, boolean includeConcatenation) {
+        if (operandIndex == 0) {
+            if (runnihgTotal == firstOperand) {
                 return true;
             }
             else {
@@ -22,15 +19,29 @@ public class Day07 implements IPuzzle {
             }
         }
         long operand = operands[operandIndex];
-        int nextOperandIndex = operandIndex + 1;
-        if (recurse(target, runnihgTotal + operand, operands, nextOperandIndex, operandCount, includeConcatenation)) {
-            return true;
+        int nextOperandIndex = operandIndex - 1;
+        long subtractTotal = runnihgTotal - operand;
+        if (subtractTotal >= firstOperand) {
+            if (recurse(firstOperand, subtractTotal, operands, nextOperandIndex, includeConcatenation)) {
+                return true;
+            }
         }
-        if (recurse(target, runnihgTotal * operand, operands, nextOperandIndex, operandCount, includeConcatenation)) {
-            return true;
+        long divideResult = runnihgTotal / operand;
+        if (divideResult >= firstOperand && (divideResult * operand) == runnihgTotal) {
+            if (recurse(firstOperand, divideResult, operands, nextOperandIndex, includeConcatenation)) {
+                return true;
+            }
         }
-        if (includeConcatenation && recurse(target, (long)((runnihgTotal * Math.pow(10, Math.ceil(Math.log10(operand + 1)))) + operand), operands, nextOperandIndex, operandCount, includeConcatenation)) {
-            return true;
+        if (includeConcatenation) {
+            long concatDivisor = (long)Math.pow(10, Math.ceil(Math.log10(operand + 1)));
+            if (runnihgTotal > concatDivisor) {
+                long concatResult = runnihgTotal / concatDivisor;
+                if (concatResult >= firstOperand && ((runnihgTotal - (concatDivisor * concatResult)) == operand)) {
+                    if (recurse(firstOperand, concatResult, operands, nextOperandIndex, true)) {
+                        return true;
+                    }
+                }
+            }
         }
         return false;
     }
@@ -51,11 +62,12 @@ public class Day07 implements IPuzzle {
             for (int operandIndex = 0; operandIndex < operandCount; operandIndex++) {
                 operands[operandIndex] = Long.parseLong(operandStrings[operandIndex].trim());
             }
-            if (recurse(target, operands[0], operands, 1, operandCount, false)) {
+            int lastOperandIndex = operandCount - 1;
+            if (recurse(operands[0], target, operands, lastOperandIndex, false)) {
                 partASum += target;
                 partBSum += target;
             }
-            else if (recurse(target, operands[0], operands, 1, operandCount, true)) {
+            else if (recurse(operands[0], target, operands, lastOperandIndex, true)) {
                 partBSum += target;
             }
         }
