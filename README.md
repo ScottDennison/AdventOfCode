@@ -61,7 +61,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2017 | 05  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day05.java) | Yes                                          |
 | 2017 | 06  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day06.java) | Yes                                          |
 | 2017 | 07  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day07.java) | Yes                                          |
-| 2017 | 08  | No                                                                                                      |                                              |
+| 2017 | 08  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2017/Day08.java) | Yes                                          |
 | 2017 | 09  | No                                                                                                      |                                              |
 | 2017 | 10  | No                                                                                                      |                                              |
 | 2017 | 11  | No                                                                                                      |                                              |
@@ -86,7 +86,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2018 | 05  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day05.java) | Yes                                          |
 | 2018 | 06  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day06.java) | No - Worst dataset is approximately 500ms    |
 | 2018 | 07  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day07.java) | Yes                                          |
-| 2018 | 08  | No                                                                                                      |                                              |
+| 2018 | 08  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2018/Day08.java) | Yes                                          |
 | 2018 | 09  | No                                                                                                      |                                              |
 | 2018 | 10  | No                                                                                                      |                                              |
 | 2018 | 11  | No                                                                                                      |                                              |
@@ -236,7 +236,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2024 | 05  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day05.java) | Yes                                          |
 | 2024 | 06  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day06.java) | No - Worst dataset is approximately 275ms    |
 | 2024 | 07  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day07.java) | Yes                                          |
-| 2024 | 08  | Not yet released at the time of writing                                                                 |                                              |
+| 2024 | 08  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day08.java) | Yes                                          |
 | 2024 | 09  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 10  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 11  | Not yet released at the time of writing                                                                 |                                              |
