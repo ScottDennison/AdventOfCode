@@ -81,13 +81,15 @@ public class Main {
 
 	private static class PuzzleRunResults {
 		private final String dataSetName;
+		private final boolean exceptionOccured;
 		private final long nanoseconds;
 		private final PuzzleRunPartResults partAResults;
 		private final PuzzleRunPartResults partBResults;
 
-		public PuzzleRunResults(String dataSetName, long nanoseconds, PuzzleRunPartResults partAResults, PuzzleRunPartResults partBResults) {
+		private PuzzleRunResults(String dataSetName, long nanoseconds, boolean exceptionOccured, PuzzleRunPartResults partAResults, PuzzleRunPartResults partBResults) {
 			this.dataSetName = dataSetName;
 			this.nanoseconds = nanoseconds;
+			this.exceptionOccured = exceptionOccured;
 			this.partAResults = partAResults;
 			this.partBResults = partBResults;
 		}
@@ -100,12 +102,24 @@ public class Main {
 			return this.nanoseconds;
 		}
 
+		public boolean isExceptionOccured() {
+			return this.exceptionOccured;
+		}
+
 		public PuzzleRunPartResults getPartAResults() {
 			return this.partAResults;
 		}
 
 		public PuzzleRunPartResults getPartBResults() {
 			return this.partBResults;
+		}
+
+		private static PuzzleRunResults createForResults(String dataSetName, long nanoseconds, PuzzleRunPartResults partAResults, PuzzleRunPartResults partBResults) {
+			return new PuzzleRunResults(dataSetName, nanoseconds, false, partAResults, partBResults);
+		}
+
+		private static PuzzleRunResults createForException(String dataSetName, long nanoseconds) {
+			return new PuzzleRunResults(dataSetName, nanoseconds, true, null, null);
 		}
 	}
 
@@ -225,12 +239,26 @@ public class Main {
 			displayTextualTableBuilder.setDefaultVerticalAlignment(DisplayTextualTableBuilder.VerticalAlignment.MIDDLE);
 			NumberFormat numberFormat = NumberFormat.getNumberInstance();
 			Map<PuzzleRunPartResults.State,Integer> stateCounts = new EnumMap<>(PuzzleRunPartResults.State.class);
+			boolean exceptionOccuredAtLeastOnce = false;
+			for (PuzzleRunResults puzzleRunResultsEntry : puzzleRunResults) {
+				if (puzzleRunResultsEntry.isExceptionOccured()) {
+					exceptionOccuredAtLeastOnce = true;
+				}
+			}
 			for (PuzzleRunResults puzzleRunResultsEntry : puzzleRunResults) {
 				displayTextualTableBuilder.addRow(true);
 				displayTextualTableBuilder.addEntry("Data Set", puzzleRunResultsEntry.getDataSetName(), DisplayTextualTableBuilder.HorizontalAlignment.LEFT);
 				displayTextualTableBuilder.addEntry("Time taken (ns)", numberFormat.format(puzzleRunResultsEntry.getNanoseconds()), DisplayTextualTableBuilder.HorizontalAlignment.RIGHT);
-				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, stateCounts, "A", puzzleRunResultsEntry.getPartAResults());
-				addPuzzleRunPartResultsToTable(displayTextualTableBuilder, stateCounts, "B", puzzleRunResultsEntry.getPartBResults());
+				if (puzzleRunResultsEntry.isExceptionOccured()) {
+					displayTextualTableBuilder.addEntry("State","EXCEPTION");
+				}
+				else {
+					if (exceptionOccuredAtLeastOnce) {
+						displayTextualTableBuilder.addEntry("State", "OK");
+					}
+					addPuzzleRunPartResultsToTable(displayTextualTableBuilder, stateCounts, "A", puzzleRunResultsEntry.getPartAResults());
+					addPuzzleRunPartResultsToTable(displayTextualTableBuilder, stateCounts, "B", puzzleRunResultsEntry.getPartBResults());
+				}
 			}
 			consoleWriter.write(displayTextualTableBuilder.build("\t", restrictedCharacterSet ? DisplayTextualTableBuilder.CharacterSet.ASCII : DisplayTextualTableBuilder.CharacterSet.BASIC_BOX_DRAWING_DOUBLE_WIDTH_OUTER, true, null));
 			boolean first = true;
@@ -308,17 +336,33 @@ public class Main {
 			PrintWriter displayPrinterWriter = new PrintWriter(new DisplayWriter(consoleWriter, "----------------------------------------", "\t\t", false));
 			boolean partBPotentiallyUnsolvable = outputBCharacters == null;
 			PuzzleConfigProvider puzzleConfigProvider = new PuzzleConfigProvider(dataSetPath,dataPath);
-			long startTime = System.nanoTime();
-			IPuzzle puzzleInstance = this.createPuzzleInstance();
-			IPuzzleResults puzzleResults = puzzleInstance.runPuzzle(inputCharacters, puzzleConfigProvider, partBPotentiallyUnsolvable, displayPrinterWriter);
-			long finishTime = System.nanoTime();
-			displayPrinterWriter.close();
-			return new PuzzleRunResults(
-				dataSetName,
-				finishTime - startTime - puzzleConfigProvider.getTimeSpentLoadingConfig(),
-				createPartResults(outputACharacters, puzzleResults.getPartAAnswerString()),
-				createPartResults(outputBCharacters, puzzleResults.getPartBAnswerString())
-			);
+			long startTime = -1;
+			long finishTime = -1;
+			boolean exceptionOccured = false;
+			IPuzzleResults puzzleResults;
+			// Try and hint to the JVM to clean up any garbage from any previous puzzle runs.
+			System.gc();
+			try {
+				startTime = System.nanoTime();
+				puzzleResults = this.createPuzzleInstance().runPuzzle(inputCharacters, puzzleConfigProvider, partBPotentiallyUnsolvable, displayPrinterWriter);
+				finishTime = System.nanoTime();
+				return PuzzleRunResults.createForResults(
+					dataSetName,
+					finishTime - startTime - puzzleConfigProvider.getTimeSpentLoadingConfig(),
+					createPartResults(outputACharacters, puzzleResults == null ? null : puzzleResults.getPartAAnswerString()),
+					createPartResults(outputBCharacters, puzzleResults == null ? null : puzzleResults.getPartBAnswerString())
+				);
+			} catch (Exception ex) {
+				finishTime = System.nanoTime();
+				displayPrinterWriter.println();
+				ex.printStackTrace(displayPrinterWriter);
+				return PuzzleRunResults.createForException(
+					dataSetName,
+					finishTime - startTime - puzzleConfigProvider.getTimeSpentLoadingConfig()
+				);
+			} finally {
+				displayPrinterWriter.close();
+			}
 		}
 
 		private static PuzzleRunPartResults createPartResults(char[] expectedResult, String actualResult) {
