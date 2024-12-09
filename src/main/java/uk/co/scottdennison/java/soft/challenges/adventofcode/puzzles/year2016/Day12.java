@@ -1,6 +1,5 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2016;
 
-import uk.co.scottdennison.java.libs.text.input.LineReader;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AssembunnyComputer;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
@@ -8,8 +7,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.Map;
-import java.util.TreeMap;
 
 public class Day12 implements IPuzzle {
     private static final int REGISTER_COUNT = 4;

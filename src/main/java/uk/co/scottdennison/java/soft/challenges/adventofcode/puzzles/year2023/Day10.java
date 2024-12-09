@@ -9,12 +9,9 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 import java.io.PrintWriter;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.ToIntFunction;
 
 public class Day10 implements IPuzzle {
     private static class TileLinkDelta {

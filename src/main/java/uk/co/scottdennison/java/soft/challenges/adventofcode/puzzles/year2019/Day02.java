@@ -1,6 +1,5 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2019;
 
-import uk.co.scottdennison.java.libs.text.input.LineReader;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.common.IntcodeComputer;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;

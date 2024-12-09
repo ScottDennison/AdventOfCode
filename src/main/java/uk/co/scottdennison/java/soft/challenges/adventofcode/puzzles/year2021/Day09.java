@@ -9,7 +9,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class Day09 implements IPuzzle {

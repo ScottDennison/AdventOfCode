@@ -8,7 +8,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.List;
 
 public class Day05 implements IPuzzle {
     private static final int DECISION_POINT = 3;

@@ -1,9 +1,5 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2015;
 
-import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 import uk.co.scottdennison.java.libs.grammar.chomsky.algorithms.ChomskyReducedFormRuleCYKAlgorithm;
 import uk.co.scottdennison.java.libs.grammar.chomsky.model.ChomskyReducedFormRules;
 import uk.co.scottdennison.java.libs.grammar.chomsky.transformation.ChomskyReducedFormRuleTransformationHelper;
@@ -15,6 +11,10 @@ import uk.co.scottdennison.java.libs.grammar.parseresults.model.ParseForest;
 import uk.co.scottdennison.java.libs.grammar.parseresults.model.ParseForestStats;
 import uk.co.scottdennison.java.libs.grammar.parseresults.util.ParseForestUtils;
 import uk.co.scottdennison.java.libs.text.input.LineReader;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;

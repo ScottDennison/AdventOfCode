@@ -4,7 +4,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2023.day01.Day01AhoCorasick;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2023.day01.Day01IndexOf;
 
 import java.io.PrintWriter;
 

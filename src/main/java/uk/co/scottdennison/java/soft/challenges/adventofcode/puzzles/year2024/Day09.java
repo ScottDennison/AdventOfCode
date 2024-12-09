@@ -6,15 +6,8 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.PriorityQueue;
-import java.util.TreeMap;
 
 public class Day09 implements IPuzzle {
     private static class SpaceInfo {

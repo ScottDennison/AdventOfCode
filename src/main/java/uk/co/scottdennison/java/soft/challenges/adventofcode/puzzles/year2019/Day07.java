@@ -7,7 +7,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.function.IntSupplier;
 import java.util.function.LongSupplier;
 
 public class Day07 implements IPuzzle {

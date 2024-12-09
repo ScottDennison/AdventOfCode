@@ -1,12 +1,12 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2015;
 
+import uk.co.scottdennison.java.libs.text.input.LineReader;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzlePartResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzlePartResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.MultiPartPuzzleResults;
-import uk.co.scottdennison.java.libs.text.input.LineReader;
 
 import java.io.PrintWriter;
 import java.util.regex.Pattern;

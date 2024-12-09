@@ -7,7 +7,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 
 import java.io.PrintWriter;
 import java.math.BigInteger;
-import java.util.BitSet;
 
 public class Day18 implements IPuzzle {
     private static final int PART_B_ROWS = 400000;

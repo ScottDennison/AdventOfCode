@@ -9,7 +9,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleRe
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 

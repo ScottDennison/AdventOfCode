@@ -6,10 +6,7 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
-import java.io.BufferedReader;
 import java.io.PrintWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

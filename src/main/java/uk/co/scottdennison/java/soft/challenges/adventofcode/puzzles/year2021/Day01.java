@@ -7,7 +7,6 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.stream.Collectors;
 
 public class Day01 implements IPuzzle {
 	@Override

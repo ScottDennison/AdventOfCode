@@ -1,10 +1,10 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2020;
 
+import uk.co.scottdennison.java.libs.text.input.LineReader;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
-import uk.co.scottdennison.java.libs.text.input.LineReader;
 
 import java.io.PrintWriter;
 import java.util.ArrayDeque;

@@ -6,14 +6,12 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
-import javax.swing.text.html.Option;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 public class Day04 implements IPuzzle {
