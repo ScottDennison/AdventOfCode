@@ -238,7 +238,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2024 | 07  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day07.java) | Yes                                          |
 | 2024 | 08  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day08.java) | Yes                                          |
 | 2024 | 09  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day09.java) | Yes                                          |
-| 2024 | 10  | Not yet released at the time of writing                                                                 |                                              |
+| 2024 | 10  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day10.java) | Yes                                          |
 | 2024 | 11  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 12  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 13  | Not yet released at the time of writing                                                                 |                                              |
