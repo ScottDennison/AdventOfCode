@@ -1,7 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2021;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.common.CaptialLetterAsciiArtProcessor;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AsciiArtProcessor;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -153,7 +153,7 @@ public class Day13 implements IPuzzle {
         }
         return new BasicPuzzleResults<>(
             firstFoldDotCount,
-            partBPotentiallyUnsolvable?null:CaptialLetterAsciiArtProcessor.parse(paper, height, width, "\n")
+            partBPotentiallyUnsolvable?null: AsciiArtProcessor.parse(paper, height, width, "\n", AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6)
         );
     }
 

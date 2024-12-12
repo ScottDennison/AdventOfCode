@@ -1,7 +1,7 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2022;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
-import uk.co.scottdennison.java.soft.challenges.adventofcode.common.CaptialLetterAsciiArtProcessor;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AsciiArtProcessor;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
@@ -38,7 +38,7 @@ public class Day10 implements IPuzzle {
         TEXT {
             @Override
             public String produceOutput(boolean[][] crtOutput, int height, int width) {
-                char[][] output = CaptialLetterAsciiArtProcessor.parse(crtOutput,height,width);
+                char[][] output = AsciiArtProcessor.parse(crtOutput,height,width,AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6);
                 if (output.length != 1) {
                     throw new IllegalStateException("Expected only one line of output.");
                 }
