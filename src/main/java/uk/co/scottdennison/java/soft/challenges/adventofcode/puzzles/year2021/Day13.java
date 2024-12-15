@@ -153,7 +153,7 @@ public class Day13 implements IPuzzle {
         }
         return new BasicPuzzleResults<>(
             firstFoldDotCount,
-            partBPotentiallyUnsolvable?null: AsciiArtProcessor.parse(paper, height, width, "\n", AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6)
+            partBPotentiallyUnsolvable?null: AsciiArtProcessor.parseSingleLineAsString(paper, height, width, AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6)
         );
     }
 

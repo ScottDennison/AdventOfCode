@@ -123,7 +123,7 @@ public class Day10 implements IPuzzle {
                     printWriter.println(pointCharGrid[y]);
                 }
                 return new BasicPuzzleResults<>(
-                    AsciiArtProcessor.parse(pointBooleanGrid, lastHeight, lastWidth, "\n", fontDefinition),
+                    AsciiArtProcessor.parseSingleLineAsString(pointBooleanGrid, lastHeight, lastWidth, fontDefinition),
                     stepCount - 1
                 );
             }

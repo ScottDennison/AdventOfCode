@@ -38,11 +38,7 @@ public class Day10 implements IPuzzle {
         TEXT {
             @Override
             public String produceOutput(boolean[][] crtOutput, int height, int width) {
-                char[][] output = AsciiArtProcessor.parse(crtOutput,height,width,AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6);
-                if (output.length != 1) {
-                    throw new IllegalStateException("Expected only one line of output.");
-                }
-                return new String(output[0]);
+                return AsciiArtProcessor.parseSingleLineAsString(crtOutput, height, width, AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6);
             }
         };
 

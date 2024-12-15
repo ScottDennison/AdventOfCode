@@ -77,7 +77,7 @@ public class Day08 implements IPuzzle {
 		}
 		return new BasicPuzzleResults<>(
 			lightsOn,
-			AsciiArtProcessor.parse(finalScreen, SCREEN_HEIGHT, SCREEN_WIDTH, "\n", AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6)
+			AsciiArtProcessor.parseSingleLineAsString(finalScreen, SCREEN_HEIGHT, SCREEN_WIDTH, AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6)
 		);
 	}
 }

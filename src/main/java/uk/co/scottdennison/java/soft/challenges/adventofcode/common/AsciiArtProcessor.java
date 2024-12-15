@@ -238,14 +238,14 @@ public class AsciiArtProcessor {
     }
 
     public static String parse(boolean[][] grid, int gridHeight, int gridWidth, String lineSeparator, FontDefinitionContainer fontDefinitionContainer) {
-        char[] lineSeparatorChars = lineSeparator.toCharArray();
-        int lineSeparatorCharCount = lineSeparatorChars.length;;
         char[][] characters = parse(grid, gridHeight, gridWidth, fontDefinitionContainer);
         int height = characters.length;
         if (height == 1) {
             return new String(characters[0]);
         }
         int width = characters[0].length;
+        char[] lineSeparatorChars = lineSeparator.toCharArray();
+        int lineSeparatorCharCount = lineSeparatorChars.length;;
         char[] flatCharacters = new char[((width+lineSeparatorCharCount)*height)-lineSeparatorCharCount];
         int flatCharacterIndex = 0;
         for (int lineIndex=0; lineIndex<height; lineIndex++) {
@@ -257,5 +257,17 @@ public class AsciiArtProcessor {
             flatCharacterIndex += width;
         }
         return new String(flatCharacters);
+    }
+
+    public static char[] parseSingleLine(boolean[][] grid, int gridHeight, int gridWidth, FontDefinitionContainer fontDefinitionContainer) {
+        char[][] characters = parse(grid, gridHeight, gridWidth, fontDefinitionContainer);
+        if (characters.length != 1) {
+            throw new IllegalStateException("Expected only a single line of characters");
+        }
+        return characters[0];
+    }
+
+    public static String parseSingleLineAsString(boolean[][] grid, int gridHeight, int gridWidth, FontDefinitionContainer fontDefinitionContainer) {
+        return new String(parseSingleLine(grid, gridHeight, gridWidth, fontDefinitionContainer));
     }
 }

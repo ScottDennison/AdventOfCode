@@ -88,7 +88,7 @@ public class Day08 implements IPuzzle {
 		}
 		return new BasicPuzzleResults<>(
 			score,
-			new String(AsciiArtProcessor.parse(finalImagePixels, IMAGE_HEIGHT, IMAGE_WIDTH, AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6)[0])
+			new String(AsciiArtProcessor.parseSingleLineAsString(finalImagePixels, IMAGE_HEIGHT, IMAGE_WIDTH, AsciiArtProcessor.StandardFontDefinition.STANDARD_5_6))
 		);
 	}
 }
