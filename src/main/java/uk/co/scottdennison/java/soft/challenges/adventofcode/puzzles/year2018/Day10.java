@@ -1,6 +1,8 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2018;
 
 import uk.co.scottdennison.java.libs.text.input.LineReader;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.common.AsciiArtProcessor;
+import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleConfigProvider;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
@@ -55,6 +57,7 @@ public class Day10 implements IPuzzle {
 
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
+        AsciiArtProcessor.StandardFontDefinition fontDefinition = AsciiArtProcessor.StandardFontDefinition.valueOf(new String(configProvider.getPuzzleConfigChars("font")).trim());
         String[] inputLines = LineReader.stringsArray(inputCharacters, true);
         int pointCount = inputLines.length;
         Point[] points = new Point[pointCount];
@@ -70,6 +73,10 @@ public class Day10 implements IPuzzle {
                 Integer.parseInt(matcher.group("velocityY"))
             );
         }
+        int lastMinY = Integer.MAX_VALUE;
+        int lastMaxY = Integer.MIN_VALUE;
+        int lastMinX = Integer.MAX_VALUE;
+        int lastMaxX = Integer.MIN_VALUE;
         int lastHeight = Integer.MAX_VALUE;
         int lastWidth = Integer.MAX_VALUE;
         int stepCount = 0;
@@ -99,23 +106,33 @@ public class Day10 implements IPuzzle {
             int height = maxY - minY + 1;
             int width = maxX - minX + 1;
             if (height > lastHeight || width > lastWidth) {
-                char[][] pointGrid = new char[height][width];
-                for (int y=0; y<height; y++) {
-                    Arrays.fill(pointGrid[y], '.');
+                char[][] pointCharGrid = new char[lastHeight][lastWidth];
+                boolean[][] pointBooleanGrid = new boolean[lastHeight][lastWidth];
+                for (int y=0; y<lastHeight; y++) {
+                    Arrays.fill(pointCharGrid[y], '.');
+                    Arrays.fill(pointBooleanGrid[y], false);
                 }
                 for (Point point : points) {
                     point.unstep();
-                    pointGrid[point.getPositionY() - minY][point.getPositionX() - minX] = '#';
+                    int gridY = point.getPositionY() - lastMinY;
+                    int gridX = point.getPositionX() - lastMinX;
+                    pointCharGrid[gridY][gridX] = '#';
+                    pointBooleanGrid[gridY][gridX] = true;
                 }
-                for (int y=0; y<height; y++) {
-                    printWriter.println(pointGrid[y]);
+                for (int y=0; y<lastHeight; y++) {
+                    printWriter.println(pointCharGrid[y]);
                 }
-                printWriter.println("Found on step " + (stepCount - 1));
-                break;
+                return new BasicPuzzleResults<>(
+                    AsciiArtProcessor.parse(pointBooleanGrid, lastHeight, lastWidth, "\n", fontDefinition),
+                    stepCount - 1
+                );
             }
+            lastMinY = minY;
+            lastMaxY = maxY;
+            lastMinX = minX;
+            lastMaxX = maxX;
             lastHeight = height;
             lastWidth = width;
         }
-        return null;
     }
 }
