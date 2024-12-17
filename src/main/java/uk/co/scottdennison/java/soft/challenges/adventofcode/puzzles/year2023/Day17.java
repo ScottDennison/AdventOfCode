@@ -129,7 +129,7 @@ public class Day17 implements IPuzzle {
     }
 
     private static int solve(Integer[][] costsGrid, int height, int width, int minimumTurnOrStopStraightLineDistance, int maximumStraightLineDistance) {
-        Optional<AStarSolver.ResultingRoute<NodeKey,Integer>> optionalResultingRoute = AStarSolver.run(
+        return AStarSolver.run(
             new AStarSolver.NodeAdapter<NodeKey,Integer>() {
                 @Override
                 public void getLinkedNodeKeys(NodeKey fromNodeKey, Consumer<NodeKey> linkedNodeKeyConsumer) {
@@ -180,19 +180,11 @@ public class Day17 implements IPuzzle {
                 public boolean isValidEndingNode(NodeKey nodeKey) {
                     return nodeKey.getStraightLineDistance() >= minimumTurnOrStopStraightLineDistance;
                 }
-
-                @Override
-                public Class<NodeKey> getClazz() {
-                    return NodeKey.class;
-                }
             },
             AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
+            new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.CostOnlyResultAdapter<>()),
             new NodeKey(0, 0, null, 0),
             new NodeKey(height-1, width-1, null, 0)
         );
-        if (!optionalResultingRoute.isPresent()) {
-            throw new IllegalStateException("No route found");
-        }
-        return optionalResultingRoute.get().getCost();
     }
 }

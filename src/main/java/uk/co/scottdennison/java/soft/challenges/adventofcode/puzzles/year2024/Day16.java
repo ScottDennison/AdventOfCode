@@ -8,20 +8,9 @@ import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleCo
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzleResults;
 
 import java.io.PrintWriter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Optional;
-import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class Day16 implements IPuzzle {
     private static class Coordinate {
@@ -137,49 +126,6 @@ public class Day16 implements IPuzzle {
         }
     }
 
-    private static final class DijkstraNode {
-        private final DirectionalCoordinate directionalCoordinate;
-        private Set<DijkstraNode> cameFrom;
-        private int score;
-
-        private DijkstraNode(DirectionalCoordinate directionalCoordinate, DijkstraNode cameFrom, int score) {
-            this.directionalCoordinate = directionalCoordinate;
-            if (cameFrom == null) {
-                this.cameFrom = new HashSet<>();
-            }
-            else {
-                this.cameFrom = new HashSet<>(Collections.singleton(cameFrom));
-            }
-            this.score = score;
-        }
-
-        public DirectionalCoordinate getDirectionalCoordinate() {
-            return this.directionalCoordinate;
-        }
-
-        public Set<DijkstraNode> getCameFrom() {
-            return Collections.unmodifiableSet(this.cameFrom);
-        }
-
-        public int getScore() {
-            return this.score;
-        }
-
-        public boolean update(DijkstraNode cameFrom, int score) {
-            if (score < this.score) {
-                this.cameFrom.clear();
-                this.cameFrom.add(cameFrom);
-                this.score = score;
-                return true;
-            }
-            if (score == this.score) {
-                this.cameFrom.add(cameFrom);
-                return false;
-            }
-            return false;
-        }
-    }
-
     private static Coordinate findAndReplaceCharacter(char[][] grid, int gridHeight, int gridWidth, char character) {
         Coordinate coordinate = null;
         for (int y=0; y<gridHeight; y++) {
@@ -199,19 +145,6 @@ public class Day16 implements IPuzzle {
         return coordinate;
     }
 
-    private static void handleNeighbour(Map<DirectionalCoordinate, DijkstraNode> knownNodes, PriorityQueue<DijkstraNode> openQueue, DijkstraNode currentNode, DirectionalCoordinate neighbouringDirectionalCoordinate, int score) {
-        DijkstraNode neighbouringNode = knownNodes.get(neighbouringDirectionalCoordinate);
-        if (neighbouringNode == null) {
-            neighbouringNode = new DijkstraNode(neighbouringDirectionalCoordinate, currentNode, score);
-            knownNodes.put(neighbouringDirectionalCoordinate, neighbouringNode);
-            openQueue.add(neighbouringNode);
-        }
-        else if (neighbouringNode.update(currentNode, score)) {
-            openQueue.remove(neighbouringNode);
-            openQueue.add(neighbouringNode);
-        }
-    }
-
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
         char[][] grid = LineReader.charArraysArray(inputCharacters, true);
@@ -227,50 +160,43 @@ public class Day16 implements IPuzzle {
             nextDirection[directionOrdinal] = directions[(directionOrdinal + 1) % directionCount];
             previousDirection[directionOrdinal] = directions[(directionOrdinal - 1 + directionCount) % directionCount];
         }
-        // Alas, we can't use AStarSolver (with a 0 heuristic) as we need to know all possible paths with the lowest score, not just the first.
-        PriorityQueue<DijkstraNode> openQueue = new PriorityQueue<>(Comparator.comparing(DijkstraNode::getScore));
-        DirectionalCoordinate fromNodeKey = new DirectionalCoordinate(start,Direction.EAST);
-        DijkstraNode fromNode = new DijkstraNode(fromNodeKey,null,0);
-        Map<DirectionalCoordinate, DijkstraNode> knownNodes = new HashMap<>();
-        knownNodes.put(fromNodeKey, fromNode);
-        openQueue.add(fromNode);
-        DijkstraNode currentNode;
-        while ((currentNode = openQueue.poll()) != null) {
-            DirectionalCoordinate currentDirectionalCoordinate = currentNode.getDirectionalCoordinate();
-            if (currentDirectionalCoordinate.getCoordinate().equals(end)) {
-                break;
-            }
-            int currentScore = currentNode.getScore();
-            Coordinate coordinate = currentDirectionalCoordinate.getCoordinate();
-            Direction direction = currentDirectionalCoordinate.getDirection();
-            int newCoordinateY = coordinate.getY() + direction.getYDelta();
-            int newCoordinateX = coordinate.getX() + direction.getXDelta();
-            if (newCoordinateY >= 0 && newCoordinateY < gridHeight && newCoordinateX >= 0 && newCoordinateX < gridWidth && grid[newCoordinateY][newCoordinateX] == '.') {
-                handleNeighbour(knownNodes, openQueue, currentNode, new DirectionalCoordinate(new Coordinate(newCoordinateY, newCoordinateX), direction), currentScore + 1);
-            }
-            int directionOrdinal = direction.ordinal();
-            handleNeighbour(knownNodes, openQueue, currentNode, new DirectionalCoordinate(coordinate, previousDirection[directionOrdinal]), currentScore + 1000);
-            handleNeighbour(knownNodes, openQueue, currentNode, new DirectionalCoordinate(coordinate, nextDirection[directionOrdinal]), currentScore + 1000);
-        }
-        if (currentNode == null) {
-            throw new IllegalStateException("Could not solve");
-        }
-        Deque<DijkstraNode> nodesToFollow = new LinkedList<>();
-        nodesToFollow.addFirst(currentNode);
-        int bestScore = currentNode.getScore();
-        Map<Coordinate,Set<Coordinate>> linkedNodes = new HashMap<>();
-        while ((currentNode = nodesToFollow.poll()) != null) {
-            Coordinate currentCoordinate = currentNode.getDirectionalCoordinate().getCoordinate();
-            Set<DijkstraNode> cameFrom = currentNode.getCameFrom();
-            for (DijkstraNode cameFromNode : cameFrom) {
-                Coordinate cameFromCoordinate = cameFromNode.getDirectionalCoordinate().getCoordinate();
-                if (!currentCoordinate.equals(cameFromCoordinate)) {
-                    linkedNodes.computeIfAbsent(currentCoordinate, __ -> new HashSet<>()).add(cameFromCoordinate);
-                    linkedNodes.computeIfAbsent(cameFromCoordinate, __ -> new HashSet<>()).add(currentCoordinate);
+        AStarSolver.CostIncludingResultAdapter.CostAdaptedResult<Integer,Map<Coordinate,Set<Coordinate>>> result = AStarSolver.run(
+            new AStarSolver.NodeAdapter<DirectionalCoordinate, Integer>() {
+                @Override
+                public void getLinkedNodeKeys(DirectionalCoordinate fromNodeKey, Consumer<DirectionalCoordinate> linkedNodeKeyConsumer) {
+                    Coordinate coordinate = fromNodeKey.getCoordinate();
+                    Direction direction = fromNodeKey.getDirection();
+                    int newCoordinateY = coordinate.getY() + direction.getYDelta();
+                    int newCoordinateX = coordinate.getX() + direction.getXDelta();
+                    if (newCoordinateY >= 0 && newCoordinateY < gridHeight && newCoordinateX >= 0 && newCoordinateX < gridWidth && grid[newCoordinateY][newCoordinateX] == '.') {
+                        linkedNodeKeyConsumer.accept(new DirectionalCoordinate(new Coordinate(newCoordinateY, newCoordinateX), direction));
+                    }
+                    int directionOrdinal = direction.ordinal();
+                    linkedNodeKeyConsumer.accept(new DirectionalCoordinate(coordinate, previousDirection[directionOrdinal]));
+                    linkedNodeKeyConsumer.accept(new DirectionalCoordinate(coordinate, nextDirection[directionOrdinal]));
                 }
-                nodesToFollow.addLast(cameFromNode);
-            }
-        }
+
+                @Override
+                public Integer getCostOfMovingBetweenLinkedNodes(DirectionalCoordinate linkedFromNodeKey, DirectionalCoordinate linkedToNodeKey) {
+                    return linkedFromNodeKey.getDirection() == linkedToNodeKey.getDirection() ? 1 : 1000;
+                }
+
+                @Override
+                public Integer getCostEstimateOfMovingBetweenNodes(DirectionalCoordinate fromNodeKey, DirectionalCoordinate toNodeKey) {
+                    return 0;
+                }
+
+                @Override
+                public boolean isValidEndingNode(DirectionalCoordinate nodeKey) {
+                    return nodeKey.getCoordinate().equals(end);
+                }
+            },
+            AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
+            new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.CostIncludingResultAdapter<>(new AStarSolver.LinkagesRouteAdapter<>(DirectionalCoordinate::getCoordinate))),
+            new DirectionalCoordinate(start, Direction.EAST),
+            new DirectionalCoordinate(end, null)
+        );
+        Map<Coordinate,Set<Coordinate>> linkedNodes = result.getResult();
         for (Map.Entry<Coordinate,Set<Coordinate>> linkedNodesEntry : linkedNodes.entrySet()) {
             char character;
             if (linkedNodesEntry.getValue().size() > 2) {
@@ -286,7 +212,7 @@ public class Day16 implements IPuzzle {
             printWriter.println(grid[y]);
         }
         return new BasicPuzzleResults<>(
-            bestScore,
+            result.getCost(),
             linkedNodes.size()
         );
     }

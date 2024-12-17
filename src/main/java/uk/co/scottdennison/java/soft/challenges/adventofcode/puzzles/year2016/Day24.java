@@ -54,6 +54,16 @@ public class Day24 implements IPuzzle {
 		}
 		Integer one = 1;
 		int[][] distances = new int[maxNumber+1][maxNumber+1];
+		AStarSolver.PointNodeAdapter<Integer> aStarPointNodeAdapter = new AStarSolver.PointNodeAdapter<>(
+			(linkedFromPoint, linkedToPoint) -> grid[linkedToPoint.getY()][linkedToPoint.getX()] != '#',
+			AStarSolver.PointNodeAdapter.UnchangingActualMoveCostAdapter.One.Of.INTEGER,
+			AStarSolver.PointNodeAdapter.EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer.INSTANCE,
+			0,
+			maxY,
+			0,
+			maxX
+		);
+		AStarSolver.FullResultAdapter<AStarSolver.PointNodeAdapter.Point,Integer,Integer> aStarResultAdapter = new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.CostOnlyResultAdapter<>());
 		for (int numberFrom=0; numberFrom<=maxNumber; numberFrom++) {
 			Point fromPoint = numberLocations.get(numberFrom);
 			int fromY = fromPoint.getY();
@@ -63,24 +73,13 @@ public class Day24 implements IPuzzle {
 				Point toPoint = numberLocations.get(numberTo);
 				int toY = toPoint.getY();
 				int toX = toPoint.getX();
-				Optional<AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer>> optionalRoute = AStarSolver.run(
-					new AStarSolver.PointNodeAdapter<>(
-						(linkedFromPoint, linkedToPoint) -> grid[linkedToPoint.getY()][linkedToPoint.getX()] != '#',
-						AStarSolver.PointNodeAdapter.UnchangingActualMoveCostAdapter.One.Of.INTEGER,
-						AStarSolver.PointNodeAdapter.EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer.INSTANCE,
-						0,
-						maxY,
-						0,
-						maxX
-					),
+				int stepCount = AStarSolver.run(
+					aStarPointNodeAdapter,
 					AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
+					aStarResultAdapter,
 					new AStarSolver.PointNodeAdapter.Point(fromY, fromX),
 					new AStarSolver.PointNodeAdapter.Point(toY, toX)
 				);
-				if (!optionalRoute.isPresent()) {
-					throw new IllegalStateException("Unable to calculate route");
-				}
-				int stepCount = optionalRoute.get().getSteps().length-1;
 				distances[numberFrom][numberTo] = stepCount;
 				distances[numberTo][numberFrom] = stepCount;
 			}

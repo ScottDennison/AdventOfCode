@@ -63,8 +63,9 @@ public class Day15 implements IPuzzle {
                 width-1
             ),
             AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
+            new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.CostOnlyResultAdapter<>()),
             new AStarSolver.PointNodeAdapter.Point(0,0),
             new AStarSolver.PointNodeAdapter.Point(height-1,width-1)
-        ).orElseThrow(() -> new IllegalStateException("Unable to solve")).getCost();
+        );
     }
 }

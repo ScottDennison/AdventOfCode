@@ -166,25 +166,25 @@ public class Day22 implements IPuzzle {
 
     private static int moveBetween(FileSystemClassification[][] fileSystemClassificationGrid, int sourceY, int sourceX, int targetY, int targetX, int maxY, int maxX, PrintWriter printWriter) {
         Integer one = 1;
-        Optional<AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer>> optionalRoute = AStarSolver.run(
-            new AStarSolver.PointNodeAdapter<>(
-                (linkedFromPoint, linkedToPoint) -> fileSystemClassificationGrid[linkedToPoint.getY()][linkedToPoint.getX()] == FileSystemClassification.STANDARD,
-                AStarSolver.PointNodeAdapter.UnchangingActualMoveCostAdapter.One.Of.INTEGER,
-                AStarSolver.PointNodeAdapter.EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer.INSTANCE,
-                0,
-                maxY,
-                0,
-                maxX
-            ),
-            AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
-            new AStarSolver.PointNodeAdapter.Point(sourceY, sourceX),
-            new AStarSolver.PointNodeAdapter.Point(targetY, targetX)
+        Deque<AStarSolver.PointNodeAdapter.Point> steps = new LinkedList<>(
+            Arrays.asList(
+                AStarSolver.run(
+                    new AStarSolver.PointNodeAdapter<>(
+                        (linkedFromPoint, linkedToPoint) -> fileSystemClassificationGrid[linkedToPoint.getY()][linkedToPoint.getX()] == FileSystemClassification.STANDARD,
+                        AStarSolver.PointNodeAdapter.UnchangingActualMoveCostAdapter.One.Of.INTEGER,
+                        AStarSolver.PointNodeAdapter.EstimatedMoveCostAdapter.CommonAlgorithms.Manhattan.Of.Integer.INSTANCE,
+                        0,
+                        maxY,
+                        0,
+                        maxX
+                    ),
+                    AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
+                    new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.SingleRouteAdapter<>(AStarSolver.PointNodeAdapter.Point.class, AStarSolver.SingleRouteAdapter.MultiplePossibleRoutesBehaviour.PICK_ARTIBTARILY)),
+                    new AStarSolver.PointNodeAdapter.Point(sourceY, sourceX),
+                    new AStarSolver.PointNodeAdapter.Point(targetY, targetX)
+                )
+            )
         );
-        if (!optionalRoute.isPresent()) {
-            throw new IllegalStateException("No route found.");
-        }
-        AStarSolver.ResultingRoute<AStarSolver.PointNodeAdapter.Point,Integer> resultingRoute = optionalRoute.get();
-        Deque<AStarSolver.PointNodeAdapter.Point> steps = new LinkedList<>(Arrays.asList(resultingRoute.getSteps()));
         int moveOperations = 0;
         AStarSolver.PointNodeAdapter.Point moveFromPoint = steps.removeFirst();
         while (true) {

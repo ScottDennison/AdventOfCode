@@ -3,15 +3,19 @@ package uk.co.scottdennison.java.soft.challenges.adventofcode.common;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AStarSolver {
 	private AStarSolver() {}
@@ -138,7 +142,6 @@ public class AStarSolver {
 		CostType getCostOfMovingBetweenLinkedNodes(NodeKeyType linkedFromNodeKey, NodeKeyType linkedToNodeKey);
 		CostType getCostEstimateOfMovingBetweenNodes(NodeKeyType fromNodeKey, NodeKeyType toNodeKey);
 		boolean isValidEndingNode(NodeKeyType nodeKey);
-		Class<NodeKeyType> getClazz();
 	}
 
 	public final static class PointNodeAdapter<CostType> implements NodeAdapter<PointNodeAdapter.Point,CostType> {
@@ -549,66 +552,211 @@ public class AStarSolver {
 		public boolean isValidEndingNode(Point nodeKey) {
 			return true;
 		}
+	}
+
+	public static interface SolutionResultAdapter<NodeKeyType,CostType,ResultType> {
+		ResultType produceForSolution(Node<NodeKeyType,CostType> finalNode);
+	}
+
+	public static interface NoSolutionResultAdapter<ResultType> {
+		ResultType produceForNoSolution();
+	}
+
+	public static interface FullResultAdapter<NodeKeyType,CostType,ResultType> extends SolutionResultAdapter<NodeKeyType,CostType,ResultType>, NoSolutionResultAdapter<ResultType> {};
+
+	public static final class OptionalResultAdapter<NodeKeyType,CostType,ResultType> implements FullResultAdapter<NodeKeyType,CostType,Optional<ResultType>> {
+		private final SolutionResultAdapter<NodeKeyType,CostType,ResultType> childSolutionResultAdapter;
+
+        public OptionalResultAdapter(SolutionResultAdapter<NodeKeyType, CostType, ResultType> childSolutionResultAdapter) {
+            this.childSolutionResultAdapter = childSolutionResultAdapter;
+        }
+
+        @Override
+		public Optional<ResultType> produceForSolution(Node<NodeKeyType, CostType> finalNode) {
+			return Optional.of(this.childSolutionResultAdapter.produceForSolution(finalNode));
+		}
 
 		@Override
-		public Class<Point> getClazz() {
-			return Point.class;
+		public Optional<ResultType> produceForNoSolution() {
+			return Optional.empty();
+		}
+	}
+
+	public static final class ThrowingResultAdapter<NodeKeyType,CostType,ResultType> implements FullResultAdapter<NodeKeyType,CostType,ResultType> {
+		private final SolutionResultAdapter<NodeKeyType,CostType,ResultType> childSolutionResultAdapter;
+
+		public ThrowingResultAdapter(SolutionResultAdapter<NodeKeyType, CostType, ResultType> childSolutionResultAdapter) {
+			this.childSolutionResultAdapter = childSolutionResultAdapter;
+		}
+
+		@Override
+		public ResultType produceForSolution(Node<NodeKeyType, CostType> finalNode) {
+			return this.childSolutionResultAdapter.produceForSolution(finalNode);
+		}
+
+		@Override
+		public ResultType produceForNoSolution() {
+			throw new IllegalStateException("No solution found.");
+		}
+	}
+
+	public static final class CostOnlyResultAdapter<NodeKeyType,CostType> implements SolutionResultAdapter<NodeKeyType,CostType,CostType> {
+		@Override
+		public CostType produceForSolution(Node<NodeKeyType, CostType> finalNode) {
+			return finalNode.getFScore();
+		}
+	}
+
+	public static final class CostIncludingResultAdapter<NodeKeyType,CostType,ResultType> implements SolutionResultAdapter<NodeKeyType,CostType, CostIncludingResultAdapter.CostAdaptedResult<CostType,ResultType>> {
+		public static class CostAdaptedResult<CostType,ResultType> {
+			private final CostType cost;
+			private final ResultType result;
+
+            public CostAdaptedResult(CostType cost, ResultType result) {
+                this.cost = cost;
+                this.result = result;
+            }
+
+			public CostType getCost() {
+				return this.cost;
+			}
+
+			public ResultType getResult() {
+				return this.result;
+			}
+		}
+
+		private final SolutionResultAdapter<NodeKeyType,CostType,ResultType> childSolutionResultAdapter;
+
+        public CostIncludingResultAdapter(SolutionResultAdapter<NodeKeyType, CostType, ResultType> childSolutionResultAdapter) {
+            this.childSolutionResultAdapter = childSolutionResultAdapter;
+        }
+
+        @Override
+		public CostAdaptedResult<CostType,ResultType> produceForSolution(Node<NodeKeyType, CostType> finalNode) {
+			return new CostAdaptedResult<>(finalNode.getFScore(),this.childSolutionResultAdapter.produceForSolution(finalNode));
+		}
+	}
+
+	public static final class SingleRouteAdapter<NodeKeyType,CostType> implements SolutionResultAdapter<NodeKeyType,CostType,NodeKeyType[]> {
+		public static enum MultiplePossibleRoutesBehaviour {
+			PICK_ARTIBTARILY,
+			THROW_EXCEPTION
+		}
+
+		private final Class<NodeKeyType> nodeKeyTypeClass;
+		private final MultiplePossibleRoutesBehaviour multiplePossibleRoutesBehaviour;
+
+        public SingleRouteAdapter(Class<NodeKeyType> nodeKeyTypeClass, MultiplePossibleRoutesBehaviour multiplePossibleRoutesBehaviour) {
+            this.nodeKeyTypeClass = nodeKeyTypeClass;
+			this.multiplePossibleRoutesBehaviour = multiplePossibleRoutesBehaviour;
+        }
+
+        @Override
+		public NodeKeyType[] produceForSolution(Node<NodeKeyType, CostType> finalNode) {
+			Deque<NodeKeyType> steps = new LinkedList<>();
+			steps.addFirst(finalNode.getNodeKey());
+			Node<NodeKeyType,CostType> traversalNode = finalNode;
+			while (true) {
+				Iterator<Node<NodeKeyType,CostType>> traversalNodeIterator = traversalNode.iterateCameFrom();
+				if (!traversalNodeIterator.hasNext()) {
+					break;
+				}
+				traversalNode = traversalNodeIterator.next();
+				if (this.multiplePossibleRoutesBehaviour == MultiplePossibleRoutesBehaviour.THROW_EXCEPTION && traversalNodeIterator.hasNext()) {
+					throw new IllegalStateException("More than one possible route");
+				}
+				steps.addFirst(traversalNode.getNodeKey());
+			}
+			@SuppressWarnings("unchecked")
+			NodeKeyType[] stepsArray = steps.toArray((NodeKeyType[]) Array.newInstance(this.nodeKeyTypeClass,steps.size()));
+			return stepsArray;
+		}
+	}
+
+	public static final class LinkagesRouteAdapter<NodeKeyType,MapKeyType,CostType> implements SolutionResultAdapter<NodeKeyType,CostType,Map<MapKeyType,Set<MapKeyType>>> {
+		private final Function<NodeKeyType,MapKeyType> nodeKeyToMapKeyMapper;
+
+        public LinkagesRouteAdapter(Function<NodeKeyType, MapKeyType> nodeKeyToMapKeyMapper) {
+            this.nodeKeyToMapKeyMapper = nodeKeyToMapKeyMapper;
+        }
+
+        @Override
+		public Map<MapKeyType, Set<MapKeyType>> produceForSolution(Node<NodeKeyType, CostType> finalNode) {
+			Deque<Node<NodeKeyType,CostType>> nodesToFollow = new LinkedList<>();
+			nodesToFollow.addFirst(finalNode);
+			Map<MapKeyType,Set<MapKeyType>> linkedNodes = new HashMap<>();
+			Node<NodeKeyType,CostType> currentNode;
+			while ((currentNode = nodesToFollow.poll()) != null) {
+				MapKeyType currentNodeMapKeyType = nodeKeyToMapKeyMapper.apply(currentNode.getNodeKey());
+				Iterator<Node<NodeKeyType,CostType>> cameFromIterator = currentNode.iterateCameFrom();
+				while (cameFromIterator.hasNext()) {
+					Node<NodeKeyType,CostType> cameFromNode = cameFromIterator.next();
+					MapKeyType cameFromMapKeyType = nodeKeyToMapKeyMapper.apply(cameFromNode.getNodeKey());
+					if (!currentNodeMapKeyType.equals(cameFromMapKeyType)) {
+						linkedNodes.computeIfAbsent(currentNodeMapKeyType, __ -> new HashSet<>()).add(cameFromMapKeyType);
+						linkedNodes.computeIfAbsent(cameFromMapKeyType, __ -> new HashSet<>()).add(currentNodeMapKeyType);
+					}
+					nodesToFollow.addLast(cameFromNode);
+				}
+			}
+			return linkedNodes;
 		}
 	}
 
 	private static class Node<NodeKeyType,CostType> {
 		private final NodeKeyType nodeKey;
-		private Node<NodeKeyType,CostType> cameFrom;
+		private Set<Node<NodeKeyType,CostType>> cameFrom;
 		private CostType fScore;
 		private CostType gScore;
 
 		private Node(NodeKeyType nodeKey, Node<NodeKeyType,CostType> cameFrom, CostType fScore, CostType gScore) {
 			this.nodeKey = nodeKey;
-			update(cameFrom, fScore, gScore);
+			if (cameFrom == null) {
+				this.cameFrom = new HashSet<>();
+			}
+			else {
+				this.cameFrom = new HashSet<>(Collections.singleton(cameFrom));
+			}
+			this.fScore = fScore;
+			this.gScore = gScore;
 		}
 
 		public NodeKeyType getNodeKey() {
 			return this.nodeKey;
 		}
 
-		public Node<NodeKeyType,CostType> getCameFrom() {
-			return this.cameFrom;
+		public Iterator<Node<NodeKeyType,CostType>> iterateCameFrom() {
+			return Collections.unmodifiableSet(this.cameFrom).iterator();
 		}
 
 		public CostType getFScore() {
 			return this.fScore;
 		}
 
+		public void setFScore(CostType fScore) {
+			this.fScore = fScore;
+		}
+
 		public CostType getGScore() {
 			return this.gScore;
 		}
 
-		public void update(Node<NodeKeyType,CostType> cameFrom, CostType fScore, CostType gScore) {
-			this.cameFrom = cameFrom;
-			this.fScore = fScore;
+		public void setGScore(CostType gScore) {
 			this.gScore = gScore;
 		}
-	}
 
-	public static class ResultingRoute<NodeKeyType,CostType> {
-		private final CostType cost;
-		private final NodeKeyType[] steps;
-
-		private ResultingRoute(CostType cost, NodeKeyType[] steps) {
-			this.cost = cost;
-			this.steps = steps;
+		public void replaceCameFrom(Node<NodeKeyType,CostType> cameFrom) {
+			this.cameFrom.clear();
+			this.cameFrom.add(cameFrom);
 		}
 
-		public CostType getCost() {
-			return this.cost;
-		}
-
-		public NodeKeyType[] getSteps() {
-			return Arrays.copyOf(this.steps,this.steps.length);
+		public void addCameFrom(Node<NodeKeyType,CostType> cameFrom) {
+			this.cameFrom.add(cameFrom);
 		}
 	}
 
-	public static <NodeKeyType,CostType> Optional<ResultingRoute<NodeKeyType,CostType>> run(NodeAdapter<NodeKeyType,CostType> nodeAdapter, CostAdapter<CostType> costAdapter, NodeKeyType fromNodeKey, NodeKeyType toNodeKey) {
+	public static <NodeKeyType,CostType,ResultType> ResultType run(NodeAdapter<NodeKeyType,CostType> nodeAdapter, CostAdapter<CostType> costAdapter, FullResultAdapter<NodeKeyType,CostType,ResultType> resultAdapter, NodeKeyType fromNodeKey, NodeKeyType toNodeKey) {
 		Comparator<CostType> costTypeComparator = costAdapter.getComparator();
 		PriorityQueue<Node<NodeKeyType,CostType>> openSet = new PriorityQueue<>((node1,node2) -> costTypeComparator.compare(node1.getFScore(),node2.getFScore()));
 		Node<NodeKeyType,CostType> fromNode = new Node<>(fromNodeKey,null,nodeAdapter.getCostEstimateOfMovingBetweenNodes(fromNodeKey, toNodeKey),costAdapter.getZeroCost());
@@ -618,30 +766,12 @@ public class AStarSolver {
 		while (true) {
 			Node<NodeKeyType,CostType> currentNode = openSet.poll();
 			if (currentNode == null) {
-				return Optional.empty();
+				return resultAdapter.produceForNoSolution();
 			}
 			NodeKeyType currentNodeKey = currentNode.getNodeKey();
 			CostType currentGScore = currentNode.getGScore();
 			if (costTypeComparator.compare(currentGScore,currentNode.getFScore()) == 0 && nodeAdapter.isValidEndingNode(currentNodeKey)) {
-				CostType cost = currentNode.getFScore();
-				Deque<NodeKeyType> steps = new LinkedList<>();
-				steps.addFirst(currentNodeKey);
-				Node<NodeKeyType,CostType> traversalNode = currentNode;
-				while (true) {
-					traversalNode = traversalNode.getCameFrom();
-					if (traversalNode == null) {
-						break;
-					}
-					steps.addFirst(traversalNode.getNodeKey());
-				}
-				@SuppressWarnings("unchecked")
-				NodeKeyType[] stepsArray = steps.toArray((NodeKeyType[])Array.newInstance(nodeAdapter.getClazz(),steps.size()));
-				return Optional.of(
-					new ResultingRoute<NodeKeyType,CostType>(
-						cost,
-						stepsArray
-					)
-				);
+				return resultAdapter.produceForSolution(currentNode);
 			}
 			nodeAdapter.getLinkedNodeKeys(
 				currentNodeKey,
@@ -653,14 +783,18 @@ public class AStarSolver {
 						knownNodes.put(linkedNodeKey, linkedNode);
 						openSet.add(linkedNode);
 					}
-					else if (costTypeComparator.compare(potentialGScore,linkedNode.getGScore()) < 0) {
-						openSet.remove(linkedNode);
-						linkedNode.update(
-							currentNode,
-							costAdapter.addCosts(potentialGScore,nodeAdapter.getCostEstimateOfMovingBetweenNodes(linkedNodeKey, toNodeKey)),
-							potentialGScore
-						);
-						openSet.add(linkedNode);
+					else {
+						int gScoreComparisonResult = costTypeComparator.compare(potentialGScore,linkedNode.getGScore());
+						if (gScoreComparisonResult == 0) {
+							linkedNode.addCameFrom(currentNode);
+						}
+						else if (gScoreComparisonResult < 0) {
+							openSet.remove(linkedNode);
+							linkedNode.replaceCameFrom(currentNode);
+							linkedNode.setFScore(costAdapter.addCosts(potentialGScore,nodeAdapter.getCostEstimateOfMovingBetweenNodes(linkedNodeKey, toNodeKey)));
+							linkedNode.setGScore(potentialGScore);
+							openSet.add(linkedNode);
+						}
 					}
 				}
 			);
