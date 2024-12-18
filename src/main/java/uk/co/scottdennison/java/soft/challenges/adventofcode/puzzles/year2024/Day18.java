@@ -82,17 +82,25 @@ public class Day18 implements IPuzzle {
             while ((coordinateToVisit = coordinatesToVisit.poll()) != null) {
                 int coordinateToVisitX = coordinateToVisit.getX();
                 int coordinateToVisitY = coordinateToVisit.getY();
-                if (coordinateToVisitX < 0 || coordinateToVisitX >= gridSize || coordinateToVisitY < 0 || coordinateToVisitY >= gridSize || corruptedSquares[coordinateToVisitY][coordinateToVisitX] || coordinatesVisited[coordinateToVisitY][coordinateToVisitX]) {
+                if (corruptedSquares[coordinateToVisitY][coordinateToVisitX] || coordinatesVisited[coordinateToVisitY][coordinateToVisitX]) {
                     continue;
                 }
                 if (coordinateToVisitX == maxCoordinateNumber && coordinateToVisitY == maxCoordinateNumber) {
                     continue fallingByteLoop;
                 }
                 coordinatesVisited[coordinateToVisitY][coordinateToVisitX] = true;
-                coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX - 1, coordinateToVisitY));
-                coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX + 1, coordinateToVisitY));
-                coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX, coordinateToVisitY - 1));
-                coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX, coordinateToVisitY + 1));
+                if (coordinateToVisitX > 0) {
+                    coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX - 1, coordinateToVisitY));
+                }
+                if (coordinateToVisitX < maxCoordinateNumber) {
+                    coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX + 1, coordinateToVisitY));
+                }
+                if (coordinateToVisitY > 0) {
+                    coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX, coordinateToVisitY - 1));
+                }
+                if (coordinateToVisitY < maxCoordinateNumber) {
+                    coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX, coordinateToVisitY + 1));
+                }
             }
             if (!coordinatesVisited[maxCoordinateNumber][maxCoordinateNumber]) {
                 return fallingByteCoordinateX + "," + fallingByteCoordinateY;
