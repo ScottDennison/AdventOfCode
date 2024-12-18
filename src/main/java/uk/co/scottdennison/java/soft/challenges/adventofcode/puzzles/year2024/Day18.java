@@ -70,11 +70,13 @@ public class Day18 implements IPuzzle {
         int maxCoordinateNumber = gridSize - 1;
         Coordinate startCordinate = new Coordinate(0,0);
         Deque<Coordinate> coordinatesToVisit = new LinkedList<>();
+        fallingByteLoop:
         for (Coordinate fallingByteCoordinate : fallingByteCoordinates) {
             int fallingByteCoordinateX = fallingByteCoordinate.getX();
             int fallingByteCoordinateY = fallingByteCoordinate.getY();
             corruptedSquares[fallingByteCoordinateY][fallingByteCoordinateX] = true;
             boolean[][] coordinatesVisited = new boolean[gridSize][gridSize];
+            coordinatesToVisit.clear();
             coordinatesToVisit.addLast(startCordinate);
             Coordinate coordinateToVisit;
             while ((coordinateToVisit = coordinatesToVisit.poll()) != null) {
@@ -82,6 +84,9 @@ public class Day18 implements IPuzzle {
                 int coordinateToVisitY = coordinateToVisit.getY();
                 if (coordinateToVisitX < 0 || coordinateToVisitX >= gridSize || coordinateToVisitY < 0 || coordinateToVisitY >= gridSize || corruptedSquares[coordinateToVisitY][coordinateToVisitX] || coordinatesVisited[coordinateToVisitY][coordinateToVisitX]) {
                     continue;
+                }
+                if (coordinateToVisitX == maxCoordinateNumber && coordinateToVisitY == maxCoordinateNumber) {
+                    continue fallingByteLoop;
                 }
                 coordinatesVisited[coordinateToVisitY][coordinateToVisitX] = true;
                 coordinatesToVisit.addLast(new Coordinate(coordinateToVisitX - 1, coordinateToVisitY));
