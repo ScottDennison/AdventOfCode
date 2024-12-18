@@ -638,7 +638,7 @@ public class AStarSolver {
 		}
 	}
 
-	public static final class SingleRouteAdapter<NodeKeyType,CostType> implements SolutionResultAdapter<NodeKeyType,CostType,NodeKeyType[]> {
+	public static final class SingleRouteResultAdapter<NodeKeyType,CostType> implements SolutionResultAdapter<NodeKeyType,CostType,NodeKeyType[]> {
 		public static enum MultiplePossibleRoutesBehaviour {
 			PICK_ARTIBTARILY,
 			THROW_EXCEPTION
@@ -647,7 +647,7 @@ public class AStarSolver {
 		private final Class<NodeKeyType> nodeKeyTypeClass;
 		private final MultiplePossibleRoutesBehaviour multiplePossibleRoutesBehaviour;
 
-        public SingleRouteAdapter(Class<NodeKeyType> nodeKeyTypeClass, MultiplePossibleRoutesBehaviour multiplePossibleRoutesBehaviour) {
+        public SingleRouteResultAdapter(Class<NodeKeyType> nodeKeyTypeClass, MultiplePossibleRoutesBehaviour multiplePossibleRoutesBehaviour) {
             this.nodeKeyTypeClass = nodeKeyTypeClass;
 			this.multiplePossibleRoutesBehaviour = multiplePossibleRoutesBehaviour;
         }
@@ -674,10 +674,10 @@ public class AStarSolver {
 		}
 	}
 
-	public static final class LinkagesRouteAdapter<NodeKeyType,MapKeyType,CostType> implements SolutionResultAdapter<NodeKeyType,CostType,Map<MapKeyType,Set<MapKeyType>>> {
+	public static final class LinkagesRouteResultAdapter<NodeKeyType,MapKeyType,CostType> implements SolutionResultAdapter<NodeKeyType,CostType,Map<MapKeyType,Set<MapKeyType>>> {
 		private final Function<NodeKeyType,MapKeyType> nodeKeyToMapKeyMapper;
 
-        public LinkagesRouteAdapter(Function<NodeKeyType, MapKeyType> nodeKeyToMapKeyMapper) {
+        public LinkagesRouteResultAdapter(Function<NodeKeyType, MapKeyType> nodeKeyToMapKeyMapper) {
             this.nodeKeyToMapKeyMapper = nodeKeyToMapKeyMapper;
         }
 

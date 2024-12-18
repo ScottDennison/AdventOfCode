@@ -192,7 +192,7 @@ public class Day16 implements IPuzzle {
                 }
             },
             AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
-            new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.CostIncludingResultAdapter<>(new AStarSolver.LinkagesRouteAdapter<>(DirectionalCoordinate::getCoordinate))),
+            new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.CostIncludingResultAdapter<>(new AStarSolver.LinkagesRouteResultAdapter<>(DirectionalCoordinate::getCoordinate))),
             new DirectionalCoordinate(start, Direction.EAST),
             new DirectionalCoordinate(end, null)
         );

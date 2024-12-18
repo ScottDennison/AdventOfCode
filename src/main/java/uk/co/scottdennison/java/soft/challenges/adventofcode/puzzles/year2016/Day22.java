@@ -11,7 +11,6 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -179,7 +178,7 @@ public class Day22 implements IPuzzle {
                         maxX
                     ),
                     AStarSolver.CostAdapter.CommonTypes.Of.Integer.INSTANCE,
-                    new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.SingleRouteAdapter<>(AStarSolver.PointNodeAdapter.Point.class, AStarSolver.SingleRouteAdapter.MultiplePossibleRoutesBehaviour.PICK_ARTIBTARILY)),
+                    new AStarSolver.ThrowingResultAdapter<>(new AStarSolver.SingleRouteResultAdapter<>(AStarSolver.PointNodeAdapter.Point.class, AStarSolver.SingleRouteResultAdapter.MultiplePossibleRoutesBehaviour.PICK_ARTIBTARILY)),
                     new AStarSolver.PointNodeAdapter.Point(sourceY, sourceX),
                     new AStarSolver.PointNodeAdapter.Point(targetY, targetX)
                 )
