@@ -21,9 +21,9 @@ public class Day22 implements IPuzzle {
         String[] inputLines = LineReader.stringsArray(inputCharacters, true);
         int sellerCount = inputLines.length;
         int[] priceDifferenceKeyToBananas = new int[_19_TO_POWER_OF_4];
-        for (int sellerIndex=0; sellerIndex<sellerCount; sellerIndex++) {
-            boolean[] seenPriceDifferenceKey = new boolean[_19_TO_POWER_OF_4];
-            long secretNumber = Long.parseLong(inputLines[sellerIndex]);
+        int[] lastSellerSeenWithPriceDifferenceKey = new int[_19_TO_POWER_OF_4];
+        for (int sellerNumber=1; sellerNumber<=sellerCount; sellerNumber++) {
+            long secretNumber = Long.parseLong(inputLines[sellerNumber - 1]);
             int lastPrice = (int)(secretNumber % 10);
             int priceDifferenceKey = 0;
             for (int iteration=1; iteration<=2000; iteration++) {
@@ -32,8 +32,8 @@ public class Day22 implements IPuzzle {
                 secretNumber = (secretNumber ^ (secretNumber << 11)) & 0xFFFFFF;
                 int price = (int)(secretNumber % 10);
                 priceDifferenceKey = ((priceDifferenceKey * 19) + ((price - lastPrice) + 9)) % _19_TO_POWER_OF_4;
-                if (iteration >= 4 && !seenPriceDifferenceKey[priceDifferenceKey]) {
-                    seenPriceDifferenceKey[priceDifferenceKey] = true;
+                if (iteration >= 4 && lastSellerSeenWithPriceDifferenceKey[priceDifferenceKey] != sellerNumber) {
+                    lastSellerSeenWithPriceDifferenceKey[priceDifferenceKey] = sellerNumber;
                     priceDifferenceKeyToBananas[priceDifferenceKey] += price;
                 }
                 lastPrice = price;

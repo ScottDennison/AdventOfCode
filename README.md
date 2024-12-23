@@ -251,7 +251,7 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2024 | 20  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day20.java) | Yes                                          |
 | 2024 | 21  | No (not yet)                                                                                            |                                              |
 | 2024 | 22  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day22.java) | Yes                                          |
-| 2024 | 23  | Not yet released at the time of writing                                                                 |                                              |
+| 2024 | 23  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day23.java) | No - Worst dataset is approximately 105ms    |
 | 2024 | 24  | Not yet released at the time of writing                                                                 |                                              |
 | 2024 | 25  | Not yet released at the time of writing                                                                 |                                              |
 Note that timing is done on a machine of the following spec:
