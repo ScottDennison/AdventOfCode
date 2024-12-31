@@ -114,7 +114,7 @@ public class Day25 implements IPuzzle {
         }
         return new BasicPuzzleResults<>(
             totalCombinations,
-            null
+            "Deliver The Chronicle"
         );
     }
 }
