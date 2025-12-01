@@ -38,9 +38,11 @@ public class Main {
 	private static final Pattern PATTERN_NEWLINE = Pattern.compile("\\R");
 
 	private static final int MIN_YEAR = 2015;
-	private static final int MAX_YEAR = 2024;
+	private static final int MAX_YEAR = 2025;
 	private static final int MIN_DAY = 1;
-	private static final int MAX_DAY = 25;
+	private static final int START_YEAR_OF_REDUCED_PUZZLES = 2025;
+	private static final int MAX_DAY_PRE_REDUCED_PUZZLES = 25;
+	private static final int MAX_DAY_POST_REDUCED_PUZZLES = 12;
 
 	public static class CommandLineBean {
 		@Option(name = "-y", aliases = "--year", usage = "only run puzzles from a specified year")
@@ -455,7 +457,8 @@ public class Main {
 		for (int year = MIN_YEAR; year <= MAX_YEAR; year++) {
 			if (noYearFilter || yearFilter.contains(year)) {
 				String yearPackageName = String.format("%s.year%04d", puzzlesPackageName, year);
-				for (int day = MIN_DAY; day <= MAX_DAY; day++) {
+				int finalDay = year < START_YEAR_OF_REDUCED_PUZZLES ? MAX_DAY_PRE_REDUCED_PUZZLES : MAX_DAY_POST_REDUCED_PUZZLES;
+				for (int day = MIN_DAY; day <= finalDay; day++) {
 					if (noDayFilter || dayFilter.contains(day)) {
 						String dayClassName = String.format("%s.Day%02d", yearPackageName, day);
 						Class<?> clazz;

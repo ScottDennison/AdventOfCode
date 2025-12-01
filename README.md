@@ -254,6 +254,19 @@ All solutions are run against 4 different sets of puzzle inputs, plus any provid
 | 2024 | 23  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day23.java) | No - Worst dataset is approximately 105ms    |
 | 2024 | 24  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day24.java) | Yes                                          |
 | 2024 | 25  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2024/Day25.java) | Yes                                          |
+| 2025 | 01  | [Yes](/src/main/java/uk/co/scottdennison/java/soft/challenges/adventofcode/puzzles/year2025/Day01.java) | Yes                                          |
+| 2025 | 02  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 03  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 04  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 05  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 06  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 07  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 08  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 09  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 10  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 11  | Not yet released at time of writing                                                                     |                                              |
+| 2025 | 12  | Not yet released at time of writing                                                                     |                                              |
+
 Note that timing is done on a machine of the following spec:
 * Intel i9-10900K CPU @ 3.70GHz
 * 64.0GB RAM
