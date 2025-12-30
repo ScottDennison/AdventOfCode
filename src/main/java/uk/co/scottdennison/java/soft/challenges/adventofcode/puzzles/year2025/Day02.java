@@ -14,7 +14,8 @@ public class Day02 implements IPuzzle {
     private static final int LONG_MAX_SIZE = (int)Math.log10(Long.MAX_VALUE);
     private static final boolean LOG = false;
 
-    private static long sumSet(Set<Long> invalidIDs) {
+    private static long sumSet(PrintWriter printWriter, String partName, Set<Long> invalidIDs) {
+        if (LOG) printWriter.println("Set for part " + partName + " has " + invalidIDs.size() + " items.");
         return invalidIDs.stream().mapToLong(Long::longValue).reduce(0L, Math::addExact);
     }
 
@@ -68,6 +69,6 @@ public class Day02 implements IPuzzle {
                 }
             }
         }
-        return new BasicPuzzleResults<>(sumSet(partAInvalidIDs), sumSet(partBInvalidIDs));
+        return new BasicPuzzleResults<>(sumSet(printWriter, "A", partAInvalidIDs), sumSet(printWriter, "B", partBInvalidIDs));
     }
 }
