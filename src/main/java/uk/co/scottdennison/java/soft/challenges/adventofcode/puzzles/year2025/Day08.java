@@ -1,5 +1,6 @@
 package uk.co.scottdennison.java.soft.challenges.adventofcode.puzzles.year2025;
 
+import uk.co.scottdennison.java.libs.datastructure.Pair;
 import uk.co.scottdennison.java.libs.text.input.LineReader;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.BasicPuzzleResults;
 import uk.co.scottdennison.java.soft.challenges.adventofcode.framework.IPuzzle;
@@ -10,6 +11,7 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Set;
@@ -17,7 +19,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class Day08 implements IPuzzle {
-    private static class Circuit implements Iterable<JunctionBox> {
+    private static class Circuit {
         private final int number;
         private final Set<JunctionBox> junctionBoxes;
 
@@ -35,19 +37,16 @@ public class Day08 implements IPuzzle {
             return junctionBoxes.size();
         }
 
-        public void merge(Circuit otherCircuit) {
-            if (otherCircuit != this) {
-                this.junctionBoxes.addAll(otherCircuit.junctionBoxes);
-                for (JunctionBox junctionBox : otherCircuit.junctionBoxes) {
-                    junctionBox.setCurrentCircuit(this);
-                }
-                otherCircuit.junctionBoxes.clear();
-            }
+        public void addAll(Set<JunctionBox> junctionBoxes) {
+            this.junctionBoxes.addAll(junctionBoxes);
         }
 
-        @Override
-        public Iterator<JunctionBox> iterator() {
-            return junctionBoxes.iterator();
+        public void clear() {
+            this.junctionBoxes.clear();
+        }
+
+        public Set<JunctionBox> getJunctionBoxes() {
+            return Collections.unmodifiableSet(junctionBoxes);
         }
 
         @Override
@@ -119,7 +118,7 @@ public class Day08 implements IPuzzle {
             long xDistance = source.getX() - dest.getX();
             long yDistance = source.getY() - dest.getY();
             long zDistance = source.getZ() - dest.getZ();
-            this.distance = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance) + (zDistance * zDistance));
+            this.distance = Math.sqrt(Math.addExact(Math.addExact(Math.multiplyExact(xDistance,xDistance),Math.multiplyExact(yDistance,yDistance)),Math.multiplyExact(zDistance,zDistance)));
         }
 
         public JunctionBox getSource() {
@@ -143,13 +142,27 @@ public class Day08 implements IPuzzle {
         }
     }
 
+    private void merge(Pairing pairing, Set<Circuit> remainingCircuits) {
+        Circuit sourceCircuit = pairing.getSource().getCurrentCircuit();
+        Circuit destCircuit = pairing.getDest().getCurrentCircuit();
+        if (sourceCircuit != destCircuit) {
+            Set<JunctionBox> destCircuitJunctionBoxes = destCircuit.getJunctionBoxes();
+            sourceCircuit.addAll(destCircuitJunctionBoxes);
+            for (JunctionBox destCircuitJunctionBox : destCircuitJunctionBoxes) {
+                destCircuitJunctionBox.setCurrentCircuit(sourceCircuit);
+            }
+            destCircuit.clear();
+            remainingCircuits.remove(destCircuit);
+        }
+    }
+
     @Override
     public IPuzzleResults runPuzzle(char[] inputCharacters, IPuzzleConfigProvider configProvider, boolean partBPotentiallyUnsolvable, PrintWriter printWriter) {
         String[] inputLines = LineReader.stringsArray(inputCharacters, true);
         int pairingsToMake = Integer.parseInt(new String(configProvider.getPuzzleConfigChars("pairings_to_make")).trim());
         int junctionBoxCount = inputLines.length;
         JunctionBox[] junctionBoxes = new JunctionBox[junctionBoxCount];
-        Circuit[] circuits = new Circuit[junctionBoxCount];
+        Set<Circuit> remainingCircuits = new HashSet<>();
         for (int junctionBoxIndex = 0; junctionBoxIndex < junctionBoxCount; junctionBoxIndex++) {
             String[] junctionBoxCoordinateParts = inputLines[junctionBoxIndex].split(",");
             JunctionBox junctionBox = new JunctionBox(
@@ -160,31 +173,39 @@ public class Day08 implements IPuzzle {
             );
             junctionBoxes[junctionBoxIndex] = junctionBox;
             Circuit circuit = new Circuit(junctionBoxIndex, Collections.singleton(junctionBox));
-            circuits[junctionBoxIndex] = circuit;
+            remainingCircuits.add(circuit);
             junctionBox.setCurrentCircuit(circuit);
         }
-        PriorityQueue<Pairing> pairingsPriorityQueue = new PriorityQueue<>(Comparator.comparingDouble(Pairing::getDistance).reversed());
-        for (int junctionBoxIndex1 = 0; junctionBoxIndex1 < junctionBoxCount; junctionBoxIndex1++) {
+        int pairingCount = ((junctionBoxCount - 1) * junctionBoxCount) / 2;
+        Pairing[] pairings = new Pairing[pairingCount];
+        for (int junctionBoxIndex1 = 0, pairingIndex = 0; junctionBoxIndex1 < junctionBoxCount; junctionBoxIndex1++) {
             JunctionBox source = junctionBoxes[junctionBoxIndex1];
             for (int junctionBoxIndex2 = junctionBoxIndex1 + 1; junctionBoxIndex2 < junctionBoxCount; junctionBoxIndex2++) {
                 JunctionBox dest = junctionBoxes[junctionBoxIndex2];
-                pairingsPriorityQueue.add(new Pairing(source, dest));
-                if (pairingsPriorityQueue.size() > pairingsToMake) {
-                    pairingsPriorityQueue.poll();
-                }
+                pairings[pairingIndex++] = new Pairing(source, dest);
             }
         }
-        Pairing[] pairings = pairingsPriorityQueue.toArray(new Pairing[0]);
         Arrays.sort(pairings, Comparator.comparing(Pairing::getDistance));
         for (int pairingIndex=0; pairingIndex<pairingsToMake; pairingIndex++) {
-            Pairing pairing = pairings[pairingIndex];
-            pairing.getSource().getCurrentCircuit().merge(pairing.getDest().getCurrentCircuit());
+            merge(pairings[pairingIndex], remainingCircuits);
         }
-        Arrays.sort(circuits, Comparator.comparing(Circuit::getConnectionCount).reversed());
-        int partATotal = circuits[0].getConnectionCount() * circuits[1].getConnectionCount() * circuits[2].getConnectionCount();
+        Circuit[] circuitsArray = remainingCircuits.stream().sorted(Comparator.comparing(Circuit::getConnectionCount).reversed()).limit(3).toArray(Circuit[]::new);
+        long partATotal = Math.multiplyExact(Math.multiplyExact(circuitsArray[0].getConnectionCount(),circuitsArray[1].getConnectionCount()),circuitsArray[2].getConnectionCount());
+        Long partBResult = null;
+        for (int pairingIndex=pairingsToMake; pairingIndex<pairingCount; pairingIndex++) {
+            Pairing pairing = pairings[pairingIndex];
+            merge(pairing, remainingCircuits);
+            if (remainingCircuits.size() == 1) {
+                partBResult = Math.multiplyExact((long)pairing.getSource().getX(),(long)pairing.getDest().getX());
+                break;
+            }
+        }
+        if (partBResult == null) {
+            throw new IllegalStateException("Circuits never competely merge.");
+        }
         return new BasicPuzzleResults<>(
             partATotal,
-            null
+            partBResult
         );
     }
 }
